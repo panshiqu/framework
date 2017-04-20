@@ -1,15 +1,17 @@
 package network
 
 import (
-	"fmt"
 	"log"
 	"net"
 
+	"bufio"
+	"encoding/binary"
 	"sync"
 )
 
 // Processor 处理器
 type Processor interface {
+	OnMessage(net.Conn, *Message)
 }
 
 // Server 服务器
@@ -81,15 +83,24 @@ func (s *Server) handleConn(conn net.Conn) {
 	s.waitgroup.Add(1)
 	defer s.waitgroup.Done()
 
-	for {
-		buf := make([]byte, 5)
-		n, err := conn.Read(buf)
+	rd := bufio.NewReader(conn)
 
-		log.Println(n, err, string(buf))
+	for {
+		buf, err := rd.Peek(2)
 		if err != nil {
 			break
 		}
 
-		fmt.Fprintf(conn, "hello")
+		size := int(binary.BigEndian.Uint16(buf))
+		if _, err = rd.Peek(size); err != nil {
+			break
+		}
+
+		message := make([]byte, size)
+		if _, err = rd.Read(message); err != nil {
+			break
+		}
+
+		s.processor.OnMessage(conn, NewRecvMessage(message))
 	}
 }
