@@ -91,8 +91,8 @@ func (s *Server) handleConn(conn net.Conn) {
 			break
 		}
 
-		size := int(binary.BigEndian.Uint16(buf))
-		if _, err = rd.Peek(size); err != nil {
+		size := binary.BigEndian.Uint16(buf)
+		if _, err = rd.Peek(int(size)); err != nil {
 			break
 		}
 
