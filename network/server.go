@@ -52,10 +52,12 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) stop() {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 	for conn := range s.connections {
 		conn.Close()
 	}
-
+	s.connections = nil
 	s.waitgroup.Wait()
 }
 
@@ -64,20 +66,29 @@ func (s *Server) Stop() {
 	s.listener.Close()
 }
 
-func (s *Server) addConn(conn net.Conn) {
+func (s *Server) addConn(conn net.Conn) bool {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
+	if s.connections == nil {
+		return false
+	}
 	s.connections[conn] = true
+	return true
 }
 
 func (s *Server) removeConn(conn net.Conn) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	delete(s.connections, conn)
+	if s.connections != nil {
+		delete(s.connections, conn)
+	}
 }
 
 func (s *Server) handleConn(conn net.Conn) {
-	s.addConn(conn)
+	if !s.addConn(conn) {
+		conn.Close()
+		return
+	}
 	defer s.removeConn(conn)
 
 	s.waitgroup.Add(1)
