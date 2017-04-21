@@ -81,6 +81,7 @@ func (s *Server) removeConn(conn net.Conn) {
 	defer s.mutex.Unlock()
 	if s.connections != nil {
 		delete(s.connections, conn)
+		conn.Close()
 	}
 }
 
