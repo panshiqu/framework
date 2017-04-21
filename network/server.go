@@ -25,7 +25,7 @@ type Server struct {
 }
 
 // NewServer 创建服务器
-func NewServer(address string, processor Processor) *Server {
+func NewServer(address string) *Server {
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		log.Fatal(err)
@@ -33,9 +33,13 @@ func NewServer(address string, processor Processor) *Server {
 
 	return &Server{
 		listener:    listener,
-		processor:   processor,
 		connections: make(map[net.Conn]bool),
 	}
+}
+
+// Register 注册服务
+func (s *Server) Register(processor Processor) {
+	s.processor = processor
 }
 
 // Start 开始服务
