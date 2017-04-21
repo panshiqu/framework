@@ -85,14 +85,13 @@ func (s *Server) removeConn(conn net.Conn) {
 }
 
 func (s *Server) handleConn(conn net.Conn) {
+	s.waitgroup.Add(1)
+	defer s.waitgroup.Done()
 	if !s.addConn(conn) {
 		conn.Close()
 		return
 	}
 	defer s.removeConn(conn)
-
-	s.waitgroup.Add(1)
-	defer s.waitgroup.Done()
 
 	rd := bufio.NewReader(conn)
 
