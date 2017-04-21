@@ -53,11 +53,11 @@ func (s *Server) Start() error {
 
 func (s *Server) stop() {
 	s.mutex.Lock()
-	defer s.mutex.Unlock()
 	for conn := range s.connections {
 		conn.Close()
 	}
 	s.connections = nil
+	s.mutex.Unlock()
 	s.waitgroup.Wait()
 }
 
