@@ -1,3 +1,8 @@
+/*
+Package network .
+1.暂时仅支持单处理器，可以随时按订阅模式扩展成多处理器，带类型注册处理器进而实现消息分发
+2.不管主动停止Stop还是被动停止Accept error，继续接收的消息都应该记录后因为GetBind==nil而返回错误（除非登陆、注册等等）
+*/
 package network
 
 import (
@@ -21,7 +26,7 @@ type Server struct {
 
 	mutex       sync.Mutex
 	waitgroup   sync.WaitGroup
-	connections map[net.Conn]bool
+	connections map[net.Conn]interface{}
 }
 
 // NewServer 创建服务器
@@ -33,11 +38,11 @@ func NewServer(address string) *Server {
 
 	return &Server{
 		listener:    listener,
-		connections: make(map[net.Conn]bool),
+		connections: make(map[net.Conn]interface{}),
 	}
 }
 
-// Register 注册服务
+// Register 注册处理
 func (s *Server) Register(processor Processor) {
 	s.processor = processor
 }
@@ -76,7 +81,7 @@ func (s *Server) addConn(conn net.Conn) bool {
 	if s.connections == nil {
 		return false
 	}
-	s.connections[conn] = true
+	s.connections[conn] = nil
 	return true
 }
 
@@ -118,4 +123,23 @@ func (s *Server) handleConn(conn net.Conn) {
 
 		s.processor.OnMessage(conn, NewRecvMessage(message))
 	}
+}
+
+// SetBind 设置绑定
+func (s *Server) SetBind(conn net.Conn, v interface{}) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	if s.connections != nil {
+		s.connections[conn] = v
+	}
+}
+
+// GetBind 获取绑定
+func (s *Server) GetBind(conn net.Conn) interface{} {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	if s.connections != nil {
+		return s.connections[conn]
+	}
+	return nil
 }
