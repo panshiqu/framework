@@ -13,16 +13,16 @@ package network
 
 import (
 	"encoding/binary"
+	"io"
 	"log"
 	"net"
-
-	"io"
 	"sync"
 )
 
 // Processor 处理器
 type Processor interface {
 	OnMessage(net.Conn, uint16, uint16, []byte) error
+	OnClose(net.Conn)
 }
 
 // Server 服务器
@@ -131,6 +131,8 @@ func (s *Server) handleConn(conn net.Conn) {
 			SendMessage(conn, mcmd, scmd, []byte(err.Error()))
 		}
 	}
+
+	s.processor.OnClose(conn)
 }
 
 // SetBind 设置绑定
