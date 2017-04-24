@@ -6,17 +6,17 @@ Package network .
 package network
 
 import (
+	"encoding/binary"
 	"log"
 	"net"
 
-	"bufio"
-	"encoding/binary"
+	"io"
 	"sync"
 )
 
 // Processor 处理器
 type Processor interface {
-	OnMessage(net.Conn, *Message)
+	OnMessage(net.Conn, uint16, uint16, []byte)
 }
 
 // Server 服务器
@@ -103,25 +103,25 @@ func (s *Server) handleConn(conn net.Conn) {
 	}
 	defer s.removeConn(conn)
 
-	rd := bufio.NewReader(conn)
-
 	for {
-		buf, err := rd.Peek(2)
-		if err != nil {
+		size := make([]byte, 2)
+
+		if _, err := io.ReadFull(conn, size); err != nil {
 			break
 		}
 
-		size := binary.BigEndian.Uint16(buf)
-		if _, err = rd.Peek(int(size)); err != nil {
+		n := binary.BigEndian.Uint16(size)
+		data := make([]byte, n)
+		copy(data, size)
+
+		if _, err := io.ReadFull(conn, data[2:]); err != nil {
 			break
 		}
 
-		message := make([]byte, size)
-		if _, err = rd.Read(message); err != nil {
-			break
-		}
-
-		s.processor.OnMessage(conn, NewRecvMessage(message))
+		s.processor.OnMessage(conn,
+			binary.BigEndian.Uint16(data[2:]),
+			binary.BigEndian.Uint16(data[4:]),
+			data[6:])
 	}
 }
 
@@ -141,5 +141,21 @@ func (s *Server) GetBind(conn net.Conn) interface{} {
 	if s.connections != nil {
 		return s.connections[conn]
 	}
+	return nil
+}
+
+// SendMessage 发送消息
+func SendMessage(conn net.Conn, mcmd uint16, scmd uint16, data []byte) error {
+	size := len(data) + 6
+	message := make([]byte, size)
+	binary.BigEndian.PutUint16(message, uint16(size))
+	binary.BigEndian.PutUint16(message[2:], mcmd)
+	binary.BigEndian.PutUint16(message[4:], scmd)
+	copy(message[6:], data)
+
+	if _, err := conn.Write(message); err != nil {
+		return err
+	}
+
 	return nil
 }
