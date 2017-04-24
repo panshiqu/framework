@@ -23,6 +23,9 @@ import (
 type Processor interface {
 	OnMessage(net.Conn, uint16, uint16, []byte) error
 	OnClose(net.Conn)
+
+	OnClientMessage(net.Conn, uint16, uint16, []byte)
+	OnClientConnect(net.Conn)
 }
 
 // Server 服务器
@@ -110,24 +113,12 @@ func (s *Server) handleConn(conn net.Conn) {
 	defer s.removeConn(conn)
 
 	for {
-		size := make([]byte, 2)
-
-		if _, err := io.ReadFull(conn, size); err != nil {
+		mcmd, scmd, data, err := RecvMessage(conn)
+		if err != nil {
 			break
 		}
 
-		n := binary.BigEndian.Uint16(size)
-		data := make([]byte, n)
-		copy(data, size)
-
-		if _, err := io.ReadFull(conn, data[2:]); err != nil {
-			break
-		}
-
-		mcmd := binary.BigEndian.Uint16(data[2:])
-		scmd := binary.BigEndian.Uint16(data[4:])
-
-		if err := s.processor.OnMessage(conn, mcmd, scmd, data[6:]); err != nil {
+		if err := s.processor.OnMessage(conn, mcmd, scmd, data); err != nil {
 			SendMessage(conn, mcmd, scmd, []byte(err.Error()))
 		}
 	}
@@ -152,6 +143,25 @@ func (s *Server) GetBind(conn net.Conn) interface{} {
 		return s.connections[conn]
 	}
 	return nil
+}
+
+// RecvMessage 接收消息
+func RecvMessage(conn net.Conn) (uint16, uint16, []byte, error) {
+	size := make([]byte, 2)
+
+	if _, err := io.ReadFull(conn, size); err != nil {
+		return 0, 0, nil, err
+	}
+
+	n := binary.BigEndian.Uint16(size)
+	data := make([]byte, n)
+	copy(data, size)
+
+	if _, err := io.ReadFull(conn, data[2:]); err != nil {
+		return 0, 0, nil, err
+	}
+
+	return binary.BigEndian.Uint16(data[2:]), binary.BigEndian.Uint16(data[4:]), data[6:], nil
 }
 
 // SendMessage 发送消息
