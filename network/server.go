@@ -1,7 +1,13 @@
 /*
-Package network .
+Package network server and client
+
 1.暂时仅支持单处理器，可以随时按订阅模式扩展成多处理器，带类型注册处理器进而实现消息分发
+
 2.不管主动停止Stop还是被动停止Accept error，继续接收的消息都应该记录后因为GetBind==nil而返回错误（除非登陆、注册等等）
+
+3.OnMessage返回error请以如下格式创建，请自行校验Json数据的合法性，该数据将直接回复给客户端
+
+	var ErrSuccess = errors.New(`{"errno":0,"errdesc":"success"}`)
 */
 package network
 
@@ -16,7 +22,7 @@ import (
 
 // Processor 处理器
 type Processor interface {
-	OnMessage(net.Conn, uint16, uint16, []byte)
+	OnMessage(net.Conn, uint16, uint16, []byte) error
 }
 
 // Server 服务器
@@ -118,10 +124,12 @@ func (s *Server) handleConn(conn net.Conn) {
 			break
 		}
 
-		s.processor.OnMessage(conn,
-			binary.BigEndian.Uint16(data[2:]),
-			binary.BigEndian.Uint16(data[4:]),
-			data[6:])
+		mcmd := binary.BigEndian.Uint16(data[2:])
+		scmd := binary.BigEndian.Uint16(data[4:])
+
+		if err := s.processor.OnMessage(conn, mcmd, scmd, data[6:]); err != nil {
+			SendMessage(conn, mcmd, scmd, []byte(err.Error()))
+		}
 	}
 }
 
