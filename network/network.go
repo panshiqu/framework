@@ -35,14 +35,14 @@ func RecvMessage(conn net.Conn) (uint16, uint16, []byte, error) {
 	}
 
 	n := binary.BigEndian.Uint16(size)
-	data := make([]byte, n)
-	copy(data, size)
+	message := make([]byte, n)
+	copy(message, size)
 
-	if _, err := io.ReadFull(conn, data[2:]); err != nil {
+	if _, err := io.ReadFull(conn, message[2:]); err != nil {
 		return 0, 0, nil, err
 	}
 
-	return binary.BigEndian.Uint16(data[2:]), binary.BigEndian.Uint16(data[4:]), data[6:], nil
+	return binary.BigEndian.Uint16(message[2:]), binary.BigEndian.Uint16(message[4:]), message[6:], nil
 }
 
 // SendMessage 发送消息
