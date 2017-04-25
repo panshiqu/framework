@@ -2,6 +2,7 @@ package network
 
 import (
 	"net"
+	"sync"
 	"time"
 
 	"github.com/panshiqu/framework/utils"
@@ -9,11 +10,12 @@ import (
 
 // Client 客户端
 type Client struct {
+	stop      bool
 	address   string
 	processor Processor
-
-	conn  net.Conn
-	delay time.Duration
+	delay     time.Duration
+	mutex     sync.RWMutex
+	conn      net.Conn
 }
 
 // NewClient 创建客户端
@@ -30,37 +32,55 @@ func (c *Client) Register(processor Processor) {
 
 // Start 开始服务
 func (c *Client) Start() {
-	defer func() {
-		utils.Sleep(&c.delay)
-		go c.Start()
-	}()
+	for !c.stop {
+		c.mutex.Lock() // 因为重连将会重新设置conn所以增加写锁
 
-	var err error
+		for {
+			var err error
 
-	if c.conn, err = net.Dial("tcp", c.address); err != nil {
-		return
-	}
+			if c.conn != nil {
+				c.conn.Close() // 重连前关闭上次连接
+			}
 
-	c.processor.OnClientConnect(c.conn)
+			if c.conn, err = net.Dial("tcp", c.address); err == nil {
+				break
+			}
 
-	for {
-		mcmd, scmd, data, err := RecvMessage(c.conn)
-		if err != nil {
-			break
+			utils.Sleep(&c.delay)
 		}
 
-		c.processor.OnClientMessage(c.conn, mcmd, scmd, data)
-	}
+		c.mutex.Unlock()
 
-	c.conn = nil
-	c.delay = 0
+		c.mutex.RLock()
+
+		c.processor.OnClientConnect(c.conn)
+
+		for {
+			mcmd, scmd, data, err := RecvMessage(c.conn)
+			if err != nil {
+				break
+			}
+
+			c.processor.OnClientMessage(c.conn, mcmd, scmd, data)
+		}
+
+		c.mutex.RUnlock()
+
+		c.delay = 0
+	}
+}
+
+// Stop 停止服务
+func (c *Client) Stop() {
+	c.mutex.RLock()
+	c.stop = true
+	c.conn.Close()
+	c.mutex.RUnlock()
 }
 
 // SendMessage 发送消息
 func (c *Client) SendMessage(mcmd uint16, scmd uint16, data []byte) error {
-	if c.conn != nil {
-		return SendMessage(c.conn, mcmd, scmd, data)
-	}
-
-	return nil
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	return SendMessage(c.conn, mcmd, scmd, data)
 }
