@@ -1,16 +1,18 @@
 package network
 
 import (
+	"errors"
 	"net"
 	"sync"
 	"time"
-
-	"github.com/panshiqu/framework/utils"
 )
+
+// ErrDisconnect 断开连接
+var ErrDisconnect = errors.New(`{"errno":1,"errdesc":"disconnect"}`)
 
 // Client 客户端
 type Client struct {
-	stop      bool
+	stop      chan bool
 	address   string
 	processor Processor
 	delay     time.Duration
@@ -21,6 +23,7 @@ type Client struct {
 // NewClient 创建客户端
 func NewClient(address string) *Client {
 	return &Client{
+		stop:    make(chan bool),
 		address: address,
 	}
 }
@@ -32,21 +35,37 @@ func (c *Client) Register(processor Processor) {
 
 // Start 开始服务
 func (c *Client) Start() {
-	for !c.stop {
+	for {
+		c.delay = 0
+
 		c.mutex.Lock() // 因为重连将会重新设置conn所以增加写锁
 
 		for {
 			var err error
 
-			if c.conn != nil {
-				c.conn.Close() // 重连前关闭上次连接
+			if c.conn != nil { // 重连前关闭上次连接
+				c.conn.Close()
 			}
 
 			if c.conn, err = net.Dial("tcp", c.address); err == nil {
 				break
 			}
 
-			utils.Sleep(&c.delay)
+			if c.delay != 0 {
+				c.delay *= 2
+			} else {
+				c.delay = 5 * time.Millisecond
+			}
+			if max := 1 * time.Second; c.delay > max {
+				c.delay = max
+			}
+
+			select {
+			case <-c.stop:
+				c.mutex.Unlock() // 防止goroutine正阻塞在mutex.RLock
+				return
+			case <-time.After(c.delay):
+			}
 		}
 
 		c.mutex.Unlock()
@@ -66,21 +85,30 @@ func (c *Client) Start() {
 
 		c.mutex.RUnlock()
 
-		c.delay = 0
+		select {
+		case <-c.stop:
+			return
+		default:
+		}
 	}
 }
 
 // Stop 停止服务
 func (c *Client) Stop() {
+	close(c.stop)
 	c.mutex.RLock()
-	c.stop = true
-	c.conn.Close()
-	c.mutex.RUnlock()
+	defer c.mutex.RUnlock()
+	if c.conn != nil { // 担心正在重连时停止conn==nil
+		c.conn.Close()
+	}
 }
 
 // SendMessage 发送消息
 func (c *Client) SendMessage(mcmd uint16, scmd uint16, data []byte) error {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
-	return SendMessage(c.conn, mcmd, scmd, data)
+	if c.conn != nil { // 担心正在重连时发送conn==nil
+		return SendMessage(c.conn, mcmd, scmd, data)
+	}
+	return ErrDisconnect
 }
