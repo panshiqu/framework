@@ -41,20 +41,23 @@ func (r *RPC) put(conn net.Conn) {
 
 // Call 调用
 func (r *RPC) Call(mcmd uint16, scmd uint16, data []byte) (dt []byte, err error) {
-	conn, err := r.get()
-	if err != nil {
+	for {
+		var conn net.Conn
+		if conn, err = r.get(); err != nil {
+			return
+		}
+
+		if err = SendMessage(conn, mcmd, scmd, data); err != nil {
+			conn.Close()
+			continue
+		}
+
+		if _, _, dt, err = RecvMessage(conn); err != nil {
+			conn.Close()
+			continue
+		}
+
+		r.put(conn)
 		return
 	}
-
-	if err = SendMessage(conn, mcmd, scmd, data); err != nil {
-		return
-	}
-
-	_, _, dt, err = RecvMessage(conn)
-	if err != nil {
-		return
-	}
-
-	r.put(conn)
-	return
 }
