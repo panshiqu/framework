@@ -1,6 +1,7 @@
 package network
 
 import (
+	"log"
 	"net"
 	"sync"
 )
@@ -48,11 +49,13 @@ func (r *RPC) Call(mcmd uint16, scmd uint16, data []byte) (dt []byte, err error)
 		}
 
 		if err = SendMessage(conn, mcmd, scmd, data); err != nil {
+			log.Println("Call SendMessage", err)
 			conn.Close()
 			continue
 		}
 
 		if _, _, dt, err = RecvMessage(conn); err != nil {
+			log.Println("Call RecvMessage", err)
 			conn.Close()
 			continue
 		}

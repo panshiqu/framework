@@ -2,6 +2,7 @@ package network
 
 import (
 	"errors"
+	"log"
 	"net"
 	"sync"
 	"time"
@@ -47,6 +48,7 @@ func (c *Client) Start() {
 				c.conn.Close()
 			}
 
+			log.Println("Dial", c.address, "delay", c.delay)
 			if c.conn, err = net.Dial("tcp", c.address); err == nil {
 				break
 			}
