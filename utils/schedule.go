@@ -37,7 +37,8 @@ func (e *event) expire() bool {
 
 // Schedule 时间表
 // 命名也只是不想与标准库Timer重名而已
-// 主要逻辑只不过是对标准库Timer、Ticker管理而已
+// 定时时间精确到秒，不精确管理goroutine的退出
+// 主要逻辑只不过是对标准库Timer、Ticker封装管理而已
 type Schedule struct {
 	mutex     sync.Mutex
 	events    map[int]*event
@@ -65,7 +66,7 @@ func (s *Schedule) Start() {
 					delete(s.events, k)
 				}
 				if v.ticker != nil {
-					v.endtime = time.Now().Add(v.duration)
+					v.endtime = v.endtime.Add(v.duration)
 				}
 				go s.processor.OnTimer(k, v.parameter)
 			}
@@ -80,32 +81,28 @@ func (s *Schedule) Add(id int, duration time.Duration, parameter interface{}, pe
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	if ev, ok := s.events[id]; ok {
-		if ev.timer != nil {
-			ev.duration = duration
-			ev.parameter = parameter
-			if !ev.timer.Stop() {
-				<-ev.timer.C // 必须这样做，不然Reset之后有可能立刻到期
-			}
-			ev.timer.Reset(duration)
+	ev, ok := s.events[id]
+	if ok {
+		if ev.timer == nil {
+			return
 		}
-
-		return
-	}
-
-	ev := &event{
-		endtime:   time.Now().Add(duration),
-		duration:  duration,
-		parameter: parameter,
-	}
-
-	if !persistence {
-		ev.timer = time.NewTimer(duration)
+		if !ev.timer.Stop() {
+			<-ev.timer.C // 必须这样做，不然Reset之后有可能立刻到期
+		}
+		ev.timer.Reset(duration)
 	} else {
-		ev.ticker = time.NewTicker(duration)
+		ev = new(event)
+		s.events[id] = ev
+		if !persistence {
+			ev.timer = time.NewTimer(duration)
+		} else {
+			ev.ticker = time.NewTicker(duration)
+		}
 	}
 
-	s.events[id] = ev
+	ev.duration = duration
+	ev.parameter = parameter
+	ev.endtime = time.Now().Add(duration)
 }
 
 // Remove 移除
