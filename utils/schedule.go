@@ -3,8 +3,6 @@ package utils
 import (
 	"sync"
 	"time"
-
-	"github.com/panshiqu/framework/network"
 )
 
 type event struct {
@@ -35,21 +33,27 @@ func (e *event) expire() bool {
 	return false
 }
 
+// Scheduler 调度程序
+type Scheduler interface {
+	OnTimer(id int, parameter interface{})
+}
+
 // Schedule 时间表
 // 命名也只是不想与标准库Timer重名而已
 // 定时时间精确到秒，不精确管理goroutine的退出
 // 主要逻辑只不过是对标准库Timer、Ticker封装管理而已
 type Schedule struct {
-	mutex     sync.Mutex
-	events    map[int]*event
-	processor network.Processor
+	scheduler Scheduler
+
+	mutex  sync.Mutex
+	events map[int]*event
 }
 
 // NewSchedule 创建时间表
-func NewSchedule(processor network.Processor) *Schedule {
+func NewSchedule(scheduler Scheduler) *Schedule {
 	return &Schedule{
+		scheduler: scheduler,
 		events:    make(map[int]*event),
-		processor: processor,
 	}
 }
 
@@ -68,7 +72,7 @@ func (s *Schedule) Start() {
 				if v.ticker != nil {
 					v.endtime = v.endtime.Add(v.duration)
 				}
-				go s.processor.OnTimer(k, v.parameter)
+				go s.scheduler.OnTimer(k, v.parameter)
 			}
 		}
 

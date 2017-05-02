@@ -19,8 +19,6 @@ import (
 
 // Processor 处理器
 type Processor interface {
-	OnTimer(id int, parameter interface{})
-
 	OnMessage(net.Conn, uint16, uint16, []byte) error
 	OnClose(net.Conn)
 
