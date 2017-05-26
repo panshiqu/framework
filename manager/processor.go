@@ -14,7 +14,7 @@ type Processor struct {
 
 // OnMessage 收到消息
 func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []byte) error {
-	log.Println("OnMessage", mcmd, scmd)
+	log.Println("OnMessage", mcmd, scmd, string(data))
 	return nil
 }
 

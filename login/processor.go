@@ -1,6 +1,7 @@
 package login
 
 import (
+	"log"
 	"net"
 
 	"github.com/panshiqu/framework/network"
@@ -13,6 +14,7 @@ type Processor struct {
 
 // OnMessage 收到消息
 func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []byte) error {
+	log.Println("OnMessage", mcmd, scmd, string(data))
 	return nil
 }
 
@@ -29,4 +31,11 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 // OnClientConnect 客户端连接成功
 func (p *Processor) OnClientConnect(conn net.Conn) {
 
+}
+
+// NewProcessor 创建处理器
+func NewProcessor(server *network.Server) *Processor {
+	return &Processor{
+		server: server,
+	}
 }
