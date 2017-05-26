@@ -10,6 +10,7 @@ import (
 // Processor 处理器
 type Processor struct {
 	server *network.Server
+	client *network.Client
 }
 
 // OnMessage 收到消息
@@ -34,8 +35,9 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 }
 
 // NewProcessor 创建处理器
-func NewProcessor(server *network.Server) *Processor {
+func NewProcessor(server *network.Server, client *network.Client) *Processor {
 	return &Processor{
 		server: server,
+		client: client,
 	}
 }
