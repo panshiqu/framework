@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 
 	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/network"
@@ -75,5 +76,12 @@ func NewProcessor(server *network.Server) *Processor {
 	return &Processor{
 		server:   server,
 		services: make(map[int]*define.Service),
+	}
+}
+
+// Monitor 监视器
+func (p *Processor) Monitor(w http.ResponseWriter, r *http.Request) {
+	for _, v := range p.services {
+		fmt.Fprintln(w, v)
 	}
 }
