@@ -1,9 +1,11 @@
 package manager
 
 import (
+	"fmt"
 	"log"
 	"net"
 
+	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/network"
 )
 
@@ -15,6 +17,28 @@ type Processor struct {
 // OnMessage 收到消息
 func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []byte) error {
 	log.Println("OnMessage", mcmd, scmd, string(data))
+
+	switch mcmd {
+	case define.ManagerCommon:
+		return p.OnMainCommon(conn, scmd, data)
+	}
+
+	return fmt.Errorf(`{"errno":1,"errdesc":"unknown main cmd %d"}`, mcmd)
+}
+
+// OnMainCommon 通用主命令
+func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) error {
+	switch scmd {
+	case define.ManagerRegisterService:
+		return p.OnSubRegisterService(conn, data)
+	}
+
+	return fmt.Errorf(`{"errno":1,"errdesc":"unknown sub cmd %d"}`, scmd)
+}
+
+// OnSubRegisterService 注册服务子命令
+func (p *Processor) OnSubRegisterService(conn net.Conn, data []byte) error {
+	log.Println(string(data))
 	return nil
 }
 
