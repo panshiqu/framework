@@ -33,14 +33,14 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 
 // OnClientConnect 客户端连接成功
 func (p *Processor) OnClientConnect(conn net.Conn) {
-	registerService := &define.RegisterService{
+	service := &define.Service{
 		ID:          1,
 		IP:          "127.0.0.1:8081",
 		ServiceType: define.ServiceLogin,
 		IsServe:     true,
 	}
 
-	data, err := json.Marshal(registerService)
+	data, err := json.Marshal(service)
 	if err != nil {
 		log.Println("OnClientConnect Marshal", err)
 		return
@@ -52,7 +52,7 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 		return
 	}
 
-	log.Println("OnClientConnect", registerService)
+	log.Println("OnClientConnect", service)
 }
 
 // NewProcessor 创建处理器

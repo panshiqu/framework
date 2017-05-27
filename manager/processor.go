@@ -11,7 +11,8 @@ import (
 
 // Processor 处理器
 type Processor struct {
-	server *network.Server
+	server   *network.Server
+	services map[int]*define.Service
 }
 
 // OnMessage 收到消息

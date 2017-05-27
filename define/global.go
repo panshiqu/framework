@@ -21,8 +21,8 @@ const (
 	ManagerRegisterService = 1
 )
 
-// RegisterService 注册服务
-type RegisterService struct {
+// Service 服务
+type Service struct {
 	ID          int    // 编号
 	IP          string // 地址
 	Count       int    // 计数
