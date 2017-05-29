@@ -27,12 +27,12 @@ const (
 
 // Service 服务
 type Service struct {
-	ID          int    // 编号
-	IP          string // 地址
-	Count       int    // 计数
-	GameType    int    // 游戏类型
-	GameLevel   int    // 游戏等级
-	ServiceType int    // 服务类型
-	IsServe     bool   // 是否服务
-	Conn        net.Conn
+	ID          int      `json:",omitempty"` // 编号
+	IP          string   `json:",omitempty"` // 地址
+	Count       int      `json:",omitempty"` // 计数
+	GameType    int      `json:",omitempty"` // 游戏类型
+	GameLevel   int      `json:",omitempty"` // 游戏等级
+	ServiceType int      `json:",omitempty"` // 服务类型
+	IsServe     bool     `json:",omitempty"` // 是否服务
+	Conn        net.Conn `json:"-"`          // 网络连接
 }
