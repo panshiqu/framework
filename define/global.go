@@ -1,5 +1,9 @@
 package define
 
+import (
+	"net"
+)
+
 const (
 	// ServiceProxy 代理服务
 	ServiceProxy = 1
@@ -30,4 +34,5 @@ type Service struct {
 	GameLevel   int    // 游戏等级
 	ServiceType int    // 服务类型
 	IsServe     bool   // 是否服务
+	Conn        net.Conn
 }

@@ -51,14 +51,27 @@ func (p *Processor) OnSubRegisterService(conn net.Conn, data []byte) error {
 		return define.NewError("repeat register service")
 	}
 
+	service.Conn = conn
 	p.services[service.ID] = &service
+
+	return nil
+}
+
+// OnSubUnRegisterService 注销服务子命令
+func (p *Processor) OnSubUnRegisterService(conn net.Conn, data []byte) error {
+	for _, v := range p.services {
+		if v.Conn == conn {
+			delete(p.services, v.ID)
+			break
+		}
+	}
 
 	return nil
 }
 
 // OnClose 连接关闭
 func (p *Processor) OnClose(conn net.Conn) {
-
+	p.OnSubUnRegisterService(conn, nil)
 }
 
 // OnClientMessage 客户端收到消息
