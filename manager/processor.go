@@ -13,6 +13,9 @@ import (
 	"github.com/panshiqu/framework/utils"
 )
 
+// 1.测试已有逻辑
+// 2.后台开启关闭service.IsServe，请复用注册注销逻辑
+
 // Processor 处理器
 type Processor struct {
 	mutex    sync.Mutex              // 锁
