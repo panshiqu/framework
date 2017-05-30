@@ -42,9 +42,9 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) error 
 
 // OnSubRegisterService 注册服务子命令
 func (p *Processor) OnSubRegisterService(conn net.Conn, data []byte) error {
-	var service define.Service
+	service := &define.Service{}
 
-	if err := json.Unmarshal(data, &service); err != nil {
+	if err := json.Unmarshal(data, service); err != nil {
 		return define.NewError(err.Error())
 	}
 
@@ -53,10 +53,10 @@ func (p *Processor) OnSubRegisterService(conn net.Conn, data []byte) error {
 	}
 
 	service.Conn = conn
-	p.services[service.ID] = &service
+	p.services[service.ID] = service
 
-	if !p.isExistSimilar(&service) {
-		p.selected[service.ID] = &service
+	if !p.isExistSimilar(service) {
+		p.selected[service.ID] = service
 
 		// 广播已选服务
 	}
