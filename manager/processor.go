@@ -89,19 +89,8 @@ func (p *Processor) OnSubUnRegisterService(conn net.Conn, data []byte) error {
 			// 服务表删除
 			delete(p.services, v.ID)
 
-			// 注销服务存在已选表中
-			if oldService, ok := p.selected[v.ID]; ok {
-				// 已选表删除
-				delete(p.selected, v.ID)
-
-				// 获取类似服务成功
-				if newService := p.getSimilarService(oldService); newService != nil {
-					// 已选表增加
-					p.selected[newService.ID] = newService
-
-					// 广播已选服务
-				}
-			}
+			// 改变已选服务
+			p.changeSelectedService(v.ID)
 
 			break
 		}
