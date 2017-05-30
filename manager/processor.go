@@ -37,8 +37,8 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) error 
 	switch scmd {
 	case define.ManagerRegisterService:
 		return p.OnSubRegisterService(conn, data)
-	case define.ManagerServiceUpdateCount:
-		return p.OnSubServiceUpdateCount(conn, data)
+	case define.ManagerUpdateServiceCount:
+		return p.OnSubUpdateServiceCount(conn, data)
 	}
 
 	return define.NewError(fmt.Sprint("unknown sub cmd ", scmd))
@@ -185,8 +185,8 @@ func (p *Processor) OnSubUnRegisterService(conn net.Conn, data []byte) error {
 	return nil
 }
 
-// OnSubServiceUpdateCount 服务更新计数子命令
-func (p *Processor) OnSubServiceUpdateCount(conn net.Conn, data []byte) error {
+// OnSubUpdateServiceCount 更新服务计数子命令
+func (p *Processor) OnSubUpdateServiceCount(conn net.Conn, data []byte) error {
 	serviceCount := &define.ServiceCount{}
 
 	if err := json.Unmarshal(data, serviceCount); err != nil {

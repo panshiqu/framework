@@ -35,8 +35,8 @@ const (
 	// ManagerRegisterService 注册服务
 	ManagerRegisterService = 1
 
-	// ManagerServiceUpdateCount 服务更新计数
-	ManagerServiceUpdateCount = 2
+	// ManagerUpdateServiceCount 更新服务计数
+	ManagerUpdateServiceCount = 2
 )
 
 // Service 服务
