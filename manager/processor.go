@@ -77,7 +77,6 @@ func (p *Processor) isExistSimilar(service *define.Service) bool {
 }
 
 func (p *Processor) getSimilarService(service *define.Service) *define.Service {
-	capacity := 1000
 	var min, max *define.Service
 	for _, v := range p.services {
 		if v.ServiceType != service.ServiceType ||
@@ -95,7 +94,7 @@ func (p *Processor) getSimilarService(service *define.Service) *define.Service {
 		}
 
 		if service.ServiceType != define.ServiceGame ||
-			v.Count > capacity {
+			v.Count > define.CapacityGame {
 			continue
 		}
 

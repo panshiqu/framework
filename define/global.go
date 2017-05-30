@@ -16,6 +16,17 @@ const (
 )
 
 const (
+	// CapacityProxy 代理容量
+	CapacityProxy = 1000
+
+	// CapacityLogin 登陆容量
+	CapacityLogin = 1000
+
+	// CapacityGame 游戏容量
+	CapacityGame = 1000
+)
+
+const (
 	// ManagerCommon 通用
 	ManagerCommon = 1
 )
