@@ -130,6 +130,29 @@ func (p *Processor) getSimilarService(service *define.Service) *define.Service {
 	return min
 }
 
+// changeSelectedService 改变已选服务
+func (p *Processor) changeSelectedService(id int) {
+	// 是否存在
+	oldService, ok := p.selected[id]
+	if !ok {
+		return
+	}
+
+	// 已选表删除
+	delete(p.selected, id)
+
+	// 获取类似服务
+	newService := p.getSimilarService(oldService)
+	if newService == nil {
+		return
+	}
+
+	// 已选表增加
+	p.selected[newService.ID] = newService
+
+	// 广播已选服务
+}
+
 // OnSubUnRegisterService 注销服务子命令
 func (p *Processor) OnSubUnRegisterService(conn net.Conn, data []byte) error {
 	// 加锁
@@ -164,6 +187,33 @@ func (p *Processor) OnSubUnRegisterService(conn net.Conn, data []byte) error {
 
 // OnSubServiceUpdateCount 服务更新计数子命令
 func (p *Processor) OnSubServiceUpdateCount(conn net.Conn, data []byte) error {
+	serviceCount := &define.ServiceCount{}
+
+	if err := json.Unmarshal(data, serviceCount); err != nil {
+		return define.NewError(err.Error())
+	}
+
+	// 加锁
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
+	// 获取服务
+	service, ok := p.services[serviceCount.ID]
+	if !ok {
+		return define.NewError("not exist service")
+	}
+
+	// 更新服务计数
+	service.Count = serviceCount.Count
+
+	// 服务计数小于对应容量
+	if service.Count < define.CapacityGame {
+		return nil
+	}
+
+	// 改变已选服务
+	p.changeSelectedService(serviceCount.ID)
+
 	return nil
 }
 

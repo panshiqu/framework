@@ -50,3 +50,9 @@ type Service struct {
 	IsServe     bool     `json:",omitempty"` // 是否服务
 	Conn        net.Conn `json:"-"`          // 网络连接
 }
+
+// ServiceCount 服务计数
+type ServiceCount struct {
+	ID    int `json:",omitempty"` // 编号
+	Count int `json:",omitempty"` // 计数
+}
