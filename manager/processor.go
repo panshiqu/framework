@@ -78,6 +78,85 @@ func (p *Processor) OnSubRegisterService(conn net.Conn, data []byte) error {
 	return nil
 }
 
+// OnSubUnRegisterService 注销服务子命令
+func (p *Processor) OnSubUnRegisterService(conn net.Conn, data []byte) error {
+	// 加锁
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
+	for _, v := range p.services {
+		if v.Conn == conn {
+			// 服务表删除
+			delete(p.services, v.ID)
+
+			// 注销服务存在已选表中
+			if oldService, ok := p.selected[v.ID]; ok {
+				// 已选表删除
+				delete(p.selected, v.ID)
+
+				// 获取类似服务成功
+				if newService := p.getSimilarService(oldService); newService != nil {
+					// 已选表增加
+					p.selected[newService.ID] = newService
+
+					// 广播已选服务
+				}
+			}
+
+			break
+		}
+	}
+
+	return nil
+}
+
+// OnSubUpdateServiceCount 更新服务计数子命令
+func (p *Processor) OnSubUpdateServiceCount(conn net.Conn, data []byte) error {
+	serviceCount := &define.ServiceCount{}
+
+	if err := json.Unmarshal(data, serviceCount); err != nil {
+		return define.NewError(err.Error())
+	}
+
+	// 加锁
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
+	// 获取服务
+	service, ok := p.services[serviceCount.ID]
+	if !ok {
+		return define.NewError("not exist service")
+	}
+
+	// 更新服务计数
+	service.Count = serviceCount.Count
+
+	// 服务计数小于对应服务容量
+	if service.Count < p.getServiceCapacity(service.ServiceType) {
+		return nil
+	}
+
+	// 改变已选服务
+	p.changeSelectedService(serviceCount.ID)
+
+	return nil
+}
+
+// OnClose 连接关闭
+func (p *Processor) OnClose(conn net.Conn) {
+	p.OnSubUnRegisterService(conn, nil)
+}
+
+// OnClientMessage 客户端收到消息
+func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, data []byte) {
+	// nothing to do
+}
+
+// OnClientConnect 客户端连接成功
+func (p *Processor) OnClientConnect(conn net.Conn) {
+	// nothing to do
+}
+
 // isExistSimilar 是否存在类似服务
 func (p *Processor) isExistSimilar(service *define.Service) bool {
 	for _, v := range p.selected {
@@ -153,38 +232,6 @@ func (p *Processor) changeSelectedService(id int) {
 	// 广播已选服务
 }
 
-// OnSubUnRegisterService 注销服务子命令
-func (p *Processor) OnSubUnRegisterService(conn net.Conn, data []byte) error {
-	// 加锁
-	p.mutex.Lock()
-	defer p.mutex.Unlock()
-
-	for _, v := range p.services {
-		if v.Conn == conn {
-			// 服务表删除
-			delete(p.services, v.ID)
-
-			// 注销服务存在已选表中
-			if oldService, ok := p.selected[v.ID]; ok {
-				// 已选表删除
-				delete(p.selected, v.ID)
-
-				// 获取类似服务成功
-				if newService := p.getSimilarService(oldService); newService != nil {
-					// 已选表增加
-					p.selected[newService.ID] = newService
-
-					// 广播已选服务
-				}
-			}
-
-			break
-		}
-	}
-
-	return nil
-}
-
 // getServiceCapacity 获取服务容量
 func (p *Processor) getServiceCapacity(tp int) int {
 	switch tp {
@@ -197,53 +244,6 @@ func (p *Processor) getServiceCapacity(tp int) int {
 	}
 
 	return 0
-}
-
-// OnSubUpdateServiceCount 更新服务计数子命令
-func (p *Processor) OnSubUpdateServiceCount(conn net.Conn, data []byte) error {
-	serviceCount := &define.ServiceCount{}
-
-	if err := json.Unmarshal(data, serviceCount); err != nil {
-		return define.NewError(err.Error())
-	}
-
-	// 加锁
-	p.mutex.Lock()
-	defer p.mutex.Unlock()
-
-	// 获取服务
-	service, ok := p.services[serviceCount.ID]
-	if !ok {
-		return define.NewError("not exist service")
-	}
-
-	// 更新服务计数
-	service.Count = serviceCount.Count
-
-	// 服务计数小于对应服务容量
-	if service.Count < p.getServiceCapacity(service.ServiceType) {
-		return nil
-	}
-
-	// 改变已选服务
-	p.changeSelectedService(serviceCount.ID)
-
-	return nil
-}
-
-// OnClose 连接关闭
-func (p *Processor) OnClose(conn net.Conn) {
-	p.OnSubUnRegisterService(conn, nil)
-}
-
-// OnClientMessage 客户端收到消息
-func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, data []byte) {
-	// nothing to do
-}
-
-// OnClientConnect 客户端连接成功
-func (p *Processor) OnClientConnect(conn net.Conn) {
-	// nothing to do
 }
 
 // NewProcessor 创建处理器
