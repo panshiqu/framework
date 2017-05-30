@@ -9,8 +9,8 @@ import (
 
 // Processor 处理器
 type Processor struct {
-	server *network.Server
-	client *network.Client
+	server *network.Server // 服务器
+	client *network.Client // 客户端
 }
 
 // OnMessage 收到消息

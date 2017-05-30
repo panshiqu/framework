@@ -11,8 +11,8 @@ import (
 
 // Processor 处理器
 type Processor struct {
-	server *network.Server
-	client *network.Client
+	server *network.Server // 服务器
+	client *network.Client // 客户端
 }
 
 // OnMessage 收到消息
@@ -33,6 +33,7 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 
 // OnClientConnect 客户端连接成功
 func (p *Processor) OnClientConnect(conn net.Conn) {
+	// 构造服务
 	service := &define.Service{
 		ID:          1,
 		IP:          "127.0.0.1:8081",
@@ -46,6 +47,7 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 		return
 	}
 
+	// 发送注册服务消息
 	if err := p.client.SendMessage(define.ManagerCommon,
 		define.ManagerRegisterService, data); err != nil {
 		log.Println("OnClientConnect SendMessage", err)
