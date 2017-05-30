@@ -69,10 +69,8 @@ func (p *Processor) OnSubRegisterService(conn net.Conn, data []byte) error {
 
 	// 不存在类似服务
 	if !p.isExistSimilar(service) {
-		// 已选表增加
-		p.selected[service.ID] = service
-
-		// 广播已选服务
+		// 增加已选服务
+		p.addSelectedService(service)
 	}
 
 	return nil
@@ -198,6 +196,22 @@ func (p *Processor) getSimilarService(service *define.Service) *define.Service {
 	return min
 }
 
+// addSelectedService 增加已选服务
+func (p *Processor) addSelectedService(service *define.Service) {
+	// 已选表增加
+	p.selected[service.ID] = service
+
+	// 通知增加已选服务
+}
+
+// delSelectedService 删除已选服务
+func (p *Processor) delSelectedService(service *define.Service) {
+	// 已选表删除
+	delete(p.selected, service.ID)
+
+	// 通知删除已选服务
+}
+
 // changeSelectedService 改变已选服务
 func (p *Processor) changeSelectedService(id int) {
 	// 是否存在
@@ -206,8 +220,8 @@ func (p *Processor) changeSelectedService(id int) {
 		return
 	}
 
-	// 已选表删除
-	delete(p.selected, id)
+	// 删除已选服务
+	p.delSelectedService(oldService)
 
 	// 获取类似服务
 	newService := p.getSimilarService(oldService)
@@ -215,10 +229,8 @@ func (p *Processor) changeSelectedService(id int) {
 		return
 	}
 
-	// 已选表增加
-	p.selected[newService.ID] = newService
-
-	// 广播已选服务
+	// 增加已选服务
+	p.addSelectedService(newService)
 }
 
 // getServiceCapacity 获取服务容量
