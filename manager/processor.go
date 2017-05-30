@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"sync"
 
 	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/network"
@@ -13,6 +14,7 @@ import (
 
 // Processor 处理器
 type Processor struct {
+	mutex    sync.Mutex              // 锁
 	server   *network.Server         // 服务器
 	services map[int]*define.Service // 服务表（所有已开启的服务）
 	selected map[int]*define.Service // 已选表（负载均衡策略后选择的服务）
@@ -47,6 +49,10 @@ func (p *Processor) OnSubRegisterService(conn net.Conn, data []byte) error {
 	if err := json.Unmarshal(data, service); err != nil {
 		return define.NewError(err.Error())
 	}
+
+	// 加锁
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
 
 	// 重复注册服务
 	if _, ok := p.services[service.ID]; ok {
@@ -124,6 +130,10 @@ func (p *Processor) getSimilarService(service *define.Service) *define.Service {
 
 // OnSubUnRegisterService 注销服务子命令
 func (p *Processor) OnSubUnRegisterService(conn net.Conn, data []byte) error {
+	// 加锁
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
 	for _, v := range p.services {
 		if v.Conn == conn {
 			// 服务表删除
@@ -176,10 +186,17 @@ func NewProcessor(server *network.Server) *Processor {
 
 // Monitor 监视器
 func (p *Processor) Monitor(w http.ResponseWriter, r *http.Request) {
+	// 加锁
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
+	// 打印服务表
 	fmt.Fprintln(w, "services:")
 	for _, v := range p.services {
 		fmt.Fprintln(w, v)
 	}
+
+	// 打印已选表
 	fmt.Fprintln(w, "selected:")
 	for _, v := range p.selected {
 		fmt.Fprintln(w, v)
