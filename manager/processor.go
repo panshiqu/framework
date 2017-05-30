@@ -15,6 +15,7 @@ import (
 type Processor struct {
 	server   *network.Server
 	services map[int]*define.Service
+	selected map[int]*define.Service
 }
 
 // OnMessage 收到消息
@@ -54,7 +55,60 @@ func (p *Processor) OnSubRegisterService(conn net.Conn, data []byte) error {
 	service.Conn = conn
 	p.services[service.ID] = &service
 
+	if !p.isExistSimilar(&service) {
+		p.selected[service.ID] = &service
+
+		// 广播已选服务
+	}
+
 	return nil
+}
+
+func (p *Processor) isExistSimilar(service *define.Service) bool {
+	for _, v := range p.selected {
+		if v.ServiceType == service.ServiceType &&
+			v.GameType == service.GameType &&
+			v.GameLevel == service.GameLevel {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (p *Processor) getSimilarService(service *define.Service) *define.Service {
+	capacity := 1000
+	var min, max *define.Service
+	for _, v := range p.services {
+		if v.ServiceType != service.ServiceType ||
+			v.GameType != service.GameType ||
+			v.GameLevel != service.GameLevel {
+			continue
+		}
+
+		if !v.IsServe {
+			continue
+		}
+
+		if min == nil || v.Count < min.Count {
+			min = v
+		}
+
+		if service.ServiceType != define.ServiceGame ||
+			v.Count > capacity {
+			continue
+		}
+
+		if max == nil || v.Count > max.Count {
+			max = v
+		}
+	}
+
+	if service.ServiceType == define.ServiceGame && max != nil {
+		return max
+	}
+
+	return min
 }
 
 // OnSubUnRegisterService 注销服务子命令
@@ -62,6 +116,16 @@ func (p *Processor) OnSubUnRegisterService(conn net.Conn, data []byte) error {
 	for _, v := range p.services {
 		if v.Conn == conn {
 			delete(p.services, v.ID)
+
+			if oldService, ok := p.selected[v.ID]; ok {
+				delete(p.selected, v.ID)
+				if newService := p.getSimilarService(oldService); newService != nil {
+					p.selected[newService.ID] = newService
+
+					// 广播已选服务
+				}
+			}
+
 			break
 		}
 	}
@@ -89,12 +153,18 @@ func NewProcessor(server *network.Server) *Processor {
 	return &Processor{
 		server:   server,
 		services: make(map[int]*define.Service),
+		selected: make(map[int]*define.Service),
 	}
 }
 
 // Monitor 监视器
 func (p *Processor) Monitor(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "services:")
 	for _, v := range p.services {
+		fmt.Fprintln(w, v)
+	}
+	fmt.Fprintln(w, "selected:")
+	for _, v := range p.selected {
 		fmt.Fprintln(w, v)
 	}
 }
