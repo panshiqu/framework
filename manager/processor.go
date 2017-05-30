@@ -10,6 +10,7 @@ import (
 
 	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/network"
+	"github.com/panshiqu/framework/utils"
 )
 
 // Processor 处理器
@@ -146,6 +147,8 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 
 // isExistSimilar 是否存在类似服务
 func (p *Processor) isExistSimilar(service *define.Service) bool {
+	defer utils.Trace("Processor isExistSimilar", service.ID)()
+
 	for _, v := range p.selected {
 		if v.ServiceType == service.ServiceType &&
 			v.GameType == service.GameType &&
@@ -159,6 +162,8 @@ func (p *Processor) isExistSimilar(service *define.Service) bool {
 
 // getSimilarService 获取类似服务
 func (p *Processor) getSimilarService(service *define.Service) *define.Service {
+	defer utils.Trace("Processor getSimilarService", service.ID)()
+
 	var min, max *define.Service
 	for _, v := range p.services {
 		if v.ServiceType != service.ServiceType ||
@@ -198,6 +203,8 @@ func (p *Processor) getSimilarService(service *define.Service) *define.Service {
 
 // addSelectedService 增加已选服务
 func (p *Processor) addSelectedService(service *define.Service) {
+	defer utils.Trace("Processor addSelectedService", service.ID)()
+
 	// 已选表增加
 	p.selected[service.ID] = service
 
@@ -206,6 +213,8 @@ func (p *Processor) addSelectedService(service *define.Service) {
 
 // delSelectedService 删除已选服务
 func (p *Processor) delSelectedService(service *define.Service) {
+	defer utils.Trace("Processor delSelectedService", service.ID)()
+
 	// 已选表删除
 	delete(p.selected, service.ID)
 
@@ -214,6 +223,8 @@ func (p *Processor) delSelectedService(service *define.Service) {
 
 // changeSelectedService 改变已选服务
 func (p *Processor) changeSelectedService(id int) {
+	defer utils.Trace("Processor changeSelectedService", id)()
+
 	// 是否存在
 	oldService, ok := p.selected[id]
 	if !ok {
@@ -235,6 +246,8 @@ func (p *Processor) changeSelectedService(id int) {
 
 // getServiceCapacity 获取服务容量
 func (p *Processor) getServiceCapacity(tp int) int {
+	defer utils.Trace("Processor getServiceCapacity", tp)()
+
 	switch tp {
 	case define.ServiceProxy:
 		return define.CapacityProxy
