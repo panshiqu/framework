@@ -185,6 +185,20 @@ func (p *Processor) OnSubUnRegisterService(conn net.Conn, data []byte) error {
 	return nil
 }
 
+// getServiceCapacity 获取服务容量
+func (p *Processor) getServiceCapacity(tp int) int {
+	switch tp {
+	case define.ServiceProxy:
+		return define.CapacityProxy
+	case define.ServiceLogin:
+		return define.CapacityLogin
+	case define.ServiceGame:
+		return define.CapacityGame
+	}
+
+	return 0
+}
+
 // OnSubUpdateServiceCount 更新服务计数子命令
 func (p *Processor) OnSubUpdateServiceCount(conn net.Conn, data []byte) error {
 	serviceCount := &define.ServiceCount{}
@@ -206,8 +220,8 @@ func (p *Processor) OnSubUpdateServiceCount(conn net.Conn, data []byte) error {
 	// 更新服务计数
 	service.Count = serviceCount.Count
 
-	// 服务计数小于对应容量
-	if service.Count < define.CapacityGame {
+	// 服务计数小于对应服务容量
+	if service.Count < p.getServiceCapacity(service.ServiceType) {
 		return nil
 	}
 
