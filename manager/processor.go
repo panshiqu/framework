@@ -13,9 +13,9 @@ import (
 
 // Processor 处理器
 type Processor struct {
-	server   *network.Server
-	services map[int]*define.Service
-	selected map[int]*define.Service
+	server   *network.Server         // 服务器
+	services map[int]*define.Service // 服务表（所有已开启的服务）
+	selected map[int]*define.Service // 已选表（负载均衡策略后选择的服务）
 }
 
 // OnMessage 收到消息
@@ -48,14 +48,20 @@ func (p *Processor) OnSubRegisterService(conn net.Conn, data []byte) error {
 		return define.NewError(err.Error())
 	}
 
+	// 重复注册服务
 	if _, ok := p.services[service.ID]; ok {
 		return define.NewError("repeat register service")
 	}
 
+	// 设置网络连接
 	service.Conn = conn
+
+	// 服务表增加
 	p.services[service.ID] = service
 
+	// 不存在类似服务
 	if !p.isExistSimilar(service) {
+		// 已选表增加
 		p.selected[service.ID] = service
 
 		// 广播已选服务
@@ -64,6 +70,7 @@ func (p *Processor) OnSubRegisterService(conn net.Conn, data []byte) error {
 	return nil
 }
 
+// isExistSimilar 是否存在类似服务
 func (p *Processor) isExistSimilar(service *define.Service) bool {
 	for _, v := range p.selected {
 		if v.ServiceType == service.ServiceType &&
@@ -76,6 +83,7 @@ func (p *Processor) isExistSimilar(service *define.Service) bool {
 	return false
 }
 
+// getSimilarService 获取类似服务
 func (p *Processor) getSimilarService(service *define.Service) *define.Service {
 	var min, max *define.Service
 	for _, v := range p.services {
@@ -85,19 +93,23 @@ func (p *Processor) getSimilarService(service *define.Service) *define.Service {
 			continue
 		}
 
+		// 服务已关闭
 		if !v.IsServe {
 			continue
 		}
 
+		// 总是记录计数最少的服务
 		if min == nil || v.Count < min.Count {
 			min = v
 		}
 
+		// 只关心游戏服务且计数小于游戏容量
 		if service.ServiceType != define.ServiceGame ||
 			v.Count > define.CapacityGame {
 			continue
 		}
 
+		// 总是记录计数较多的游戏服务（尽可能在相同游戏服务中玩，便于快速组桌开始游戏）
 		if max == nil || v.Count > max.Count {
 			max = v
 		}
@@ -114,11 +126,17 @@ func (p *Processor) getSimilarService(service *define.Service) *define.Service {
 func (p *Processor) OnSubUnRegisterService(conn net.Conn, data []byte) error {
 	for _, v := range p.services {
 		if v.Conn == conn {
+			// 服务表删除
 			delete(p.services, v.ID)
 
+			// 注销服务存在已选表中
 			if oldService, ok := p.selected[v.ID]; ok {
+				// 已选表删除
 				delete(p.selected, v.ID)
+
+				// 获取类似服务成功
 				if newService := p.getSimilarService(oldService); newService != nil {
+					// 已选表增加
 					p.selected[newService.ID] = newService
 
 					// 广播已选服务
