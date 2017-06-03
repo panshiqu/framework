@@ -71,7 +71,7 @@ func (p *Processor) OnSubRegisterService(conn net.Conn, data []byte) error {
 	// 服务表增加
 	p.services[service.ID] = service
 
-	// 不存在类似已选
+	// 是否存在类似已选
 	if !p.isExistSimilarSelected(service) {
 		// 增加已选服务
 		p.addSelectedService(service)
@@ -135,6 +135,8 @@ func (p *Processor) OnSubUpdateServiceCount(conn net.Conn, data []byte) error {
 
 // OnClose 连接关闭
 func (p *Processor) OnClose(conn net.Conn) {
+	defer utils.Trace("Processor OnClose")()
+
 	p.OnSubUnRegisterService(conn, nil)
 }
 
@@ -246,8 +248,6 @@ func (p *Processor) changeSelectedService(id int) {
 
 // getServiceCapacity 获取服务容量
 func (p *Processor) getServiceCapacity(tp int) int {
-	defer utils.Trace("Processor getServiceCapacity", tp)()
-
 	switch tp {
 	case define.ServiceProxy:
 		return define.CapacityProxy
