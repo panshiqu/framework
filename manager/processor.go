@@ -233,11 +233,15 @@ func (p *Processor) changeSelectedService(id int) {
 		return
 	}
 
+	// 获取类似服务
+	newService := p.getSimilarService(oldService)
+	if oldService == newService {
+		return
+	}
+
 	// 删除已选服务
 	p.delSelectedService(oldService)
 
-	// 获取类似服务
-	newService := p.getSimilarService(oldService)
 	if newService == nil {
 		return
 	}
