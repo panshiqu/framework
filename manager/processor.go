@@ -71,8 +71,8 @@ func (p *Processor) OnSubRegisterService(conn net.Conn, data []byte) error {
 	// 服务表增加
 	p.services[service.ID] = service
 
-	// 不存在类似服务
-	if !p.isExistSimilar(service) {
+	// 不存在类似已选
+	if !p.isExistSimilarSelected(service) {
 		// 增加已选服务
 		p.addSelectedService(service)
 	}
@@ -148,14 +148,17 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 	// nothing to do
 }
 
-// isExistSimilar 是否存在类似服务
-func (p *Processor) isExistSimilar(service *define.Service) bool {
-	defer utils.Trace("Processor isExistSimilar", service.ID)()
+// isSimilarService 是否类似服务
+func (p *Processor) isSimilarService(l, r *define.Service) bool {
+	return l.ServiceType == r.ServiceType && l.GameType == r.GameType && l.GameLevel == r.GameLevel
+}
+
+// isExistSimilarSelected 是否存在类似已选
+func (p *Processor) isExistSimilarSelected(service *define.Service) bool {
+	defer utils.Trace("Processor isExistSimilarSelected", service.ID)()
 
 	for _, v := range p.selected {
-		if v.ServiceType == service.ServiceType &&
-			v.GameType == service.GameType &&
-			v.GameLevel == service.GameLevel {
+		if p.isSimilarService(v, service) {
 			return true
 		}
 	}
@@ -169,14 +172,8 @@ func (p *Processor) getSimilarService(service *define.Service) *define.Service {
 
 	var min, max *define.Service
 	for _, v := range p.services {
-		if v.ServiceType != service.ServiceType ||
-			v.GameType != service.GameType ||
-			v.GameLevel != service.GameLevel {
-			continue
-		}
-
-		// 服务已关闭
-		if !v.IsServe {
+		if !p.isSimilarService(v, service) ||
+			!v.IsServe {
 			continue
 		}
 
