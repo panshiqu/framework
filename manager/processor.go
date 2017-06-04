@@ -174,6 +174,33 @@ func (p *Processor) OnSubOpenService(conn net.Conn, data []byte) error {
 
 // OnSubShutService 关闭服务
 func (p *Processor) OnSubShutService(conn net.Conn, data []byte) error {
+	shutService := &define.ShutService{}
+
+	if err := json.Unmarshal(data, shutService); err != nil {
+		return define.NewError(err.Error())
+	}
+
+	// 加锁
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
+	// 获取服务
+	service, ok := p.services[shutService.ID]
+	if !ok {
+		return define.NewError("not exist service")
+	}
+
+	// 服务已关闭
+	if !service.IsServe {
+		return define.NewError("service already shut")
+	}
+
+	// 关闭服务
+	service.IsServe = false
+
+	// 改变已选服务
+	p.changeSelectedService(shutService.ID)
+
 	return nil
 }
 

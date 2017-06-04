@@ -67,3 +67,8 @@ type ServiceCount struct {
 type OpenService struct {
 	ID int `json:",omitempty"` // 编号
 }
+
+// ShutService 关闭服务
+type ShutService struct {
+	ID int `json:",omitempty"` // 编号
+}
