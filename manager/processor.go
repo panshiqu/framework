@@ -78,6 +78,16 @@ func (p *Processor) OnSubRegisterService(conn net.Conn, data []byte) error {
 		p.addSelectedService(service)
 	}
 
+	// 仅通知代理
+	if service.ServiceType != define.ServiceProxy {
+		return nil
+	}
+
+	// 通知已选服务
+	if err := network.SendJSONMessage(conn, define.ManagerCommon, define.ManagerNotifyCurService, p.selected); err != nil {
+		log.Println("OnSubRegisterService SendJSONMessage", err)
+	}
+
 	return nil
 }
 
