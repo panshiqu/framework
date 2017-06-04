@@ -13,6 +13,7 @@ package network
 
 import (
 	"encoding/binary"
+	"encoding/json"
 	"io"
 	"net"
 )
@@ -59,4 +60,14 @@ func SendMessage(conn net.Conn, mcmd uint16, scmd uint16, data []byte) error {
 	}
 
 	return nil
+}
+
+// SendJSONMessage 发送消息
+func SendJSONMessage(conn net.Conn, mcmd uint16, scmd uint16, js interface{}) error {
+	data, err := json.Marshal(js)
+	if err != nil {
+		return err
+	}
+
+	return SendMessage(conn, mcmd, scmd, data)
 }
