@@ -13,9 +13,6 @@ import (
 	"github.com/panshiqu/framework/utils"
 )
 
-// 1.测试已有逻辑
-// 2.后台开启关闭service.IsServe，请复用注册注销逻辑
-
 // Processor 处理器
 type Processor struct {
 	mutex    sync.Mutex              // 锁
@@ -107,7 +104,7 @@ func (p *Processor) OnSubUnRegisterService(conn net.Conn, data []byte) error {
 
 // OnSubUpdateServiceCount 更新服务计数子命令
 func (p *Processor) OnSubUpdateServiceCount(conn net.Conn, data []byte) error {
-	serviceCount := &define.ServiceCount{}
+	serviceCount := &define.Service{}
 
 	if err := json.Unmarshal(data, serviceCount); err != nil {
 		return define.NewError(err.Error())
@@ -139,7 +136,7 @@ func (p *Processor) OnSubUpdateServiceCount(conn net.Conn, data []byte) error {
 
 // OnSubOpenService 开启服务
 func (p *Processor) OnSubOpenService(conn net.Conn, data []byte) error {
-	openService := &define.OpenService{}
+	openService := &define.Service{}
 
 	if err := json.Unmarshal(data, openService); err != nil {
 		return define.NewError(err.Error())
@@ -174,7 +171,7 @@ func (p *Processor) OnSubOpenService(conn net.Conn, data []byte) error {
 
 // OnSubShutService 关闭服务
 func (p *Processor) OnSubShutService(conn net.Conn, data []byte) error {
-	shutService := &define.ShutService{}
+	shutService := &define.Service{}
 
 	if err := json.Unmarshal(data, shutService); err != nil {
 		return define.NewError(err.Error())
