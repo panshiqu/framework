@@ -37,6 +37,12 @@ const (
 
 	// ManagerUpdateServiceCount 更新服务计数
 	ManagerUpdateServiceCount = 2
+
+	// ManagerOpenService 开启服务
+	ManagerOpenService = 3
+
+	// ManagerShutService 关闭服务
+	ManagerShutService = 4
 )
 
 // Service 服务

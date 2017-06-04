@@ -43,6 +43,10 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) error 
 		return p.OnSubRegisterService(conn, data)
 	case define.ManagerUpdateServiceCount:
 		return p.OnSubUpdateServiceCount(conn, data)
+	case define.ManagerOpenService:
+		return p.OnSubOpenService(conn, data)
+	case define.ManagerShutService:
+		return p.OnSubShutService(conn, data)
 	}
 
 	return define.NewError(fmt.Sprint("unknown sub cmd ", scmd))
@@ -130,6 +134,16 @@ func (p *Processor) OnSubUpdateServiceCount(conn net.Conn, data []byte) error {
 	// 改变已选服务
 	p.changeSelectedService(serviceCount.ID)
 
+	return nil
+}
+
+// OnSubOpenService 开启服务
+func (p *Processor) OnSubOpenService(conn net.Conn, data []byte) error {
+	return nil
+}
+
+// OnSubShutService 关闭服务
+func (p *Processor) OnSubShutService(conn net.Conn, data []byte) error {
 	return nil
 }
 
