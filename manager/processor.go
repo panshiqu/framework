@@ -279,6 +279,7 @@ func (p *Processor) addSelectedService(service *define.Service) {
 	p.selected[service.ID] = service
 
 	// 通知增加已选服务
+	p.notifySelectedService(define.ManagerNotifyAddService, service)
 }
 
 // delSelectedService 删除已选服务
@@ -289,6 +290,35 @@ func (p *Processor) delSelectedService(service *define.Service) {
 	delete(p.selected, service.ID)
 
 	// 通知删除已选服务
+	p.notifySelectedService(define.ManagerNotifyDelService, service)
+}
+
+// notifySelectedService 通知已选服务
+func (p *Processor) notifySelectedService(scmd uint16, service *define.Service) {
+	defer utils.Trace("Processor notifySelectedService", scmd, service.ID)()
+
+	data, err := json.Marshal(service)
+	if err != nil {
+		log.Println("notifySelectedService Marshal", err)
+		return
+	}
+
+	for _, v := range p.services {
+		// 不通知自己
+		if v.ID == service.ID {
+			continue
+		}
+
+		// 仅通知代理
+		if v.ServiceType != define.ServiceProxy {
+			continue
+		}
+
+		// 通知已选服务
+		if err := network.SendMessage(v.Conn, define.ManagerCommon, scmd, data); err != nil {
+			log.Println("notifySelectedService SendMessage", err)
+		}
+	}
 }
 
 // changeSelectedService 改变已选服务
