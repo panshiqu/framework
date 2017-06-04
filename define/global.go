@@ -43,6 +43,15 @@ const (
 
 	// ManagerShutService 关闭服务
 	ManagerShutService = 4
+
+	// ManagerNotifyCurService 通知当前服务
+	ManagerNotifyCurService = 101
+
+	// ManagerNotifyAddService 通知增加服务
+	ManagerNotifyAddService = 102
+
+	// ManagerNotifyDelService 通知删除服务
+	ManagerNotifyDelService = 103
 )
 
 // Service 服务
