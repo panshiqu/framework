@@ -38,8 +38,8 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) error 
 	switch scmd {
 	case define.ManagerRegisterService:
 		return p.OnSubRegisterService(conn, data)
-	case define.ManagerUpdateServiceCount:
-		return p.OnSubUpdateServiceCount(conn, data)
+	case define.ManagerUpdateCount:
+		return p.OnSubUpdateCount(conn, data)
 	case define.ManagerOpenService:
 		return p.OnSubOpenService(conn, data)
 	case define.ManagerShutService:
@@ -102,11 +102,11 @@ func (p *Processor) OnSubUnRegisterService(conn net.Conn, data []byte) error {
 	return nil
 }
 
-// OnSubUpdateServiceCount 更新服务计数子命令
-func (p *Processor) OnSubUpdateServiceCount(conn net.Conn, data []byte) error {
-	serviceCount := &define.Service{}
+// OnSubUpdateCount 更新计数子命令
+func (p *Processor) OnSubUpdateCount(conn net.Conn, data []byte) error {
+	updateCount := &define.Service{}
 
-	if err := json.Unmarshal(data, serviceCount); err != nil {
+	if err := json.Unmarshal(data, updateCount); err != nil {
 		return define.NewError(err.Error())
 	}
 
@@ -115,21 +115,21 @@ func (p *Processor) OnSubUpdateServiceCount(conn net.Conn, data []byte) error {
 	defer p.mutex.Unlock()
 
 	// 获取服务
-	service, ok := p.services[serviceCount.ID]
+	service, ok := p.services[updateCount.ID]
 	if !ok {
 		return define.NewError("not exist service")
 	}
 
-	// 更新服务计数
-	service.Count = serviceCount.Count
+	// 更新计数
+	service.Count = updateCount.Count
 
-	// 服务计数小于对应服务容量
+	// 计数小于对应容量
 	if service.Count < p.getServiceCapacity(service.ServiceType) {
 		return nil
 	}
 
 	// 改变已选服务
-	p.changeSelectedService(serviceCount.ID)
+	p.changeSelectedService(updateCount.ID)
 
 	return nil
 }
