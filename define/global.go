@@ -62,3 +62,8 @@ type ServiceCount struct {
 	ID    int `json:",omitempty"` // 编号
 	Count int `json:",omitempty"` // 计数
 }
+
+// OpenService 开启服务
+type OpenService struct {
+	ID int `json:",omitempty"` // 编号
+}

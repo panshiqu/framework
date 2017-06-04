@@ -139,6 +139,36 @@ func (p *Processor) OnSubUpdateServiceCount(conn net.Conn, data []byte) error {
 
 // OnSubOpenService 开启服务
 func (p *Processor) OnSubOpenService(conn net.Conn, data []byte) error {
+	openService := &define.OpenService{}
+
+	if err := json.Unmarshal(data, openService); err != nil {
+		return define.NewError(err.Error())
+	}
+
+	// 加锁
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
+	// 获取服务
+	service, ok := p.services[openService.ID]
+	if !ok {
+		return define.NewError("not exist service")
+	}
+
+	// 服务已开启
+	if service.IsServe {
+		return define.NewError("service already open")
+	}
+
+	// 开启服务
+	service.IsServe = true
+
+	// 是否存在类似已选
+	if !p.isExistSimilarSelected(service) {
+		// 增加已选服务
+		p.addSelectedService(service)
+	}
+
 	return nil
 }
 
