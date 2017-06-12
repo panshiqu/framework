@@ -29,9 +29,9 @@ func main() {
 		return
 	}
 
-	server := network.NewServer("127.0.0.1:8081")
-	client := network.NewClient("127.0.0.1:8080")
-	processor := login.NewProcessor(server, client)
+	server := network.NewServer(config.ListenIP)
+	client := network.NewClient(config.DialIP)
+	processor := login.NewProcessor(server, client, config)
 
 	server.Register(processor)
 	client.Register(processor)

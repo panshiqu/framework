@@ -11,8 +11,9 @@ import (
 
 // Processor 处理器
 type Processor struct {
-	server *network.Server // 服务器
-	client *network.Client // 客户端
+	server *network.Server     // 服务器
+	client *network.Client     // 客户端
+	config *define.ConfigLogin // 配置
 }
 
 // OnMessage 收到消息
@@ -35,8 +36,8 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 func (p *Processor) OnClientConnect(conn net.Conn) {
 	// 构造服务
 	service := &define.Service{
-		ID:          1,
-		IP:          "127.0.0.1:8081",
+		ID:          p.config.ID,
+		IP:          p.config.ListenIP,
 		ServiceType: define.ServiceLogin,
 		IsServe:     true,
 	}
@@ -58,9 +59,10 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 }
 
 // NewProcessor 创建处理器
-func NewProcessor(server *network.Server, client *network.Client) *Processor {
+func NewProcessor(server *network.Server, client *network.Client, config *define.ConfigLogin) *Processor {
 	return &Processor{
 		server: server,
 		client: client,
+		config: config,
 	}
 }
