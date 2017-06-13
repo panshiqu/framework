@@ -6,8 +6,10 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/manager"
 	"github.com/panshiqu/framework/network"
+	"github.com/panshiqu/framework/utils"
 )
 
 func handleSignal(server *network.Server) {
@@ -21,14 +23,20 @@ func handleSignal(server *network.Server) {
 }
 
 func main() {
-	server := network.NewServer("127.0.0.1:8080")
+	config := &define.ConfigManager{}
+	if err := utils.ReadJSON("./config/manager.json", config); err != nil {
+		log.Println("ReadJSON ConfigManager", err)
+		return
+	}
+
+	server := network.NewServer(config.ListenIP)
 	processor := manager.NewProcessor(server)
 	server.Register(processor)
 	go handleSignal(server)
 
 	go func() {
 		http.HandleFunc("/", processor.Monitor)
-		log.Println(http.ListenAndServe("127.0.0.1:9090", nil))
+		log.Println(http.ListenAndServe(config.PprofIP, nil))
 	}()
 
 	if err := server.Start(); err != nil {
