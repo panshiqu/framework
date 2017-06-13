@@ -32,4 +32,6 @@ type ConfigGame struct {
 
 // ConfigDB 数据库服务器配置
 type ConfigDB struct {
+	PprofIP  string
+	ListenIP string
 }
