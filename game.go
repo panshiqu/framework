@@ -5,8 +5,10 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/game"
 	"github.com/panshiqu/framework/network"
+	"github.com/panshiqu/framework/utils"
 )
 
 func handleSignal(server *network.Server, client *network.Client) {
@@ -21,9 +23,15 @@ func handleSignal(server *network.Server, client *network.Client) {
 }
 
 func main() {
-	server := network.NewServer("127.0.0.1:8082")
-	client := network.NewClient("127.0.0.1:8080")
-	processor := game.NewProcessor(server, client)
+	config := &define.ConfigGame{}
+	if err := utils.ReadJSON("./config/game.json", config); err != nil {
+		log.Println("ReadJSON ConfigGame", err)
+		return
+	}
+
+	server := network.NewServer(config.ListenIP)
+	client := network.NewClient(config.DialIP)
+	processor := game.NewProcessor(server, client, config)
 
 	server.Register(processor)
 	client.Register(processor)
