@@ -2,6 +2,7 @@ package login
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net"
 
@@ -19,6 +20,27 @@ type Processor struct {
 // OnMessage 收到消息
 func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []byte) error {
 	log.Println("OnMessage", mcmd, scmd, string(data))
+
+	switch mcmd {
+	case define.LoginCommon:
+		return p.OnMainCommon(conn, scmd, data)
+	}
+
+	return define.NewError(fmt.Sprint("unknown main cmd ", mcmd))
+}
+
+// OnMainCommon 通用主命令
+func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) error {
+	switch scmd {
+	case define.LoginFastRegister:
+		return p.OnSubFastRegister(conn, data)
+	}
+
+	return define.NewError(fmt.Sprint("unknown sub cmd ", scmd))
+}
+
+// OnSubFastRegister 快速注册子命令
+func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) error {
 	return nil
 }
 
