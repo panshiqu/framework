@@ -41,6 +41,14 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) error 
 
 // OnSubFastRegister 快速注册子命令
 func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) error {
+	fastRegister := &define.FastRegister{}
+
+	if err := json.Unmarshal(data, fastRegister); err != nil {
+		return define.NewError(err.Error())
+	}
+
+	log.Println(fastRegister)
+
 	return nil
 }
 

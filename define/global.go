@@ -75,3 +75,13 @@ type Service struct {
 	IsServe     bool     `json:",omitempty"` // 是否服务
 	Conn        net.Conn `json:"-"`          // 网络连接
 }
+
+// FastRegister 快速注册
+type FastRegister struct {
+	Account  string `json:",omitempty"` // 账户
+	Password string `json:",omitempty"` // 密码
+	Machine  string `json:",omitempty"` // 机器码
+	Name     string `json:",omitempty"` // 名称
+	Icon     int    `json:",omitempty"` // 图标
+	Gender   int    `json:",omitempty"` // 性别
+}
