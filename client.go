@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/network"
 )
 
@@ -31,7 +32,23 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 
 // OnClientConnect 客户端连接成功
 func (p *Processor) OnClientConnect(conn net.Conn) {
+	// 构造服务
+	fastRegister := &define.FastRegister{
+		Account:  "panshiqu",
+		Password: "111111",
+		Machine:  "panshiqu",
+		Name:     "panshiqu",
+		Icon:     0,
+		Gender:   0,
+	}
 
+	// 发送快速注册消息
+	if err := p.client.SendJSONMessage(define.LoginCommon, define.LoginFastRegister, fastRegister); err != nil {
+		log.Println("OnClientConnect SendJSONMessage", err)
+		return
+	}
+
+	log.Println("OnClientConnect", fastRegister)
 }
 
 func handleSignal(client *network.Client) {
@@ -45,7 +62,7 @@ func handleSignal(client *network.Client) {
 }
 
 func main() {
-	client := network.NewClient("127.0.0.1:8080")
+	client := network.NewClient("127.0.0.1:8081")
 	client.Register(&Processor{client: client})
 	go handleSignal(client)
 	client.Start()
