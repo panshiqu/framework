@@ -54,6 +54,16 @@ const (
 	ManagerNotifyDelService = 103
 )
 
+const (
+	// LoginCommon 通用
+	LoginCommon = 1
+)
+
+const (
+	// LoginFastRegister 快速注册
+	LoginFastRegister = 1
+)
+
 // Service 服务
 type Service struct {
 	ID          int      `json:",omitempty"` // 编号
