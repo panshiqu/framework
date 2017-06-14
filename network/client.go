@@ -114,3 +114,13 @@ func (c *Client) SendMessage(mcmd uint16, scmd uint16, data []byte) error {
 	}
 	return ErrDisconnect
 }
+
+// SendJSONMessage 发送消息
+func (c *Client) SendJSONMessage(mcmd uint16, scmd uint16, js interface{}) error {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	if c.conn != nil { // 担心正在重连时发送conn==nil
+		return SendJSONMessage(c.conn, mcmd, scmd, js)
+	}
+	return ErrDisconnect
+}
