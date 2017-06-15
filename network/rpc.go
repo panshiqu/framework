@@ -1,9 +1,12 @@
 package network
 
 import (
+	"encoding/json"
 	"log"
 	"net"
 	"sync"
+
+	"github.com/panshiqu/framework/define"
 )
 
 // RPC 远程过程调用
@@ -63,4 +66,27 @@ func (r *RPC) Call(mcmd uint16, scmd uint16, data []byte) (dt []byte, err error)
 		r.put(conn)
 		return
 	}
+}
+
+// JSONCall 调用
+func (r *RPC) JSONCall(mcmd uint16, scmd uint16, in interface{}, out interface{}) (err error) {
+	var indata, outdata []byte
+
+	if indata, err = json.Marshal(in); err != nil {
+		return
+	}
+
+	if outdata, err = r.Call(mcmd, scmd, indata); err != nil {
+		return
+	}
+
+	if err = define.CheckError(outdata); err != nil {
+		return
+	}
+
+	if err = json.Unmarshal(outdata, out); err != nil {
+		return
+	}
+
+	return
 }
