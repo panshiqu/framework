@@ -1,15 +1,13 @@
 package network
 
 import (
-	"errors"
 	"log"
 	"net"
 	"sync"
 	"time"
-)
 
-// ErrDisconnect 断开连接
-var ErrDisconnect = errors.New(`{"Errno":1,"Errdesc":"disconnect"}`)
+	"github.com/panshiqu/framework/define"
+)
 
 // Client 客户端
 type Client struct {
@@ -112,7 +110,7 @@ func (c *Client) SendMessage(mcmd uint16, scmd uint16, data []byte) error {
 	if c.conn != nil { // 担心正在重连时发送conn==nil
 		return SendMessage(c.conn, mcmd, scmd, data)
 	}
-	return ErrDisconnect
+	return define.NewError("disconnect")
 }
 
 // SendJSONMessage 发送消息
@@ -122,5 +120,5 @@ func (c *Client) SendJSONMessage(mcmd uint16, scmd uint16, js interface{}) error
 	if c.conn != nil { // 担心正在重连时发送conn==nil
 		return SendJSONMessage(c.conn, mcmd, scmd, js)
 	}
-	return ErrDisconnect
+	return define.NewError("disconnect")
 }
