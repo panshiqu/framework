@@ -7,7 +7,7 @@ Package network server and client
 
 3.OnMessage返回error请以如下格式创建，请自行校验Json数据的合法性，该数据将直接回复给客户端
 
-	var ErrSuccess = errors.New(`{"errno":0,"errdesc":"success"}`)
+	var ErrSuccess = errors.New(`{"Errno":0,"Errdesc":"success"}`)
 */
 package network
 

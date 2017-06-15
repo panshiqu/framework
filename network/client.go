@@ -9,7 +9,7 @@ import (
 )
 
 // ErrDisconnect 断开连接
-var ErrDisconnect = errors.New(`{"errno":1,"errdesc":"disconnect"}`)
+var ErrDisconnect = errors.New(`{"Errno":1,"Errdesc":"disconnect"}`)
 
 // Client 客户端
 type Client struct {
