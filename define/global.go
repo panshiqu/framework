@@ -64,6 +64,16 @@ const (
 	LoginFastRegister = 1
 )
 
+const (
+	// DBCommon 通用
+	DBCommon = 1
+)
+
+const (
+	// DBFastRegister 快速注册
+	DBFastRegister = 1
+)
+
 // Service 服务
 type Service struct {
 	ID          int      `json:",omitempty"` // 编号
@@ -84,4 +94,5 @@ type FastRegister struct {
 	Name     string `json:",omitempty"` // 名称
 	Icon     int    `json:",omitempty"` // 图标
 	Gender   int    `json:",omitempty"` // 性别
+	IP       string `json:",omitempty"` // 地址
 }
