@@ -72,16 +72,9 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 		IsServe:     true,
 	}
 
-	data, err := json.Marshal(service)
-	if err != nil {
-		log.Println("OnClientConnect Marshal", err)
-		return
-	}
-
 	// 发送注册服务消息
-	if err := p.client.SendMessage(define.ManagerCommon,
-		define.ManagerRegisterService, data); err != nil {
-		log.Println("OnClientConnect SendMessage", err)
+	if err := p.client.SendJSONMessage(define.ManagerCommon, define.ManagerRegisterService, service); err != nil {
+		log.Println("OnClientConnect SendJSONMessage", err)
 		return
 	}
 
