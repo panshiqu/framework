@@ -12,6 +12,7 @@ import (
 
 // Processor 处理器
 type Processor struct {
+	rpc    *network.RPC        // 数据库
 	server *network.Server     // 服务器
 	client *network.Client     // 客户端
 	config *define.ConfigLogin // 配置
@@ -46,6 +47,9 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) error {
 	if err := json.Unmarshal(data, fastRegister); err != nil {
 		return err
 	}
+
+	// 获取客户端地址
+	fastRegister.IP, _, _ = net.SplitHostPort(conn.RemoteAddr().String())
 
 	log.Println(fastRegister)
 
@@ -84,6 +88,7 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 // NewProcessor 创建处理器
 func NewProcessor(server *network.Server, client *network.Client, config *define.ConfigLogin) *Processor {
 	return &Processor{
+		rpc:    network.NewRPC(config.DBIP),
 		server: server,
 		client: client,
 		config: config,

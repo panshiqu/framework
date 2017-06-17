@@ -17,6 +17,7 @@ type ConfigProxy struct {
 // ConfigLogin 登陆服务器配置
 type ConfigLogin struct {
 	ID       int
+	DBIP     string
 	DialIP   string
 	PprofIP  string
 	ListenIP string
@@ -25,6 +26,7 @@ type ConfigLogin struct {
 // ConfigGame 游戏服务器配置
 type ConfigGame struct {
 	ID       int
+	DBIP     string
 	DialIP   string
 	PprofIP  string
 	ListenIP string
