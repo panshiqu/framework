@@ -30,7 +30,7 @@ func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []by
 		return p.OnMainCommon(conn, scmd, data)
 	}
 
-	return &define.Error{Errno: 1, Errdesc: fmt.Sprint("unknown main cmd ", mcmd)}
+	return &define.MyError{Errno: 1, Errdesc: fmt.Sprint("unknown main cmd ", mcmd)}
 }
 
 // OnMainCommon 通用主命令
@@ -46,7 +46,7 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) error 
 		return p.OnSubShutService(conn, data)
 	}
 
-	return &define.Error{Errno: 1, Errdesc: fmt.Sprint("unknown sub cmd ", scmd)}
+	return &define.MyError{Errno: 1, Errdesc: fmt.Sprint("unknown sub cmd ", scmd)}
 }
 
 // OnSubRegisterService 注册服务子命令
@@ -63,7 +63,7 @@ func (p *Processor) OnSubRegisterService(conn net.Conn, data []byte) error {
 
 	// 重复注册服务
 	if _, ok := p.services[service.ID]; ok {
-		return &define.Error{Errno: 1, Errdesc: "repeat register service"}
+		return &define.MyError{Errno: 1, Errdesc: "repeat register service"}
 	}
 
 	// 设置网络连接
@@ -127,7 +127,7 @@ func (p *Processor) OnSubUpdateCount(conn net.Conn, data []byte) error {
 	// 获取服务
 	service, ok := p.services[updateCount.ID]
 	if !ok {
-		return &define.Error{Errno: 1, Errdesc: "not exist service"}
+		return &define.MyError{Errno: 1, Errdesc: "not exist service"}
 	}
 
 	// 更新计数
@@ -159,12 +159,12 @@ func (p *Processor) OnSubOpenService(conn net.Conn, data []byte) error {
 	// 获取服务
 	service, ok := p.services[openService.ID]
 	if !ok {
-		return &define.Error{Errno: 1, Errdesc: "not exist service"}
+		return &define.MyError{Errno: 1, Errdesc: "not exist service"}
 	}
 
 	// 服务已开启
 	if service.IsServe {
-		return &define.Error{Errno: 1, Errdesc: "service already open"}
+		return &define.MyError{Errno: 1, Errdesc: "service already open"}
 	}
 
 	// 开启服务
@@ -194,12 +194,12 @@ func (p *Processor) OnSubShutService(conn net.Conn, data []byte) error {
 	// 获取服务
 	service, ok := p.services[shutService.ID]
 	if !ok {
-		return &define.Error{Errno: 1, Errdesc: "not exist service"}
+		return &define.MyError{Errno: 1, Errdesc: "not exist service"}
 	}
 
 	// 服务已关闭
 	if !service.IsServe {
-		return &define.Error{Errno: 1, Errdesc: "service already shut"}
+		return &define.MyError{Errno: 1, Errdesc: "service already shut"}
 	}
 
 	// 关闭服务

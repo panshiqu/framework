@@ -27,7 +27,7 @@ func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []by
 		return p.OnMainCommon(conn, scmd, data)
 	}
 
-	return &define.Error{Errno: 1, Errdesc: fmt.Sprint("unknown main cmd ", mcmd)}
+	return &define.MyError{Errno: 1, Errdesc: fmt.Sprint("unknown main cmd ", mcmd)}
 }
 
 // OnMainCommon 通用主命令
@@ -37,7 +37,7 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) error 
 		return p.OnSubFastRegister(conn, data)
 	}
 
-	return &define.Error{Errno: 1, Errdesc: fmt.Sprint("unknown sub cmd ", scmd)}
+	return &define.MyError{Errno: 1, Errdesc: fmt.Sprint("unknown sub cmd ", scmd)}
 }
 
 // OnSubFastRegister 快速注册子命令

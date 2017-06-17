@@ -10,14 +10,14 @@ const (
 	ErrSuccess int = 0
 )
 
-// Error 错误
-type Error struct {
+// MyError 错误
+type MyError struct {
 	Errno   int    `json:",omitempty"` // 错误码
 	Errdesc string `json:",omitempty"` // 错误描述
 }
 
-func (e *Error) Error() string {
-	return fmt.Sprintf(`{"Errno":%d,"Errdesc":"%s"}`, e.Errno, e.Errdesc)
+func (m *MyError) Error() string {
+	return fmt.Sprintf(`{"Errno":%d,"Errdesc":"%s"}`, m.Errno, m.Errdesc)
 }
 
 // NewError 创建错误
@@ -27,14 +27,14 @@ func NewError(desc string) error {
 
 // CheckError 检查错误
 func CheckError(data []byte) error {
-	eno := &Error{}
+	me := &MyError{}
 
-	if err := json.Unmarshal(data, eno); err != nil {
+	if err := json.Unmarshal(data, me); err != nil {
 		return err
 	}
 
-	if eno.Errno != ErrSuccess {
-		return eno
+	if me.Errno != ErrSuccess {
+		return me
 	}
 
 	return nil

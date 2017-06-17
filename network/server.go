@@ -4,6 +4,8 @@ import (
 	"log"
 	"net"
 	"sync"
+
+	"github.com/panshiqu/framework/define"
 )
 
 // Server 服务器
@@ -97,7 +99,11 @@ func (s *Server) handleConn(conn net.Conn) {
 		}
 
 		if err := s.processor.OnMessage(conn, mcmd, scmd, data); err != nil {
-			SendMessage(conn, mcmd, scmd, []byte(err.Error()))
+			if me, ok := err.(*define.MyError); ok {
+				SendMessage(conn, mcmd, scmd, []byte(me.Error()))
+			} else {
+				SendMessage(conn, mcmd, scmd, []byte(define.NewError(err.Error()).Error()))
+			}
 		}
 	}
 
