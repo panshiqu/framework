@@ -8,6 +8,32 @@ import (
 const (
 	// ErrSuccess 成功
 	ErrSuccess int = 0
+
+	// ErrFailure 失败
+	ErrFailure int = 1
+)
+
+var (
+	// ErrDisconnect 断开连接
+	ErrDisconnect = &MyError{Errno: ErrFailure, Errdesc: "disconnect"}
+
+	// ErrUnknownMainCmd 未知主命令
+	ErrUnknownMainCmd = &MyError{Errno: ErrFailure, Errdesc: "unknown main cmd"}
+
+	// ErrUnknownSubCmd 未知子命令
+	ErrUnknownSubCmd = &MyError{Errno: ErrFailure, Errdesc: "unknown sub cmd"}
+
+	// ErrRepeatRegisterService 重复注册服务
+	ErrRepeatRegisterService = &MyError{Errno: ErrFailure, Errdesc: "repeat register service"}
+
+	// ErrNotExistService 不存在该服务
+	ErrNotExistService = &MyError{Errno: ErrFailure, Errdesc: "not exist service"}
+
+	// ErrServiceAlreadyOpen 服务已经开启
+	ErrServiceAlreadyOpen = &MyError{Errno: ErrFailure, Errdesc: "service already open"}
+
+	// ErrServiceAlreadyShut 服务已经关闭
+	ErrServiceAlreadyShut = &MyError{Errno: ErrFailure, Errdesc: "service already shut"}
 )
 
 // MyError 错误
@@ -18,11 +44,6 @@ type MyError struct {
 
 func (m *MyError) Error() string {
 	return fmt.Sprintf(`{"Errno":%d,"Errdesc":"%s"}`, m.Errno, m.Errdesc)
-}
-
-// NewError 创建错误
-func NewError(desc string) error {
-	return fmt.Errorf(`{"Errno":1,"Errdesc":"%s"}`, desc)
 }
 
 // CheckError 检查错误

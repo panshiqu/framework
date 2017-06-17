@@ -99,11 +99,16 @@ func (s *Server) handleConn(conn net.Conn) {
 		}
 
 		if err := s.processor.OnMessage(conn, mcmd, scmd, data); err != nil {
-			if me, ok := err.(*define.MyError); ok {
-				SendMessage(conn, mcmd, scmd, []byte(me.Error()))
-			} else {
-				SendMessage(conn, mcmd, scmd, []byte(define.NewError(err.Error()).Error()))
+			me, ok := err.(*define.MyError)
+
+			if !ok {
+				me = &define.MyError{
+					Errno:   define.ErrFailure,
+					Errdesc: err.Error(),
+				}
 			}
+
+			SendMessage(conn, mcmd, scmd, []byte(me.Error()))
 		}
 	}
 
