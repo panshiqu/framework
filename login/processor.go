@@ -42,6 +42,7 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) error 
 // OnSubFastRegister 快速注册子命令
 func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) error {
 	fastRegister := &define.FastRegister{}
+	replyFastRegister := &define.ReplyFastRegister{}
 
 	if err := json.Unmarshal(data, fastRegister); err != nil {
 		return err
@@ -50,7 +51,20 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) error {
 	// 获取客户端地址
 	fastRegister.IP, _, _ = net.SplitHostPort(conn.RemoteAddr().String())
 
-	log.Println(fastRegister)
+	// 数据库请求
+	if err := p.rpc.JSONCall(define.DBCommon, define.DBFastRegister, fastRegister, replyFastRegister); err != nil {
+		return err
+	}
+
+	// 只更新不查询字段
+	replyFastRegister.UserName = fastRegister.Name
+	replyFastRegister.UserIcon = fastRegister.Icon
+	replyFastRegister.UserGender = fastRegister.Gender
+
+	// 回复客户端
+	if err := network.SendJSONMessage(conn, define.LoginCommon, define.LoginFastRegister, replyFastRegister); err != nil {
+		return err
+	}
 
 	return nil
 }
