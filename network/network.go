@@ -5,9 +5,7 @@ Package network server and client
 
 2.不管主动停止Stop还是被动停止Accept error，继续接收的消息都应该记录后因为GetBind==nil而返回错误（除非登陆、注册等等）
 
-3.OnMessage返回error请以如下格式创建，请自行校验Json数据的合法性，该数据将直接回复给客户端
-
-	var ErrSuccess = errors.New(`{"Errno":0,"Errdesc":"success"}`)
+3.OnMessage返回值可以扩展成interface{}类型，通过断言error, MyError, others进而区别对待，将可以实现快捷回复消息（暂不实现）
 */
 package network
 
