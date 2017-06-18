@@ -20,9 +20,5 @@ func ReadJSON(name string, js interface{}) error {
 		return err
 	}
 
-	if err := json.Unmarshal(body, js); err != nil {
-		return err
-	}
-
-	return nil
+	return json.Unmarshal(body, js)
 }
