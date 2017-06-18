@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net"
@@ -8,6 +9,12 @@ import (
 	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/network"
 )
+
+// LOG 日志数据库
+var LOG *sql.DB
+
+// GAME 游戏数据库
+var GAME *sql.DB
 
 // Processor 处理器
 type Processor struct {
@@ -88,6 +95,30 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 
 // NewProcessor 创建处理器
 func NewProcessor(server *network.Server) *Processor {
+	var err error
+
+	// todo SetMaxOpenConns, SetMaxIdleConns
+
+	if LOG, err = sql.Open("mysql", "root:@/log"); err != nil {
+		log.Println("Open log", err)
+		return nil
+	}
+
+	if err = LOG.Ping(); err != nil {
+		log.Println("Ping log", err)
+		return nil
+	}
+
+	if GAME, err = sql.Open("mysql", "root:@/game"); err != nil {
+		log.Println("Open game", err)
+		return nil
+	}
+
+	if err = GAME.Ping(); err != nil {
+		log.Println("Ping game", err)
+		return nil
+	}
+
 	return &Processor{
 		server: server,
 	}

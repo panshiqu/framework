@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/panshiqu/framework/db"
 	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/network"
@@ -30,6 +31,11 @@ func main() {
 
 	server := network.NewServer(config.ListenIP)
 	processor := db.NewProcessor(server)
+
+	if processor == nil {
+		return
+	}
+
 	server.Register(processor)
 	go handleSignal(server)
 
