@@ -84,6 +84,10 @@ func (r *RPC) JSONCall(mcmd uint16, scmd uint16, in interface{}, out interface{}
 		return
 	}
 
+	if out == nil {
+		return
+	}
+
 	if err = json.Unmarshal(outdata, out); err != nil {
 		return
 	}

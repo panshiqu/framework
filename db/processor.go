@@ -16,6 +16,24 @@ type Processor struct {
 
 // OnMessage 收到消息
 func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []byte) error {
+	ret := p.OnMessageEx(conn, mcmd, scmd, data)
+
+	// 必须回复消息
+	if ret == nil {
+		return define.ErrSuccess
+	}
+
+	// 错误直接回复
+	if err, ok := ret.(error); ok {
+		return err
+	}
+
+	// 实现快捷回复消息
+	return network.SendJSONMessage(conn, mcmd, scmd, ret)
+}
+
+// OnMessageEx 收到消息
+func (p *Processor) OnMessageEx(conn net.Conn, mcmd uint16, scmd uint16, data []byte) interface{} {
 	log.Println("OnMessage", mcmd, scmd, string(data))
 
 	switch mcmd {
@@ -27,7 +45,7 @@ func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []by
 }
 
 // OnMainCommon 通用主命令
-func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) error {
+func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) interface{} {
 	switch scmd {
 	case define.DBFastRegister:
 		return p.OnSubFastRegister(conn, data)
@@ -37,7 +55,7 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) error 
 }
 
 // OnSubFastRegister 快速注册子命令
-func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) error {
+func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 	fastRegister := &define.FastRegister{}
 
 	if err := json.Unmarshal(data, fastRegister); err != nil {
@@ -50,11 +68,7 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) error {
 		UserID: 10000000,
 	}
 
-	if err := network.SendJSONMessage(conn, define.DBCommon, define.DBFastRegister, replyFastRegister); err != nil {
-		return err
-	}
-
-	return nil
+	return replyFastRegister
 }
 
 // OnClose 连接关闭
