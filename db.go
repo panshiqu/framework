@@ -19,6 +19,8 @@ func handleSignal(server *network.Server) {
 	s := <-c
 	log.Println("Got signal:", s)
 
+	db.GAME.Close()
+	db.LOG.Close()
 	server.Stop()
 }
 
