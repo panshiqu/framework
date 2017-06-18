@@ -103,7 +103,7 @@ func (s *Server) handleConn(conn net.Conn) {
 
 			if !ok {
 				me = &define.MyError{
-					Errno:   define.ErrFailure,
+					Errno:   define.ErrnoFailure,
 					Errdesc: err.Error(),
 				}
 			}

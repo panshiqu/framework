@@ -6,34 +6,40 @@ import (
 )
 
 const (
-	// ErrSuccess 成功
-	ErrSuccess int = 0
+	// ErrnoSuccess 成功
+	ErrnoSuccess int = 0
 
-	// ErrFailure 失败
-	ErrFailure int = 1
+	// ErrnoFailure 失败
+	ErrnoFailure int = 1
 )
 
 var (
+	// ErrSuccess 成功
+	ErrSuccess = &MyError{Errno: ErrnoSuccess, Errdesc: "success"}
+
+	// ErrFailure 失败
+	ErrFailure = &MyError{Errno: ErrnoFailure, Errdesc: "failure"}
+
 	// ErrDisconnect 断开连接
-	ErrDisconnect = &MyError{Errno: ErrFailure, Errdesc: "disconnect"}
+	ErrDisconnect = &MyError{Errno: ErrnoFailure, Errdesc: "disconnect"}
 
 	// ErrUnknownMainCmd 未知主命令
-	ErrUnknownMainCmd = &MyError{Errno: ErrFailure, Errdesc: "unknown main cmd"}
+	ErrUnknownMainCmd = &MyError{Errno: ErrnoFailure, Errdesc: "unknown main cmd"}
 
 	// ErrUnknownSubCmd 未知子命令
-	ErrUnknownSubCmd = &MyError{Errno: ErrFailure, Errdesc: "unknown sub cmd"}
+	ErrUnknownSubCmd = &MyError{Errno: ErrnoFailure, Errdesc: "unknown sub cmd"}
 
 	// ErrRepeatRegisterService 重复注册服务
-	ErrRepeatRegisterService = &MyError{Errno: ErrFailure, Errdesc: "repeat register service"}
+	ErrRepeatRegisterService = &MyError{Errno: ErrnoFailure, Errdesc: "repeat register service"}
 
 	// ErrNotExistService 不存在该服务
-	ErrNotExistService = &MyError{Errno: ErrFailure, Errdesc: "not exist service"}
+	ErrNotExistService = &MyError{Errno: ErrnoFailure, Errdesc: "not exist service"}
 
 	// ErrServiceAlreadyOpen 服务已经开启
-	ErrServiceAlreadyOpen = &MyError{Errno: ErrFailure, Errdesc: "service already open"}
+	ErrServiceAlreadyOpen = &MyError{Errno: ErrnoFailure, Errdesc: "service already open"}
 
 	// ErrServiceAlreadyShut 服务已经关闭
-	ErrServiceAlreadyShut = &MyError{Errno: ErrFailure, Errdesc: "service already shut"}
+	ErrServiceAlreadyShut = &MyError{Errno: ErrnoFailure, Errdesc: "service already shut"}
 )
 
 // MyError 错误
@@ -54,7 +60,7 @@ func CheckError(data []byte) error {
 		return err
 	}
 
-	if me.Errno != ErrSuccess {
+	if me.Errno != ErrnoSuccess {
 		return me
 	}
 
