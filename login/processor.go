@@ -62,11 +62,7 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) error {
 	replyFastRegister.UserGender = fastRegister.Gender
 
 	// 回复客户端
-	if err := network.SendJSONMessage(conn, define.LoginCommon, define.LoginFastRegister, replyFastRegister); err != nil {
-		return err
-	}
-
-	return nil
+	return network.SendJSONMessage(conn, define.LoginCommon, define.LoginFastRegister, replyFastRegister)
 }
 
 // OnClose 连接关闭
