@@ -64,16 +64,48 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) interf
 // OnSubFastRegister 快速注册子命令
 func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 	fastRegister := &define.FastRegister{}
+	replyFastRegister := &define.ReplyFastRegister{}
 
 	if err := json.Unmarshal(data, fastRegister); err != nil {
 		return err
 	}
 
-	log.Println(fastRegister)
+	// 查询用户信息
+	if err := GAME.QueryRow("SELECT user_id, user_level, bind_phone, user_score, user_diamond FROM view_information_treasure WHERE user_account=?", fastRegister.Account).Scan(
+		&replyFastRegister.UserID,
+		&replyFastRegister.UserLevel,
+		&replyFastRegister.BindPhone,
+		&replyFastRegister.UserScore,
+		&replyFastRegister.UserDiamond,
+	); err == sql.ErrNoRows {
+		// 插入用户信息
+		res, err := GAME.Exec("INSERT INTO user_information (user_account, user_name, register_ip, register_machine) VALUES (?, ?, ?, ?)",
+			fastRegister.Account,
+			fastRegister.Name,
+			fastRegister.IP,
+			fastRegister.Machine,
+		)
+		if err != nil {
+			return err
+		}
 
-	replyFastRegister := &define.ReplyFastRegister{
-		UserID: 10000000,
+		// 获取用户编号
+		uid, err := res.LastInsertId()
+		if err != nil {
+			return err
+		}
+
+		replyFastRegister.UserID = int(uid)
+
+		// 插入用户财富
+		if _, err = GAME.Exec("INSERT INTO user_treasure (user_id) VALUES (?)", uid); err != nil {
+			return err
+		}
+	} else if err != nil {
+		return err
 	}
+
+	log.Println(fastRegister, replyFastRegister)
 
 	return replyFastRegister
 }
