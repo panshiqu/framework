@@ -38,8 +38,8 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 		Password: "111111",
 		Machine:  "panshiqu",
 		Name:     "panshiqu",
-		Icon:     0,
-		Gender:   0,
+		Icon:     1,
+		Gender:   define.GenderFemale,
 	}
 
 	// 发送快速注册消息

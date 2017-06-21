@@ -75,6 +75,17 @@ const (
 )
 
 const (
+	// GenderMale 男
+	GenderMale = 1
+
+	// GenderFemale 女
+	GenderFemale = 2
+
+	// GenderUnknown 未知
+	GenderUnknown = 3
+)
+
+const (
 	// ChangeTypeRegister 注册
 	ChangeTypeRegister = 1
 
