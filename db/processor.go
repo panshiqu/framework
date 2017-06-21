@@ -65,13 +65,13 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) interf
 func (p *Processor) ChangeUserTreasure(UserID int, Score int64, VarScore int64, Diamond int64, VarDiamond int64, ChangeType int) error {
 	// 当前分数钻石
 	if Score < 0 || Diamond < 0 {
-		if err := GAME.QueryRow("SELECT user_score, user_diamond FROM user_treasure WHERE user_id=?", UserID).Scan(&Score, &Diamond); err != nil {
+		if err := GAME.QueryRow("SELECT user_score, user_diamond FROM user_treasure WHERE user_id = ?", UserID).Scan(&Score, &Diamond); err != nil {
 			return err
 		}
 	}
 
 	// 更新分数钻石
-	if _, err := GAME.Exec("UPDATE user_treasure SET user_score=user_score+?, user_diamond=user_diamond+? WHERE user_id=?", VarScore, VarDiamond, UserID); err != nil {
+	if _, err := GAME.Exec("UPDATE user_treasure SET user_score = user_score + ?, user_diamond = user_diamond + ? WHERE user_id = ?", VarScore, VarDiamond, UserID); err != nil {
 		return err
 	}
 
@@ -93,7 +93,7 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 	}
 
 	// 查询用户信息
-	if err := GAME.QueryRow("SELECT user_id, user_level, bind_phone, user_score, user_diamond FROM view_information_treasure WHERE user_account=?", fastRegister.Account).Scan(
+	if err := GAME.QueryRow("SELECT user_id, user_level, bind_phone, user_score, user_diamond FROM view_information_treasure WHERE user_account = ?", fastRegister.Account).Scan(
 		&replyFastRegister.UserID,
 		&replyFastRegister.UserLevel,
 		&replyFastRegister.BindPhone,
