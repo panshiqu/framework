@@ -61,6 +61,28 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) interf
 	return define.ErrUnknownSubCmd
 }
 
+// ChangeUserTreasure 改变用户财富
+func (p *Processor) ChangeUserTreasure(UserID int, Score int64, VarScore int64, Diamond int64, VarDiamond int64, ChangeType int) error {
+	// 当前分数钻石
+	if Score < 0 || Diamond < 0 {
+		if err := GAME.QueryRow("SELECT user_score, user_diamond FROM user_treasure WHERE user_id=?", UserID).Scan(&Score, &Diamond); err != nil {
+			return err
+		}
+	}
+
+	// 更新分数钻石
+	if _, err := GAME.Exec("UPDATE user_treasure SET user_score=user_score+?, user_diamond=user_diamond+? WHERE user_id=?", VarScore, VarDiamond, UserID); err != nil {
+		return err
+	}
+
+	// 记录财富日志
+	if _, err := LOG.Exec("INSERT INTO user_treasure_log_20161220 (user_id, cur_score, var_score, cur_diamond, var_diamond, change_type) VALUES (?, ?, ?, ?, ?, ?)", UserID, Score, VarScore, Diamond, VarDiamond, ChangeType); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // OnSubFastRegister 快速注册子命令
 func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 	fastRegister := &define.FastRegister{}
@@ -99,6 +121,25 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 
 		// 插入用户财富
 		if _, err = GAME.Exec("INSERT INTO user_treasure (user_id) VALUES (?)", uid); err != nil {
+			return err
+		}
+
+		// 用户初始分数钻石
+		var Score, Diamond int64
+
+		if err := GAME.QueryRow(`SELECT Content FROM game_config WHERE Title = "InitScore"`).Scan(&Score); err != nil {
+			return err
+		}
+
+		if err := GAME.QueryRow(`SELECT Content FROM game_config WHERE Title = "InitDiamond"`).Scan(&Diamond); err != nil {
+			return err
+		}
+
+		replyFastRegister.UserScore = Score
+		replyFastRegister.UserDiamond = Diamond
+
+		// 用户财富变化 todo
+		if err := p.ChangeUserTreasure(int(uid), -1, Score, -1, Diamond, 1); err != nil {
 			return err
 		}
 	} else if err != nil {
