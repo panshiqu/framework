@@ -2,16 +2,15 @@ package utils
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"time"
 )
 
 // Date 日期
-func Date() string {
+func Date() int {
 	y, m, d := time.Now().Date()
-	return fmt.Sprintf("%d%02d%02d", y, m, d)
+	return y*10000 + int(m)*100 + d
 }
 
 // ReadJSON 打开读取解析JSON文件

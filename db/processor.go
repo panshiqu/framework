@@ -3,11 +3,13 @@ package db
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net"
 
 	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/network"
+	"github.com/panshiqu/framework/utils"
 )
 
 // LOG 日志数据库
@@ -76,7 +78,7 @@ func (p *Processor) ChangeUserTreasure(id int, score int64, varScore int64, diam
 	}
 
 	// 记录财富日志
-	if _, err := LOG.Exec("INSERT INTO user_treasure_log_20161220 (user_id, cur_score, var_score, cur_diamond, var_diamond, change_type) VALUES (?, ?, ?, ?, ?, ?)", id, score, varScore, diamond, varDiamond, changeType); err != nil {
+	if _, err := LOG.Exec(fmt.Sprintf("INSERT INTO user_treasure_log_%d (user_id, cur_score, var_score, cur_diamond, var_diamond, change_type) VALUES (?, ?, ?, ?, ?, ?)", utils.Date()), id, score, varScore, diamond, varDiamond, changeType); err != nil {
 		return err
 	}
 
