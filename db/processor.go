@@ -62,21 +62,21 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) interf
 }
 
 // ChangeUserTreasure 改变用户财富
-func (p *Processor) ChangeUserTreasure(UserID int, Score int64, VarScore int64, Diamond int64, VarDiamond int64, ChangeType int) error {
+func (p *Processor) ChangeUserTreasure(id int, score int64, varScore int64, diamond int64, varDiamond int64, changeType int) error {
 	// 当前分数钻石
-	if Score < 0 || Diamond < 0 {
-		if err := GAME.QueryRow("SELECT user_score, user_diamond FROM user_treasure WHERE user_id = ?", UserID).Scan(&Score, &Diamond); err != nil {
+	if score < 0 || diamond < 0 {
+		if err := GAME.QueryRow("SELECT user_score, user_diamond FROM user_treasure WHERE user_id = ?", id).Scan(&score, &diamond); err != nil {
 			return err
 		}
 	}
 
 	// 更新分数钻石
-	if _, err := GAME.Exec("UPDATE user_treasure SET user_score = user_score + ?, user_diamond = user_diamond + ? WHERE user_id = ?", VarScore, VarDiamond, UserID); err != nil {
+	if _, err := GAME.Exec("UPDATE user_treasure SET user_score = user_score + ?, user_diamond = user_diamond + ? WHERE user_id = ?", varScore, varDiamond, id); err != nil {
 		return err
 	}
 
 	// 记录财富日志
-	if _, err := LOG.Exec("INSERT INTO user_treasure_log_20161220 (user_id, cur_score, var_score, cur_diamond, var_diamond, change_type) VALUES (?, ?, ?, ?, ?, ?)", UserID, Score, VarScore, Diamond, VarDiamond, ChangeType); err != nil {
+	if _, err := LOG.Exec("INSERT INTO user_treasure_log_20161220 (user_id, cur_score, var_score, cur_diamond, var_diamond, change_type) VALUES (?, ?, ?, ?, ?, ?)", id, score, varScore, diamond, varDiamond, changeType); err != nil {
 		return err
 	}
 
@@ -125,21 +125,21 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 		}
 
 		// 用户初始分数钻石
-		var Score, Diamond int64
+		var score, diamond int64
 
-		if err := GAME.QueryRow(`SELECT Content FROM game_config WHERE Title = "InitScore"`).Scan(&Score); err != nil {
+		if err := GAME.QueryRow(`SELECT Content FROM game_config WHERE Title = "InitScore"`).Scan(&score); err != nil {
 			return err
 		}
 
-		if err := GAME.QueryRow(`SELECT Content FROM game_config WHERE Title = "InitDiamond"`).Scan(&Diamond); err != nil {
+		if err := GAME.QueryRow(`SELECT Content FROM game_config WHERE Title = "InitDiamond"`).Scan(&diamond); err != nil {
 			return err
 		}
 
-		replyFastRegister.UserScore = Score
-		replyFastRegister.UserDiamond = Diamond
+		replyFastRegister.UserScore = score
+		replyFastRegister.UserDiamond = diamond
 
 		// 用户财富变化
-		if err := p.ChangeUserTreasure(int(uid), 0, Score, 0, Diamond, define.ChangeTypeRegister); err != nil {
+		if err := p.ChangeUserTreasure(int(uid), 0, score, 0, diamond, define.ChangeTypeRegister); err != nil {
 			return err
 		}
 	} else if err != nil {
