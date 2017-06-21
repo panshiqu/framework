@@ -103,9 +103,11 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 		&replyFastRegister.UserDiamond,
 	); err == sql.ErrNoRows {
 		// 插入用户信息
-		res, err := GAME.Exec("INSERT INTO user_information (user_account, user_name, register_ip, register_machine) VALUES (?, ?, ?, ?)",
+		res, err := GAME.Exec("INSERT INTO user_information (user_account, user_name, user_icon, user_gender, register_ip, register_machine) VALUES (?, ?, ?, ?, ?, ?)",
 			fastRegister.Account,
 			fastRegister.Name,
+			fastRegister.Icon,
+			fastRegister.Gender,
 			fastRegister.IP,
 			fastRegister.Machine,
 		)
@@ -144,6 +146,9 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 		if err := p.ChangeUserTreasure(int(uid), 0, score, 0, diamond, define.ChangeTypeRegister); err != nil {
 			return err
 		}
+
+		// 初始用户等级
+		replyFastRegister.UserLevel = 1
 	} else if err != nil {
 		return err
 	}
