@@ -74,6 +74,17 @@ const (
 	DBFastRegister = 1
 )
 
+const (
+	// ChangeTypeRegister 注册
+	ChangeTypeRegister = 1
+
+	// ChangeTypeWinLose 输赢
+	ChangeTypeWinLose = 2
+
+	// ChangeTypeSignIn 签到
+	ChangeTypeSignIn = 3
+)
+
 // Service 服务
 type Service struct {
 	ID          int      `json:",omitempty"` // 编号

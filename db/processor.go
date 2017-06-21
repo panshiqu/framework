@@ -138,8 +138,8 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 		replyFastRegister.UserScore = Score
 		replyFastRegister.UserDiamond = Diamond
 
-		// 用户财富变化 todo
-		if err := p.ChangeUserTreasure(int(uid), -1, Score, -1, Diamond, 1); err != nil {
+		// 用户财富变化
+		if err := p.ChangeUserTreasure(int(uid), 0, Score, 0, Diamond, define.ChangeTypeRegister); err != nil {
 			return err
 		}
 	} else if err != nil {
