@@ -153,7 +153,15 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 		return err
 	}
 
-	log.Println(fastRegister, replyFastRegister)
+	// 总是更新这些字段
+	if _, err := GAME.Exec("UPDATE user_information SET user_name = ?, user_icon = ?, user_gender = ? WHERE user_id = ?",
+		fastRegister.Name,
+		fastRegister.Icon,
+		fastRegister.Gender,
+		replyFastRegister.UserID,
+	); err != nil {
+		return err
+	}
 
 	return replyFastRegister
 }

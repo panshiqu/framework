@@ -111,7 +111,7 @@ type Service struct {
 // FastRegister 快速注册
 type FastRegister struct {
 	Account  string `json:",omitempty"` // 账户
-	Password string `json:",omitempty"` // 密码
+	Password string `json:",omitempty"` // 密码（未使用）
 	Machine  string `json:",omitempty"` // 机器码
 	Name     string `json:",omitempty"` // 名称
 	Icon     int    `json:",omitempty"` // 图标
