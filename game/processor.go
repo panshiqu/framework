@@ -1,6 +1,7 @@
 package game
 
 import (
+	"encoding/json"
 	"log"
 	"net"
 
@@ -40,7 +41,18 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) error 
 
 // OnSubFastLogin 快速登陆子命令
 func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) error {
-	return nil
+	fastLogin := &define.FastLogin{}
+	replyFastLogin := &define.ReplyFastLogin{}
+
+	if err := json.Unmarshal(data, fastLogin); err != nil {
+		return err
+	}
+
+	// 可以判断时间戳是否接近当前时间
+	// 即使抓包再封包依然不能模拟玩家登陆
+
+	// 回复客户端
+	return network.SendJSONMessage(conn, define.GameCommon, define.GameFastLogin, replyFastLogin)
 }
 
 // OnClose 连接关闭

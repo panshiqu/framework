@@ -149,7 +149,7 @@ type ReplyFastRegister struct {
 // FastLogin 快速登陆
 type FastLogin struct {
 	UserID    int    `json:",omitempty"` // 编号
-	Timestamp int    `json:",omitempty"` // 时间戳
+	Timestamp int64  `json:",omitempty"` // 时间戳
 	Signature string `json:",omitempty"` // 加密签名
 }
 
