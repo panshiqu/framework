@@ -65,6 +65,16 @@ const (
 )
 
 const (
+	// GameCommon 通用
+	GameCommon = 1
+)
+
+const (
+	// GameFastLogin 快速登陆
+	GameFastLogin = 1
+)
+
+const (
 	// DBCommon 通用
 	DBCommon = 1
 )
