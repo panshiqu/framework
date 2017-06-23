@@ -118,6 +118,18 @@ type Service struct {
 	Conn        net.Conn `json:"-"`          // 网络连接
 }
 
+// UserInfo 用户信息
+type UserInfo struct {
+	UserID      int    `json:",omitempty"` // 编号
+	UserName    string `json:",omitempty"` // 名称
+	UserIcon    int    `json:",omitempty"` // 图标
+	UserLevel   int    `json:",omitempty"` // 等级
+	UserGender  int    `json:",omitempty"` // 性别
+	BindPhone   string `json:",omitempty"` // 绑定手机
+	UserScore   int64  `json:",omitempty"` // 分数
+	UserDiamond int64  `json:",omitempty"` // 钻石
+}
+
 // FastRegister 快速注册
 type FastRegister struct {
 	Account  string `json:",omitempty"` // 账户
@@ -131,12 +143,12 @@ type FastRegister struct {
 
 // ReplyFastRegister 回复快速注册
 type ReplyFastRegister struct {
-	UserID      int    `json:",omitempty"` // 编号
-	UserName    string `json:",omitempty"` // 名称
-	UserIcon    int    `json:",omitempty"` // 图标
-	UserLevel   int    `json:",omitempty"` // 等级
-	UserGender  int    `json:",omitempty"` // 性别
-	BindPhone   string `json:",omitempty"` // 绑定手机
-	UserScore   int64  `json:",omitempty"` // 分数
-	UserDiamond int64  `json:",omitempty"` // 钻石
+	UserInfo
+}
+
+// FastLogin 快速登陆
+type FastLogin struct {
+	UserID    int    `json:",omitempty"` // 编号
+	Timestamp int    `json:",omitempty"` // 时间戳
+	Signature string `json:",omitempty"` // 加密签名
 }
