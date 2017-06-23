@@ -152,3 +152,9 @@ type FastLogin struct {
 	Timestamp int    `json:",omitempty"` // 时间戳
 	Signature string `json:",omitempty"` // 加密签名
 }
+
+// ReplyFastLogin 返回快速登陆
+type ReplyFastLogin struct {
+	UserInfo
+	IsRobot bool `json:",omitempty"` // 机器人
+}
