@@ -10,6 +10,7 @@ import (
 
 // Processor 处理器
 type Processor struct {
+	rpc    *network.RPC       // 数据库
 	server *network.Server    // 服务器
 	client *network.Client    // 客户端
 	config *define.ConfigGame // 配置
@@ -18,6 +19,27 @@ type Processor struct {
 // OnMessage 收到消息
 func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []byte) error {
 	log.Println("OnMessage", mcmd, scmd, string(data))
+
+	switch mcmd {
+	case define.GameCommon:
+		return p.OnMainCommon(conn, scmd, data)
+	}
+
+	return define.ErrUnknownMainCmd
+}
+
+// OnMainCommon 通用主命令
+func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) error {
+	switch scmd {
+	case define.GameFastLogin:
+		return p.OnSubFastLogin(conn, data)
+	}
+
+	return define.ErrUnknownSubCmd
+}
+
+// OnSubFastLogin 快速登陆子命令
+func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) error {
 	return nil
 }
 
@@ -53,6 +75,7 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 // NewProcessor 创建处理器
 func NewProcessor(server *network.Server, client *network.Client, config *define.ConfigGame) *Processor {
 	return &Processor{
+		rpc:    network.NewRPC(config.DBIP),
 		server: server,
 		client: client,
 		config: config,
