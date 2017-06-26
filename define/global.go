@@ -85,6 +85,9 @@ const (
 const (
 	// DBFastRegister 快速注册
 	DBFastRegister = 1
+
+	// DBFastLogin 快速登陆
+	DBFastLogin = 2
 )
 
 const (

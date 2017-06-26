@@ -58,6 +58,8 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) interf
 	switch scmd {
 	case define.DBFastRegister:
 		return p.OnSubFastRegister(conn, data)
+	case define.DBFastLogin:
+		return p.OnSubFastLogin(conn, data)
 	}
 
 	return define.ErrUnknownSubCmd
@@ -164,6 +166,33 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 	}
 
 	return replyFastRegister
+}
+
+// OnSubFastLogin 快速登陆子命令
+func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) interface{} {
+	var id int
+	replyFastLogin := &define.ReplyFastLogin{}
+
+	if err := json.Unmarshal(data, &id); err != nil {
+		return err
+	}
+
+	// 查询用户信息
+	if err := GAME.QueryRow("SELECT user_id, user_name, user_icon, user_level, user_gender+0, bind_phone, user_score, user_diamond, is_robot FROM view_information_treasure WHERE user_id = ?", id).Scan(
+		&replyFastLogin.UserID,
+		&replyFastLogin.UserName,
+		&replyFastLogin.UserIcon,
+		&replyFastLogin.UserLevel,
+		&replyFastLogin.UserGender,
+		&replyFastLogin.BindPhone,
+		&replyFastLogin.UserScore,
+		&replyFastLogin.UserDiamond,
+		&replyFastLogin.IsRobot,
+	); err != nil {
+		return err
+	}
+
+	return replyFastLogin
 }
 
 // OnClose 连接关闭

@@ -55,6 +55,11 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) error {
 		return define.ErrSignature
 	}
 
+	// 数据库请求
+	if err := p.rpc.JSONCall(define.DBCommon, define.DBFastLogin, &fastLogin.UserID, replyFastLogin); err != nil {
+		return err
+	}
+
 	// 回复客户端
 	return network.SendJSONMessage(conn, define.GameCommon, define.GameFastLogin, replyFastLogin)
 }
