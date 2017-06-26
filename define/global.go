@@ -4,6 +4,9 @@ import (
 	"net"
 )
 
+// Token 令牌
+const Token = "116227"
+
 const (
 	// ServiceProxy 代理服务
 	ServiceProxy = 1

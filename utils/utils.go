@@ -10,6 +10,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/panshiqu/framework/define"
 )
 
 // Date 日期
@@ -20,7 +22,7 @@ func Date() int {
 
 // Signature 签名
 func Signature(timestamp int64) string {
-	s := fmt.Sprintf("%s%d", "116227", timestamp)
+	s := fmt.Sprintf("%s%d", define.Token, timestamp)
 	ss := strings.Split(s, "")
 	sort.Strings(ss)
 	sha := sha1.New()
