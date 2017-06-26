@@ -20,6 +20,9 @@ var (
 	// ErrFailure 失败
 	ErrFailure = &MyError{Errno: ErrnoFailure, Errdesc: "failure"}
 
+	// ErrSignature 签名
+	ErrSignature = &MyError{Errno: ErrnoFailure, Errdesc: "signature"}
+
 	// ErrDisconnect 断开连接
 	ErrDisconnect = &MyError{Errno: ErrnoFailure, Errdesc: "disconnect"}
 

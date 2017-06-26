@@ -7,6 +7,7 @@ import (
 
 	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/network"
+	"github.com/panshiqu/framework/utils"
 )
 
 // Processor 处理器
@@ -49,7 +50,10 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) error {
 	}
 
 	// 可以判断时间戳是否接近当前时间
-	// 即使抓包再封包依然不能模拟玩家登陆
+	// 即使抓包再封包依然不能模拟登陆
+	if utils.Signature(fastLogin.Timestamp) != fastLogin.Signature {
+		return define.ErrSignature
+	}
 
 	// 回复客户端
 	return network.SendJSONMessage(conn, define.GameCommon, define.GameFastLogin, replyFastLogin)
