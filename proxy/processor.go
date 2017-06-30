@@ -18,7 +18,15 @@ type Processor struct {
 // OnMessage 收到消息
 func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []byte) error {
 	log.Println("OnMessage", mcmd, scmd, string(data))
-	return nil
+
+	session, ok := p.server.GetBind(conn).(*Session)
+	if !ok {
+		log.Println("NewSession")
+		session := NewSession(conn)
+		p.server.SetBind(conn, session)
+	}
+
+	return session.OnMessage(mcmd, scmd, data)
 }
 
 // OnClose 连接关闭
