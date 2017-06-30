@@ -69,7 +69,7 @@ const (
 
 const (
 	// GameCommon 通用
-	GameCommon = 1
+	GameCommon = 100
 )
 
 const (

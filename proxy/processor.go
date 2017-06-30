@@ -22,7 +22,7 @@ func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []by
 	session, ok := p.server.GetBind(conn).(*Session)
 	if !ok {
 		log.Println("NewSession")
-		session := NewSession(conn)
+		session = NewSession(conn)
 		p.server.SetBind(conn, session)
 	}
 
