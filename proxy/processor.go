@@ -31,7 +31,10 @@ func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []by
 
 // OnClose 连接关闭
 func (p *Processor) OnClose(conn net.Conn) {
-
+	if session, ok := p.server.GetBind(conn).(*Session); ok {
+		log.Println("CloseSession")
+		session.OnClose()
+	}
 }
 
 // OnClientMessage 客户端收到消息

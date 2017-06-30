@@ -32,6 +32,17 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) error {
 	return network.SendMessage(s.login, mcmd, scmd, data)
 }
 
+// OnClose 连接关闭
+func (s *Session) OnClose() {
+	if s.login != nil {
+		s.login.Close()
+	}
+
+	if s.game != nil {
+		s.game.Close()
+	}
+}
+
 // RecvMessage 收到消息
 func (s *Session) RecvMessage(conn net.Conn) {
 	for {
