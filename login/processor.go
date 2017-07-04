@@ -48,9 +48,6 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) error {
 		return err
 	}
 
-	// 获取客户端地址
-	fastRegister.IP, _, _ = net.SplitHostPort(conn.RemoteAddr().String())
-
 	// 数据库请求
 	if err := p.rpc.JSONCall(define.DBCommon, define.DBFastRegister, fastRegister, replyFastRegister); err != nil {
 		return err

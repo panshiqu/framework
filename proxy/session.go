@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"encoding/json"
 	"net"
 
 	"github.com/panshiqu/framework/define"
@@ -27,6 +28,19 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 			}
 
 			go s.RecvMessage(s.login)
+
+			// 填充客户端地址
+			fastRegister := &define.FastRegister{}
+
+			if err = json.Unmarshal(data, fastRegister); err != nil {
+				return err
+			}
+
+			fastRegister.IP, _, _ = net.SplitHostPort(s.client.RemoteAddr().String())
+
+			if data, err = json.Marshal(fastRegister); err != nil {
+				return err
+			}
 		}
 
 		if s.login == nil {
