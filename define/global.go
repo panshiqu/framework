@@ -75,6 +75,9 @@ const (
 const (
 	// GameFastLogin 快速登陆
 	GameFastLogin = 1
+
+	// GameLogout 登出
+	GameLogout = 2
 )
 
 const (
