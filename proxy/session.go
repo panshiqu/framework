@@ -5,6 +5,7 @@ import (
 
 	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/network"
+	"github.com/panshiqu/framework/utils"
 )
 
 // Session 会话
@@ -14,9 +15,12 @@ type Session struct {
 
 // OnMessage 收到消息
 func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) error {
+	defer utils.Trace("Session OnMessage", mcmd, scmd)()
+
 	if mcmd == define.LoginCommon && scmd == define.LoginFastRegister {
 		if s.login != nil {
 			s.login.Close()
+			s.login = nil
 		}
 
 		conn, err := net.Dial("tcp", "127.0.0.1:8081")
@@ -34,17 +38,23 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) error {
 
 // OnClose 连接关闭
 func (s *Session) OnClose() {
+	defer utils.Trace("Session OnClose")()
+
 	if s.login != nil {
 		s.login.Close()
+		s.login = nil
 	}
 
 	if s.game != nil {
 		s.game.Close()
+		s.game = nil
 	}
 }
 
 // RecvMessage 收到消息
 func (s *Session) RecvMessage(conn net.Conn) {
+	defer utils.Trace("Session RecvMessage")()
+
 	for {
 		mcmd, scmd, data, err := network.RecvMessage(conn)
 		if err != nil {
@@ -53,6 +63,8 @@ func (s *Session) RecvMessage(conn net.Conn) {
 
 		network.SendMessage(s.client, mcmd, scmd, data)
 	}
+
+	s.client.Close()
 }
 
 // NewSession 创建会话
