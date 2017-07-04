@@ -20,10 +20,7 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 	switch mcmd {
 	case define.LoginCommon:
 		if scmd == define.LoginFastRegister {
-			if s.login != nil {
-				s.login.Close()
-				s.login = nil
-			}
+			s.closeLogin()
 
 			if s.login, err = net.Dial("tcp", "127.0.0.1:8081"); err != nil {
 				return err
@@ -42,10 +39,7 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 	case define.GameCommon:
 		switch scmd {
 		case define.GameFastLogin:
-			if s.game != nil {
-				s.game.Close()
-				s.game = nil
-			}
+			s.closeGame()
 
 			if s.game, err = net.Dial("tcp", "127.0.0.1:8082"); err != nil {
 				return err
@@ -54,11 +48,7 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 			go s.RecvMessage(s.game)
 
 		case define.GameLogout:
-			if s.game != nil {
-				s.game.Close()
-				s.game = nil
-			}
-
+			s.closeGame()
 			return nil
 		}
 
@@ -75,17 +65,8 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 
 // OnClose 连接关闭
 func (s *Session) OnClose() {
-	defer utils.Trace("Session OnClose")()
-
-	if s.login != nil {
-		s.login.Close()
-		s.login = nil
-	}
-
-	if s.game != nil {
-		s.game.Close()
-		s.game = nil
-	}
+	s.closeLogin()
+	s.closeGame()
 }
 
 // RecvMessage 收到消息
@@ -108,5 +89,19 @@ func (s *Session) RecvMessage(conn net.Conn) {
 func NewSession(client net.Conn) *Session {
 	return &Session{
 		client: client,
+	}
+}
+
+func (s *Session) closeLogin() {
+	if s.login != nil {
+		s.login.Close()
+		s.login = nil
+	}
+}
+
+func (s *Session) closeGame() {
+	if s.game != nil {
+		s.game.Close()
+		s.game = nil
 	}
 }
