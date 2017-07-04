@@ -14,7 +14,7 @@ type Session struct {
 }
 
 // OnMessage 收到消息
-func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) error {
+func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 	defer utils.Trace("Session OnMessage", mcmd, scmd)()
 
 	if mcmd == define.LoginCommon && scmd == define.LoginFastRegister {
@@ -23,14 +23,11 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) error {
 			s.login = nil
 		}
 
-		conn, err := net.Dial("tcp", "127.0.0.1:8081")
-		if err != nil {
+		if s.login, err = net.Dial("tcp", "127.0.0.1:8081"); err != nil {
 			return err
 		}
 
-		go s.RecvMessage(conn)
-
-		s.login = conn
+		go s.RecvMessage(s.login)
 	}
 
 	return network.SendMessage(s.login, mcmd, scmd, data)
