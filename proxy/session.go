@@ -32,6 +32,11 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 			go s.RecvMessage(s.login)
 		}
 
+		if s.login == nil {
+			s.client.Close()
+			return nil
+		}
+
 		return network.SendMessage(s.login, mcmd, scmd, data)
 
 	case define.GameCommon:
@@ -54,6 +59,11 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 				s.game = nil
 			}
 
+			return nil
+		}
+
+		if s.game == nil {
+			s.client.Close()
 			return nil
 		}
 
