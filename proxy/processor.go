@@ -11,10 +11,9 @@ import (
 
 // Processor 处理器
 type Processor struct {
-	server   *network.Server     // 服务器
-	client   *network.Client     // 客户端
-	config   *define.ConfigProxy // 配置
-	selected Selected            // 已选
+	server *network.Server     // 服务器
+	client *network.Client     // 客户端
+	config *define.ConfigProxy // 配置
 }
 
 // OnMessage 收到消息
@@ -56,7 +55,7 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 			return
 		}
 
-		p.selected.Init(selected)
+		SIns().Init(selected)
 
 	// 增加已选服务
 	case define.ManagerNotifyAddService:
@@ -66,7 +65,7 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 			return
 		}
 
-		p.selected.Add(service)
+		SIns().Add(service)
 
 	// 删除已选服务
 	case define.ManagerNotifyDelService:
@@ -76,7 +75,7 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 			return
 		}
 
-		p.selected.Del(service)
+		SIns().Del(service)
 	}
 }
 

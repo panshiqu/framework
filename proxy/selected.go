@@ -12,6 +12,8 @@ type Selected struct {
 	selected map[int]*define.Service
 }
 
+var sins *Selected
+
 // Init 初始化
 func (s *Selected) Init(v map[int]*define.Service) {
 	s.mutex.Lock()
@@ -31,4 +33,13 @@ func (s *Selected) Del(v *define.Service) {
 	s.mutex.Lock()
 	delete(s.selected, v.ID)
 	s.mutex.Unlock()
+}
+
+// SIns 单例模式
+func SIns() *Selected {
+	if sins == nil {
+		sins = new(Selected)
+	}
+
+	return sins
 }
