@@ -13,6 +13,8 @@ import (
 // Session 会话
 type Session struct {
 	client, login, game net.Conn
+
+	userid int // 用户编号
 }
 
 // OnMessage 收到消息
@@ -71,7 +73,7 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 			go s.RecvMessage(s.game)
 
 			newFastLogin := &define.FastLogin{
-				UserID:    1,
+				UserID:    s.userid,
 				Timestamp: time.Now().Unix(),
 			}
 
@@ -111,6 +113,12 @@ func (s *Session) RecvMessage(conn net.Conn) {
 		mcmd, scmd, data, err := network.RecvMessage(conn)
 		if err != nil {
 			break
+		}
+
+		if mcmd == define.LoginCommon && scmd == define.LoginFastRegister {
+			replyFastRegister := &define.ReplyFastRegister{}
+			json.Unmarshal(data, replyFastRegister)
+			s.userid = replyFastRegister.UserID
 		}
 
 		network.SendMessage(s.client, mcmd, scmd, data)
