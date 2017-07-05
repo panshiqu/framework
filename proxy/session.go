@@ -23,7 +23,8 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 		if scmd == define.LoginFastRegister {
 			s.closeLogin()
 
-			if s.login, err = sins.Dial(define.ServiceLogin, 0, 0); err != nil {
+			if s.login, err = sins.Dial(define.ServiceLogin,
+				define.GameUnknown, define.LevelUnknown); err != nil {
 				return err
 			}
 
@@ -55,7 +56,8 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 		case define.GameFastLogin:
 			s.closeGame()
 
-			if s.game, err = net.Dial("tcp", "127.0.0.1:8082"); err != nil {
+			if s.game, err = sins.Dial(define.ServiceGame,
+				define.GameLandlords, define.LevelOne); err != nil {
 				return err
 			}
 

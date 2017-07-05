@@ -80,6 +80,8 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 	service := &define.Service{
 		ID:          p.config.ID,
 		IP:          p.config.ListenIP,
+		GameType:    define.GameLandlords,
+		GameLevel:   define.LevelOne,
 		ServiceType: define.ServiceGame,
 		IsServe:     true,
 	}
