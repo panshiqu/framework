@@ -23,7 +23,7 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 		if scmd == define.LoginFastRegister {
 			s.closeLogin()
 
-			if s.login, err = net.Dial("tcp", "127.0.0.1:8081"); err != nil {
+			if s.login, err = sins.Dial(define.ServiceLogin, 0, 0); err != nil {
 				return err
 			}
 

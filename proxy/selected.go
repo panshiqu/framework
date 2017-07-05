@@ -1,10 +1,13 @@
 package proxy
 
 import (
+	"net"
 	"sync"
 
 	"github.com/panshiqu/framework/define"
 )
+
+var sins Selected
 
 // Selected 已选服务
 type Selected struct {
@@ -12,7 +15,19 @@ type Selected struct {
 	selected map[int]*define.Service
 }
 
-var sins *Selected
+// Dial 连接
+func (s *Selected) Dial(st, gt, gl int) (net.Conn, error) {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	for _, v := range s.selected {
+		if v.ServiceType == st && v.GameType == gt && v.GameLevel == gl {
+			return net.Dial("tcp", v.IP)
+		}
+	}
+
+	return nil, define.ErrNotExistService
+}
 
 // Init 初始化
 func (s *Selected) Init(v map[int]*define.Service) {
@@ -33,13 +48,4 @@ func (s *Selected) Del(v *define.Service) {
 	s.mutex.Lock()
 	delete(s.selected, v.ID)
 	s.mutex.Unlock()
-}
-
-// SIns 单例模式
-func SIns() *Selected {
-	if sins == nil {
-		sins = new(Selected)
-	}
-
-	return sins
 }

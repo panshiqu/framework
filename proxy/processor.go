@@ -55,7 +55,7 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 			return
 		}
 
-		SIns().Init(selected)
+		sins.Init(selected)
 
 	// 增加已选服务
 	case define.ManagerNotifyAddService:
@@ -65,7 +65,7 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 			return
 		}
 
-		SIns().Add(service)
+		sins.Add(service)
 
 	// 删除已选服务
 	case define.ManagerNotifyDelService:
@@ -75,7 +75,7 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 			return
 		}
 
-		SIns().Del(service)
+		sins.Del(service)
 	}
 }
 
