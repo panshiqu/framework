@@ -4,16 +4,19 @@ import (
 	"encoding/json"
 	"log"
 	"net"
+	"time"
 
 	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/network"
+	"github.com/panshiqu/framework/utils"
 )
 
 // Processor 处理器
 type Processor struct {
-	server *network.Server     // 服务器
-	client *network.Client     // 客户端
-	config *define.ConfigProxy // 配置
+	server   *network.Server     // 服务器
+	client   *network.Client     // 客户端
+	config   *define.ConfigProxy // 配置
+	schedule *utils.Schedule     // 定时
 }
 
 // OnMessage 收到消息
@@ -98,11 +101,22 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 	log.Println("OnClientConnect", service)
 }
 
+// OnTimer 定时到期
+func (p *Processor) OnTimer(id int, parameter interface{}) {
+	log.Println("OnTimer")
+}
+
 // NewProcessor 创建处理器
 func NewProcessor(server *network.Server, client *network.Client, config *define.ConfigProxy) *Processor {
-	return &Processor{
+	processor := &Processor{
 		server: server,
 		client: client,
 		config: config,
 	}
+
+	processor.schedule = utils.NewSchedule(processor)
+	processor.schedule.Add(0, time.Second, nil, true)
+	go processor.schedule.Start()
+
+	return processor
 }
