@@ -140,6 +140,17 @@ const (
 	ChangeTypeSignIn = 3
 )
 
+const (
+	// KeepAliveDead 死亡
+	KeepAliveDead = 1
+
+	// KeepAliveWarn 警告
+	KeepAliveWarn = 2
+
+	// KeepAliveSafe 安全
+	KeepAliveSafe = 3
+)
+
 // Service 服务
 type Service struct {
 	ID          int      `json:",omitempty"` // 编号
