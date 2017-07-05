@@ -19,6 +19,31 @@ const (
 )
 
 const (
+	// GameUnknown 未知
+	GameUnknown = 0
+
+	// GameLandlords 斗地主
+	GameLandlords = 1
+)
+
+const (
+	// LevelUnknown 未知
+	LevelUnknown = 0
+
+	// LevelOne 新手场
+	LevelOne = 1
+
+	// LevelTwo 初级场
+	LevelTwo = 2
+
+	// LevelThree 中级场
+	LevelThree = 3
+
+	// LevelFour 高级场
+	LevelFour = 4
+)
+
+const (
 	// CapacityProxy 代理容量
 	CapacityProxy = 1000
 
