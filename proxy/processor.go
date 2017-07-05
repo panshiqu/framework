@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"encoding/json"
 	"log"
 	"net"
 
@@ -40,6 +41,36 @@ func (p *Processor) OnClose(conn net.Conn) {
 // OnClientMessage 客户端收到消息
 func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, data []byte) {
 	log.Println("OnClientMessage", mcmd, scmd, string(data))
+
+	if mcmd != define.ManagerCommon {
+		return
+	}
+
+	switch scmd {
+	// 通知已选服务
+	case define.ManagerNotifyCurService:
+		var selected map[int]*define.Service
+
+		if err := json.Unmarshal(data, &selected); err != nil {
+			return
+		}
+
+	// 增加已选服务
+	case define.ManagerNotifyAddService:
+		service := &define.Service{}
+
+		if err := json.Unmarshal(data, service); err != nil {
+			return
+		}
+
+	// 删除已选服务
+	case define.ManagerNotifyDelService:
+		service := &define.Service{}
+
+		if err := json.Unmarshal(data, service); err != nil {
+			return
+		}
+	}
 }
 
 // OnClientConnect 客户端连接成功
