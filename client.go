@@ -32,7 +32,7 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 
 // OnClientConnect 客户端连接成功
 func (p *Processor) OnClientConnect(conn net.Conn) {
-	// 构造服务
+	// 快速注册
 	fastRegister := &define.FastRegister{
 		Account:  "panshiqu",
 		Password: "111111",
@@ -49,6 +49,20 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 	}
 
 	log.Println("OnClientConnect", fastRegister)
+
+	// 快速登陆
+	fastLogin := &define.FastLogin{
+		GameType:  define.GameLandlords,
+		GameLevel: define.LevelOne,
+	}
+
+	// 发送快速登陆消息
+	if err := p.client.SendJSONMessage(define.GameCommon, define.GameFastLogin, fastLogin); err != nil {
+		log.Println("OnClientConnect SendJSONMessage", err)
+		return
+	}
+
+	log.Println("OnClientConnect", fastLogin)
 }
 
 func handleSignal(client *network.Client) {

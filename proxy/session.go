@@ -3,6 +3,7 @@ package proxy
 import (
 	"encoding/json"
 	"net"
+	"time"
 
 	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/network"
@@ -56,12 +57,29 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 		case define.GameFastLogin:
 			s.closeGame()
 
+			fastLogin := &define.FastLogin{}
+
+			if err = json.Unmarshal(data, fastLogin); err != nil {
+				return err
+			}
+
 			if s.game, err = sins.Dial(define.ServiceGame,
-				define.GameLandlords, define.LevelOne); err != nil {
+				fastLogin.GameType, fastLogin.GameLevel); err != nil {
 				return err
 			}
 
 			go s.RecvMessage(s.game)
+
+			newFastLogin := &define.FastLogin{
+				UserID:    1,
+				Timestamp: time.Now().Unix(),
+			}
+
+			newFastLogin.Signature = utils.Signature(newFastLogin.Timestamp)
+
+			if data, err = json.Marshal(newFastLogin); err != nil {
+				return err
+			}
 
 		case define.GameLogout:
 			s.closeGame()

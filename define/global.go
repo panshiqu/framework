@@ -183,6 +183,8 @@ type ReplyFastRegister struct {
 // FastLogin 快速登陆
 type FastLogin struct {
 	UserID    int    `json:",omitempty"` // 编号
+	GameType  int    `json:",omitempty"` // 类型
+	GameLevel int    `json:",omitempty"` // 等级
 	Timestamp int64  `json:",omitempty"` // 时间戳
 	Signature string `json:",omitempty"` // 加密签名
 }
