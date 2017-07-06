@@ -3,6 +3,7 @@ package proxy
 import (
 	"encoding/json"
 	"net"
+	"sync/atomic"
 	"time"
 
 	"github.com/panshiqu/framework/define"
@@ -14,13 +15,16 @@ import (
 type Session struct {
 	client, login, game net.Conn
 
-	userid int // 用户编号
+	userid int   // 用户编号
+	status int32 // 会话状态
 	close  chan bool
 }
 
 // OnMessage 收到消息
 func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 	defer utils.Trace("Session OnMessage", mcmd, scmd)()
+
+	atomic.StoreInt32(&s.status, define.KeepAliveSafe)
 
 	switch mcmd {
 	case define.LoginCommon:
@@ -140,7 +144,20 @@ func (s *Session) KeepAlive() {
 		select {
 		case <-s.close:
 			return
+
 		case <-ticker.C:
+			switch atomic.LoadInt32(&s.status) {
+			case define.KeepAliveSafe:
+				atomic.StoreInt32(&s.status, define.KeepAliveWarn)
+
+			case define.KeepAliveWarn:
+				atomic.StoreInt32(&s.status, define.KeepAliveDead)
+				network.SendMessage(s.client, 1000, 1000, nil)
+
+			case define.KeepAliveDead:
+				s.client.Close()
+			}
+
 		default:
 			time.Sleep(time.Second)
 		}
@@ -151,6 +168,7 @@ func (s *Session) KeepAlive() {
 func NewSession(client net.Conn) *Session {
 	ses := &Session{
 		client: client,
+		status: define.KeepAliveSafe,
 		close:  make(chan bool),
 	}
 
