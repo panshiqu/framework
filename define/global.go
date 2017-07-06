@@ -55,6 +55,16 @@ const (
 )
 
 const (
+	// GLobalCommon 通用
+	GLobalCommon = 0
+)
+
+const (
+	// GLobalKeepAlive 保活
+	GLobalKeepAlive = 0
+)
+
+const (
 	// ManagerCommon 通用
 	ManagerCommon = 1
 )

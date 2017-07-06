@@ -152,7 +152,7 @@ func (s *Session) KeepAlive() {
 
 			case define.KeepAliveWarn:
 				atomic.StoreInt32(&s.status, define.KeepAliveDead)
-				network.SendMessage(s.client, 1000, 1000, nil)
+				network.SendMessage(s.client, define.GLobalCommon, define.GLobalKeepAlive, nil)
 
 			case define.KeepAliveDead:
 				s.client.Close()

@@ -29,6 +29,10 @@ func (p *Processor) OnClose(conn net.Conn) {
 func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, data []byte) {
 	log.Println("OnClientMessage", mcmd, scmd, string(data))
 
+	if mcmd == define.GLobalCommon && scmd == define.GLobalKeepAlive {
+		p.client.SendMessage(mcmd, scmd, nil)
+	}
+
 	if mcmd == define.LoginCommon && scmd == define.LoginFastRegister {
 		// 快速登陆
 		fastLogin := &define.FastLogin{
