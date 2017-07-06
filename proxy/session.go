@@ -15,6 +15,7 @@ type Session struct {
 	client, login, game net.Conn
 
 	userid int // 用户编号
+	close  chan bool
 }
 
 // OnMessage 收到消息
@@ -101,6 +102,7 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 
 // OnClose 连接关闭
 func (s *Session) OnClose() {
+	close(s.close)
 	s.closeLogin()
 	s.closeGame()
 }
@@ -127,11 +129,34 @@ func (s *Session) RecvMessage(conn net.Conn) {
 	s.client.Close()
 }
 
+// KeepAlive 保活
+func (s *Session) KeepAlive() {
+	defer utils.Trace("Session KeepAlive")()
+
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-s.close:
+			return
+		case <-ticker.C:
+		default:
+			time.Sleep(time.Second)
+		}
+	}
+}
+
 // NewSession 创建会话
 func NewSession(client net.Conn) *Session {
-	return &Session{
+	ses := &Session{
 		client: client,
+		close:  make(chan bool),
 	}
+
+	go ses.KeepAlive()
+
+	return ses
 }
 
 func (s *Session) closeLogin() {
