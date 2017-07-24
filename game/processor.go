@@ -42,6 +42,8 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) error 
 
 // OnSubFastLogin 快速登陆子命令
 func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) error {
+	defer utils.Trace("Processor OnSubFastLogin")()
+
 	fastLogin := &define.FastLogin{}
 	replyFastLogin := &define.ReplyFastLogin{}
 
@@ -57,6 +59,10 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) error {
 
 	// 查找用户
 	if userItem := uins.Search(fastLogin.UserID); userItem != nil {
+		// 设置绑定
+		p.server.SetBind(conn, userItem)
+
+		// 回复数据
 		replyFastLogin.UserID = userItem.UserID()
 		replyFastLogin.UserName = userItem.UserName()
 		replyFastLogin.UserIcon = userItem.UserIcon()
@@ -65,6 +71,8 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) error {
 		replyFastLogin.BindPhone = userItem.BindPhone()
 		replyFastLogin.UserScore = userItem.UserScore()
 		replyFastLogin.UserDiamond = userItem.UserDiamond()
+
+		// 回复客户端
 		return network.SendJSONMessage(conn, define.GameCommon, define.GameFastLogin, replyFastLogin)
 	}
 
@@ -73,13 +81,24 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) error {
 		return err
 	}
 
+	// 插入用户
+	userItem := uins.Insert(conn, replyFastLogin)
+
+	// 设置绑定
+	p.server.SetBind(conn, userItem)
+
 	// 回复客户端
 	return network.SendJSONMessage(conn, define.GameCommon, define.GameFastLogin, replyFastLogin)
 }
 
 // OnClose 连接关闭
 func (p *Processor) OnClose(conn net.Conn) {
+	defer utils.Trace("Processor OnClose")()
 
+	// 获取绑定用户
+	if userItem, ok := p.server.GetBind(conn).(*UserItem); ok {
+		uins.Delete(userItem.UserID())
+	}
 }
 
 // OnClientMessage 客户端收到消息
@@ -116,4 +135,8 @@ func NewProcessor(server *network.Server, client *network.Client, config *define
 		client: client,
 		config: config,
 	}
+}
+
+func init() {
+	uins.users = make(map[int]*UserItem)
 }

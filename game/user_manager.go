@@ -15,8 +15,8 @@ type UserManager struct {
 	users map[int]*UserItem
 }
 
-// Remove 移除用户
-func (u *UserManager) Remove(id int) {
+// Delete 删除用户
+func (u *UserManager) Delete(id int) {
 	u.mutex.Lock()
 	delete(u.users, id)
 	u.mutex.Unlock()
@@ -34,8 +34,8 @@ func (u *UserManager) Search(id int) *UserItem {
 	return nil
 }
 
-// Create 创造用户
-func (u *UserManager) Create(conn net.Conn, reply *define.ReplyFastLogin) *UserItem {
+// Insert 插入用户
+func (u *UserManager) Insert(conn net.Conn, reply *define.ReplyFastLogin) *UserItem {
 	userItem := &UserItem{
 		id:      reply.UserID,
 		name:    reply.UserName,
