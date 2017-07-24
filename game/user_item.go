@@ -9,6 +9,7 @@ type UserItem struct {
 	icon    int      // 图标
 	level   int      // 等级
 	gender  int      // 性别
+	phone   string   // 手机
 	score   int64    // 分数
 	diamond int64    // 钻石
 	robot   bool     // 机器人
@@ -38,6 +39,11 @@ func (u *UserItem) UserLevel() int {
 // UserGender 用户性别
 func (u *UserItem) UserGender() int {
 	return u.gender
+}
+
+// BindPhone 用户手机
+func (u *UserItem) BindPhone() string {
+	return u.phone
 }
 
 // UserScore 用户分数

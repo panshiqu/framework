@@ -55,6 +55,19 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) error {
 		return define.ErrSignature
 	}
 
+	// 查找用户
+	if userItem := uins.Search(fastLogin.UserID); userItem != nil {
+		replyFastLogin.UserID = userItem.UserID()
+		replyFastLogin.UserName = userItem.UserName()
+		replyFastLogin.UserIcon = userItem.UserIcon()
+		replyFastLogin.UserLevel = userItem.UserLevel()
+		replyFastLogin.UserGender = userItem.UserGender()
+		replyFastLogin.BindPhone = userItem.BindPhone()
+		replyFastLogin.UserScore = userItem.UserScore()
+		replyFastLogin.UserDiamond = userItem.UserDiamond()
+		return network.SendJSONMessage(conn, define.GameCommon, define.GameFastLogin, replyFastLogin)
+	}
+
 	// 数据库请求
 	if err := p.rpc.JSONCall(define.DBCommon, define.DBFastLogin, &fastLogin.UserID, replyFastLogin); err != nil {
 		return err
