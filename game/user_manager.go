@@ -1,7 +1,9 @@
 package game
 
 import (
+	"fmt"
 	"net"
+	"net/http"
 	"sync"
 
 	"github.com/panshiqu/framework/define"
@@ -54,4 +56,14 @@ func (u *UserManager) Insert(conn net.Conn, reply *define.ReplyFastLogin) *UserI
 	u.mutex.Unlock()
 
 	return userItem
+}
+
+// Monitor 监视器
+func (u *UserManager) Monitor(w http.ResponseWriter, r *http.Request) {
+	u.mutex.Lock()
+	fmt.Fprintln(w, "users:")
+	for _, v := range u.users {
+		fmt.Fprintln(w, v)
+	}
+	u.mutex.Unlock()
 }

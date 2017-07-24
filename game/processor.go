@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net"
+	"net/http"
 
 	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/network"
@@ -135,6 +136,11 @@ func NewProcessor(server *network.Server, client *network.Client, config *define
 		client: client,
 		config: config,
 	}
+}
+
+// Monitor 监视器
+func (p *Processor) Monitor(w http.ResponseWriter, r *http.Request) {
+	uins.Monitor(w, r)
 }
 
 func init() {

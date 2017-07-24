@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 
@@ -38,6 +39,11 @@ func main() {
 
 	go handleSignal(server, client)
 	go client.Start()
+
+	go func() {
+		http.HandleFunc("/", processor.Monitor)
+		log.Println(http.ListenAndServe(config.PprofIP, nil))
+	}()
 
 	if err := server.Start(); err != nil {
 		log.Println("Start", err)
