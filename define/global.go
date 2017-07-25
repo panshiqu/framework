@@ -161,6 +161,14 @@ const (
 	KeepAliveSafe = 3
 )
 
+const (
+	// TableStatusFree 空闲
+	TableStatusFree = 0
+
+	// TableStatusGame 游戏
+	TableStatusGame = 1
+)
+
 // Service 服务
 type Service struct {
 	ID          int      `json:",omitempty"` // 编号
