@@ -24,15 +24,14 @@ func handleSignal(server *network.Server, client *network.Client) {
 }
 
 func main() {
-	config := &define.ConfigGame{}
-	if err := utils.ReadJSON("./config/game.json", config); err != nil {
+	if err := utils.ReadJSON("./config/game.json", &define.CG); err != nil {
 		log.Println("ReadJSON ConfigGame", err)
 		return
 	}
 
-	server := network.NewServer(config.ListenIP)
-	client := network.NewClient(config.DialIP)
-	processor := game.NewProcessor(server, client, config)
+	server := network.NewServer(define.CG.ListenIP)
+	client := network.NewClient(define.CG.DialIP)
+	processor := game.NewProcessor(server, client)
 
 	server.Register(processor)
 	client.Register(processor)
@@ -42,7 +41,7 @@ func main() {
 
 	go func() {
 		http.HandleFunc("/", processor.Monitor)
-		log.Println(http.ListenAndServe(config.PprofIP, nil))
+		log.Println(http.ListenAndServe(define.CG.PprofIP, nil))
 	}()
 
 	if err := server.Start(); err != nil {

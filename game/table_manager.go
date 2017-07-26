@@ -3,6 +3,8 @@ package game
 import (
 	"sort"
 	"sync"
+
+	"github.com/panshiqu/framework/define"
 )
 
 var tins TableManager
@@ -20,7 +22,7 @@ func (t *TableManager) TrySitDown(userItem *UserItem) {
 		sort.Sort(TableFrameSlice(t.tables))
 
 		// 只要有桌子椅子就能坐下，这里不关心桌子状态
-		if len(t.tables) == 0 || t.tables[0].UserCount() == cins.UserPerTable {
+		if len(t.tables) == 0 || t.tables[0].UserCount() == define.CG.UserPerTable {
 			t.AddTableFrame()
 			continue
 		}
@@ -52,9 +54,9 @@ func (t TableFrameSlice) Less(i, j int) bool {
 		return t[i].TableStatus() < t[j].TableStatus()
 	} else if c1, c2 := t[i].UserCount(), t[j].UserCount(); c1 != c2 {
 		switch {
-		case c2 == cins.UserPerTable:
+		case c2 == define.CG.UserPerTable:
 			return true
-		case c1 == cins.UserPerTable:
+		case c1 == define.CG.UserPerTable:
 			return false
 		default:
 			return c1 > c2

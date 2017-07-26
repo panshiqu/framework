@@ -13,10 +13,9 @@ import (
 
 // Processor 处理器
 type Processor struct {
-	rpc    *network.RPC       // 数据库
-	server *network.Server    // 服务器
-	client *network.Client    // 客户端
-	config *define.ConfigGame // 配置
+	rpc    *network.RPC    // 数据库
+	server *network.Server // 服务器
+	client *network.Client // 客户端
 }
 
 // OnMessage 收到消息
@@ -111,8 +110,8 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 func (p *Processor) OnClientConnect(conn net.Conn) {
 	// 构造服务
 	service := &define.Service{
-		ID:          p.config.ID,
-		IP:          p.config.ListenIP,
+		ID:          define.CG.ID,
+		IP:          define.CG.ListenIP,
 		GameType:    define.GameLandlords,
 		GameLevel:   define.LevelOne,
 		ServiceType: define.ServiceGame,
@@ -129,12 +128,11 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 }
 
 // NewProcessor 创建处理器
-func NewProcessor(server *network.Server, client *network.Client, config *define.ConfigGame) *Processor {
+func NewProcessor(server *network.Server, client *network.Client) *Processor {
 	return &Processor{
-		rpc:    network.NewRPC(config.DBIP),
+		rpc:    network.NewRPC(define.CG.DBIP),
 		server: server,
 		client: client,
-		config: config,
 	}
 }
 
