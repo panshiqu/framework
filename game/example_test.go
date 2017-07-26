@@ -1,11 +1,10 @@
 package game
 
 import (
-	"math/rand"
-	"sort"
 	"testing"
 )
 
+/*
 func TestTableFrameSlice(t *testing.T) {
 	var m []*TableFrame
 	m = append(m, &TableFrame{id: 1, count: 3})
@@ -20,6 +19,8 @@ func TestTableFrameSlice(t *testing.T) {
 	m = append(m, &TableFrame{id: 10, count: 4})
 	m = append(m, &TableFrame{id: 11, status: 1})
 	m = append(m, &TableFrame{id: 12, status: 1})
+
+	define.CG.UserPerTable = 4
 
 	mm := make([]*TableFrame, len(m))
 
@@ -39,6 +40,7 @@ func TestTableFrameSlice(t *testing.T) {
 		}
 	}
 }
+*/
 
 func TestTrySitDown(t *testing.T) {
 
