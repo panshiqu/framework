@@ -1,10 +1,12 @@
 package game
 
+import "github.com/panshiqu/framework/define"
+
 // TableFrame 桌子框架
 type TableFrame struct {
-	id     int
-	status int
-	users  []*UserItem
+	id     int         // 编号
+	status int         // 状态
+	users  []*UserItem // 用户
 }
 
 // TableID 桌子编号
@@ -18,18 +20,40 @@ func (t *TableFrame) TableStatus() int {
 }
 
 // UserCount 用户数量
-func (t *TableFrame) UserCount() int {
-	return 0
+func (t *TableFrame) UserCount() (cnt int) {
+	for _, v := range t.users {
+		if v != nil {
+			cnt++
+		}
+	}
+
+	return
+}
+
+// NilChairID 空椅子编号
+func (t *TableFrame) NilChairID() int {
+	for k, v := range t.users {
+		if v == nil {
+			return k
+		}
+	}
+
+	return define.InvalidChair
 }
 
 // SitDown 坐下
 func (t *TableFrame) SitDown(userItem *UserItem) {
-
+	chair := t.NilChairID()
+	t.users[chair] = userItem
+	userItem.SetChairID(chair)
+	userItem.SetTableFrame(t)
 }
 
 // StandUp 站起
 func (t *TableFrame) StandUp(userItem *UserItem) {
-
+	t.users[userItem.ChairID()] = nil
+	userItem.SetChairID(define.InvalidChair)
+	userItem.SetTableFrame(nil)
 }
 
 // OnTimer 定时器

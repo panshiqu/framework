@@ -14,6 +14,9 @@ type UserItem struct {
 	diamond int64    // 钻石
 	robot   bool     // 机器人
 	conn    net.Conn // 网络连接
+
+	chairID    int         // 椅子编号
+	tableFrame *TableFrame // 桌子框架
 }
 
 // UserID 用户编号
@@ -59,4 +62,24 @@ func (u *UserItem) UserDiamond() int64 {
 // IsRobot 是否机器人
 func (u *UserItem) IsRobot() bool {
 	return u.robot
+}
+
+// ChairID 椅子编号
+func (u *UserItem) ChairID() int {
+	return u.chairID
+}
+
+// SetChairID 设置椅子编号
+func (u *UserItem) SetChairID(v int) {
+	u.chairID = v
+}
+
+// TableFrame 桌子框架
+func (u *UserItem) TableFrame() *TableFrame {
+	return u.tableFrame
+}
+
+// SetTableFrame 设置桌子框架
+func (u *UserItem) SetTableFrame(v *TableFrame) {
+	u.tableFrame = v
 }

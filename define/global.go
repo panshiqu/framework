@@ -169,6 +169,9 @@ const (
 	TableStatusGame = 1
 )
 
+// InvalidChair 无效椅子
+const InvalidChair = -1
+
 // Service 服务
 type Service struct {
 	ID          int      `json:",omitempty"` // 编号

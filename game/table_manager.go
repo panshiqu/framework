@@ -11,9 +11,9 @@ var tins TableManager
 
 // TableManager 桌子管理
 type TableManager struct {
-	count  int
-	mutex  sync.Mutex
-	tables []*TableFrame
+	count  int           // 计数
+	mutex  sync.Mutex    // 加锁
+	tables []*TableFrame // 桌子
 }
 
 // TrySitDown 尝试坐下
@@ -37,7 +37,8 @@ func (t *TableManager) AddTableFrame() {
 	t.count++
 
 	tableFrame := &TableFrame{
-		id: t.count,
+		id:    t.count,
+		users: make([]*UserItem, define.CG.UserPerTable),
 	}
 
 	t.tables = append(t.tables, tableFrame)
