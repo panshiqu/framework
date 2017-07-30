@@ -88,7 +88,14 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) error {
 	p.server.SetBind(conn, userItem)
 
 	// 回复客户端
-	return network.SendJSONMessage(conn, define.GameCommon, define.GameFastLogin, replyFastLogin)
+	if err := network.SendJSONMessage(conn, define.GameCommon, define.GameFastLogin, replyFastLogin); err != nil {
+		return err
+	}
+
+	// 用户坐下
+	tins.TrySitDown(userItem)
+
+	return nil
 }
 
 // OnClose 连接关闭
@@ -139,6 +146,7 @@ func NewProcessor(server *network.Server, client *network.Client) *Processor {
 // Monitor 监视器
 func (p *Processor) Monitor(w http.ResponseWriter, r *http.Request) {
 	uins.Monitor(w, r)
+	tins.Monitor(w, r)
 }
 
 func init() {
