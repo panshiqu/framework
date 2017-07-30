@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net"
 	"os"
@@ -54,10 +55,10 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 func (p *Processor) OnClientConnect(conn net.Conn) {
 	// 快速注册
 	fastRegister := &define.FastRegister{
-		Account:  "panshiqu",
+		Account:  *account,
 		Password: "111111",
-		Machine:  "panshiqu",
-		Name:     "panshiqu",
+		Machine:  *account,
+		Name:     *account,
 		Icon:     1,
 		Gender:   define.GenderFemale,
 	}
@@ -81,7 +82,10 @@ func handleSignal(client *network.Client) {
 	client.Stop()
 }
 
+var account = flag.String("account", "panshiqu", "account")
+
 func main() {
+	flag.Parse()
 	client := network.NewClient("127.0.0.1:8083")
 	client.Register(&Processor{client: client})
 	go handleSignal(client)
