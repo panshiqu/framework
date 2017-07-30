@@ -104,6 +104,9 @@ func (p *Processor) OnClose(conn net.Conn) {
 
 	// 获取绑定用户
 	if userItem, ok := p.server.GetBind(conn).(*UserItem); ok {
+		if tableFrame := userItem.TableFrame(); tableFrame != nil {
+			tableFrame.StandUp(userItem)
+		}
 		uins.Delete(userItem.UserID())
 	}
 }
