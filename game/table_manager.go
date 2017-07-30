@@ -1,6 +1,8 @@
 package game
 
 import (
+	"fmt"
+	"net/http"
 	"sort"
 	"sync"
 
@@ -18,6 +20,8 @@ type TableManager struct {
 
 // TrySitDown 尝试坐下
 func (t *TableManager) TrySitDown(userItem *UserItem) {
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
 	for {
 		sort.Sort(TableFrameSlice(t.tables))
 
@@ -68,4 +72,14 @@ func (t TableFrameSlice) Less(i, j int) bool {
 }
 func (t TableFrameSlice) Swap(i, j int) {
 	t[i], t[j] = t[j], t[i]
+}
+
+// Monitor 监视器
+func (t *TableManager) Monitor(w http.ResponseWriter, r *http.Request) {
+	t.mutex.Lock()
+	fmt.Fprintln(w, "tables:")
+	for _, v := range t.tables {
+		fmt.Fprintln(w, v)
+	}
+	t.mutex.Unlock()
 }
