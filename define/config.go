@@ -25,12 +25,13 @@ type ConfigLogin struct {
 
 // ConfigGame 游戏服务器配置
 type ConfigGame struct {
-	ID           int
-	DBIP         string
-	DialIP       string
-	PprofIP      string
-	ListenIP     string
-	UserPerTable int // 用户数量每桌
+	ID            int
+	DBIP          string
+	DialIP        string
+	PprofIP       string
+	ListenIP      string
+	UserPerTable  int // 用户数量每桌
+	MinReadyStart int // 最小准备开始
 }
 
 // CG 游戏配置

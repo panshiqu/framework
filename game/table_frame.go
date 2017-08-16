@@ -30,6 +30,17 @@ func (t *TableFrame) UserCount() (cnt int) {
 	return
 }
 
+// ReadyCount 准备数量
+func (t *TableFrame) ReadyCount() (cnt int) {
+	for _, v := range t.users {
+		if v != nil && v.UserStatus() == define.UserStatusReady {
+			cnt++
+		}
+	}
+
+	return
+}
+
 // NilChairID 空椅子编号
 func (t *TableFrame) NilChairID() int {
 	for k, v := range t.users {
@@ -54,6 +65,37 @@ func (t *TableFrame) StandUp(userItem *UserItem) {
 	t.users[userItem.ChairID()] = nil
 	userItem.SetChairID(define.InvalidChair)
 	userItem.SetTableFrame(nil)
+}
+
+// StartGame 开始游戏
+func (t *TableFrame) StartGame() {
+	// 校验桌子状态
+	if t.status == define.TableStatusGame {
+		return
+	}
+
+	// 检查准备数量
+	if t.ReadyCount() < define.CG.MinReadyStart {
+		return
+	}
+
+	// 设置用户状态
+	for _, v := range t.users {
+		v.SetUserStatus(define.UserStatusPlaying)
+	}
+}
+
+// ConcludeGame 结束游戏
+func (t *TableFrame) ConcludeGame() {
+	// 校验桌子状态
+	if t.status == define.TableStatusFree {
+		return
+	}
+
+	// 设置用户状态
+	for _, v := range t.users {
+		v.SetUserStatus(define.UserStatusFree)
+	}
 }
 
 // OnTimer 定时器

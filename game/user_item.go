@@ -15,6 +15,7 @@ type UserItem struct {
 	robot   bool     // 机器人
 	conn    net.Conn // 网络连接
 
+	status     int         // 状态
 	chairID    int         // 椅子编号
 	tableFrame *TableFrame // 桌子框架
 }
@@ -62,6 +63,16 @@ func (u *UserItem) UserDiamond() int64 {
 // IsRobot 是否机器人
 func (u *UserItem) IsRobot() bool {
 	return u.robot
+}
+
+// UserStatus 用户状态
+func (u *UserItem) UserStatus() int {
+	return u.status
+}
+
+// SetUserStatus 设置用户状态
+func (u *UserItem) SetUserStatus(v int) {
+	u.status = v
 }
 
 // ChairID 椅子编号

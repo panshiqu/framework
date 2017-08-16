@@ -169,6 +169,20 @@ const (
 	TableStatusGame = 1
 )
 
+const (
+	// UserStatusFree 空闲
+	UserStatusFree = 0
+
+	// UserStatusReady 准备
+	UserStatusReady = 1
+
+	// UserStatusPlaying 游戏
+	UserStatusPlaying = 2
+
+	// UserStatusOffline 离线
+	UserStatusOffline = 3
+)
+
 // InvalidChair 无效椅子
 const InvalidChair = -1
 
