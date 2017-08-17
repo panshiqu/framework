@@ -186,6 +186,9 @@ const (
 // InvalidChair 无效椅子
 const InvalidChair = -1
 
+// InvalidTable 无效桌子
+const InvalidTable = -1
+
 // Service 服务
 type Service struct {
 	ID          int      `json:",omitempty"` // 编号

@@ -88,6 +88,10 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) error {
 	replyFastLogin.UserScore = userItem.UserScore()
 	replyFastLogin.UserDiamond = userItem.UserDiamond()
 
+	replyFastLogin.UserStatus = userItem.UserStatus()
+	replyFastLogin.ChairID = userItem.ChairID()
+	replyFastLogin.TableID = userItem.TableID()
+
 	// 回复客户端
 	return network.SendJSONMessage(conn, define.GameCommon, define.GameFastLogin, replyFastLogin)
 }
