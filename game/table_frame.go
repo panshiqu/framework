@@ -83,9 +83,6 @@ func (t *TableFrame) StartGame() {
 	for _, v := range t.users {
 		v.SetUserStatus(define.UserStatusPlaying)
 	}
-
-	// 设置桌子状态
-	t.status = define.TableStatusGame
 }
 
 // ConcludeGame 结束游戏
@@ -99,9 +96,6 @@ func (t *TableFrame) ConcludeGame() {
 	for _, v := range t.users {
 		v.SetUserStatus(define.UserStatusFree)
 	}
-
-	// 设置桌子状态
-	t.status = define.TableStatusFree
 }
 
 // OnTimer 定时器
