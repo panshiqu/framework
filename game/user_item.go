@@ -1,10 +1,6 @@
 package game
 
-import (
-	"net"
-
-	"github.com/panshiqu/framework/define"
-)
+import "net"
 
 // UserItem 用户
 type UserItem struct {
@@ -87,15 +83,6 @@ func (u *UserItem) ChairID() int {
 // SetChairID 设置椅子编号
 func (u *UserItem) SetChairID(v int) {
 	u.chairID = v
-}
-
-// TableID 桌子编号
-func (u *UserItem) TableID() int {
-	if u.tableFrame != nil {
-		return u.tableFrame.TableID()
-	}
-
-	return define.InvalidTable
 }
 
 // TableFrame 桌子框架
