@@ -4,5 +4,6 @@
     "DialIP": "127.0.0.1:8080",
     "PprofIP": "127.0.0.1:9092",
     "ListenIP": "127.0.0.1:8082",
-    "UserPerTable": 4
+    "UserPerTable": 4,
+    "MinReadyStart": 1
 }
