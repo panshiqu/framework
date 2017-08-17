@@ -57,45 +57,39 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) error {
 		return define.ErrSignature
 	}
 
+	var userItem *UserItem
+
 	// 查找用户
-	if userItem := uins.Search(fastLogin.UserID); userItem != nil {
-		// 设置绑定
-		p.server.SetBind(conn, userItem)
+	if userItem = uins.Search(fastLogin.UserID); userItem == nil {
+		// 数据库请求
+		if err := p.rpc.JSONCall(define.DBCommon, define.DBFastLogin, &fastLogin.UserID, replyFastLogin); err != nil {
+			return err
+		}
 
-		// 回复数据
-		replyFastLogin.UserID = userItem.UserID()
-		replyFastLogin.UserName = userItem.UserName()
-		replyFastLogin.UserIcon = userItem.UserIcon()
-		replyFastLogin.UserLevel = userItem.UserLevel()
-		replyFastLogin.UserGender = userItem.UserGender()
-		replyFastLogin.BindPhone = userItem.BindPhone()
-		replyFastLogin.UserScore = userItem.UserScore()
-		replyFastLogin.UserDiamond = userItem.UserDiamond()
+		// 插入用户
+		userItem = uins.Insert(conn, replyFastLogin)
 
-		// 回复客户端
-		return network.SendJSONMessage(conn, define.GameCommon, define.GameFastLogin, replyFastLogin)
+		// 用户坐下
+		tins.TrySitDown(userItem)
+	} else {
+
 	}
-
-	// 数据库请求
-	if err := p.rpc.JSONCall(define.DBCommon, define.DBFastLogin, &fastLogin.UserID, replyFastLogin); err != nil {
-		return err
-	}
-
-	// 插入用户
-	userItem := uins.Insert(conn, replyFastLogin)
 
 	// 设置绑定
 	p.server.SetBind(conn, userItem)
 
+	// 回复数据
+	replyFastLogin.UserID = userItem.UserID()
+	replyFastLogin.UserName = userItem.UserName()
+	replyFastLogin.UserIcon = userItem.UserIcon()
+	replyFastLogin.UserLevel = userItem.UserLevel()
+	replyFastLogin.UserGender = userItem.UserGender()
+	replyFastLogin.BindPhone = userItem.BindPhone()
+	replyFastLogin.UserScore = userItem.UserScore()
+	replyFastLogin.UserDiamond = userItem.UserDiamond()
+
 	// 回复客户端
-	if err := network.SendJSONMessage(conn, define.GameCommon, define.GameFastLogin, replyFastLogin); err != nil {
-		return err
-	}
-
-	// 用户坐下
-	tins.TrySitDown(userItem)
-
-	return nil
+	return network.SendJSONMessage(conn, define.GameCommon, define.GameFastLogin, replyFastLogin)
 }
 
 // OnClose 连接关闭
