@@ -186,6 +186,9 @@ const (
 // InvalidChair 无效椅子
 const InvalidChair = -1
 
+// InvalidTable 无效桌子
+const InvalidTable = -1
+
 // Service 服务
 type Service struct {
 	ID          int      `json:",omitempty"` // 编号
@@ -238,5 +241,8 @@ type FastLogin struct {
 // ReplyFastLogin 返回快速登陆
 type ReplyFastLogin struct {
 	UserInfo
-	IsRobot bool `json:",omitempty"` // 机器人
+	IsRobot    bool `json:",omitempty"` // 机器人
+	UserStatus int  `json:",omitempty"` // 用户状态
+	ChairID    int  `json:",omitempty"` // 椅子编号
+	TableID    int  `json:",omitempty"` // 桌子编号
 }
