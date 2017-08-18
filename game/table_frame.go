@@ -78,9 +78,17 @@ func (t *TableFrame) SitDown(userItem *UserItem) {
 
 // StandUp 站起
 func (t *TableFrame) StandUp(userItem *UserItem) {
-	t.users[userItem.ChairID()] = nil
+	chair := userItem.ChairID()
+	t.users[chair] = nil
 	userItem.SetChairID(define.InvalidChair)
 	userItem.SetTableFrame(nil)
+
+	standUp := &define.NotifyStandUp{
+		ChairID: chair,
+	}
+
+	// 广播用户站起
+	t.SendTableJSONMessage(define.GameCommon, define.GameNotifyStandUp, standUp)
 }
 
 // StartGame 开始游戏

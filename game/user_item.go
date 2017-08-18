@@ -111,8 +111,8 @@ func (u *UserItem) SetTableFrame(v *TableFrame) {
 }
 
 // TableUserInfo 桌子用户信息
-func (u *UserItem) TableUserInfo() *define.TableUserInfo {
-	return &define.TableUserInfo{
+func (u *UserItem) TableUserInfo() *define.NotifySitDown {
+	return &define.NotifySitDown{
 		UserInfo: define.UserInfo{
 			UserID:      u.id,
 			UserName:    u.name,

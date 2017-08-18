@@ -219,12 +219,17 @@ type UserInfo struct {
 	UserDiamond int64  `json:",omitempty"` // 钻石
 }
 
-// TableUserInfo 桌子用户信息
-type TableUserInfo struct {
+// NotifySitDown 通知坐下
+type NotifySitDown struct {
 	UserInfo
 	TableID    int `json:",omitempty"` // 桌子编号
 	ChairID    int `json:",omitempty"` // 椅子编号
 	UserStatus int `json:",omitempty"` // 用户状态
+}
+
+// NotifyStandUp 通知站起
+type NotifyStandUp struct {
+	ChairID int `json:",omitempty"` // 椅子编号
 }
 
 // FastRegister 快速注册
