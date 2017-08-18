@@ -35,6 +35,8 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) error 
 	switch scmd {
 	case define.GameFastLogin:
 		return p.OnSubFastLogin(conn, data)
+	case define.GameReady:
+		return p.OnSubReady(conn, data)
 	}
 
 	return define.ErrUnknownSubCmd
@@ -95,6 +97,11 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) error {
 	// 用户坐下
 	tins.TrySitDown(userItem)
 
+	return nil
+}
+
+// OnSubReady 准备子命令
+func (p *Processor) OnSubReady(conn net.Conn, data []byte) error {
 	return nil
 }
 

@@ -49,6 +49,10 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 
 		log.Println("OnClientMessage", fastLogin)
 	}
+
+	if mcmd == define.GameCommon && scmd == define.GameNotifySitDown {
+		p.client.SendMessage(define.GameCommon, define.GameReady, nil)
+	}
 }
 
 // OnClientConnect 客户端连接成功

@@ -114,6 +114,9 @@ const (
 	// GameLogout 登出
 	GameLogout = 2
 
+	// GameReady 准备
+	GameReady = 3
+
 	// GameNotifySitDown 通知坐下
 	GameNotifySitDown = 101
 
