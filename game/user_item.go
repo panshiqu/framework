@@ -1,9 +1,11 @@
 package game
 
 import (
+	"encoding/json"
 	"net"
 
 	"github.com/panshiqu/framework/define"
+	"github.com/panshiqu/framework/network"
 )
 
 // UserItem 用户
@@ -106,4 +108,34 @@ func (u *UserItem) TableFrame() *TableFrame {
 // SetTableFrame 设置桌子框架
 func (u *UserItem) SetTableFrame(v *TableFrame) {
 	u.tableFrame = v
+}
+
+// TableUserInfo 桌子用户信息
+func (u *UserItem) TableUserInfo() *define.TableUserInfo {
+	return &define.TableUserInfo{
+		UserInfo: define.UserInfo{
+			UserID:      u.id,
+			UserName:    u.name,
+			UserIcon:    u.icon,
+			UserLevel:   u.level,
+			UserGender:  u.gender,
+			UserScore:   u.score,
+			UserDiamond: u.diamond,
+		},
+		TableID:    u.TableID(),
+		ChairID:    u.chairID,
+		UserStatus: u.status,
+	}
+}
+
+// SendMessage 发送消息
+func (u *UserItem) SendMessage(mcmd uint16, scmd uint16, data []byte) {
+	network.SendMessage(u.conn, mcmd, scmd, data)
+}
+
+// SendJSONMessage 发送消息
+func (u *UserItem) SendJSONMessage(mcmd uint16, scmd uint16, js interface{}) {
+	if data, err := json.Marshal(js); err == nil {
+		u.SendMessage(mcmd, scmd, data)
+	}
 }

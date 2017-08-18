@@ -1,6 +1,10 @@
 package game
 
-import "github.com/panshiqu/framework/define"
+import (
+	"encoding/json"
+
+	"github.com/panshiqu/framework/define"
+)
 
 // TableFrame 桌子框架
 type TableFrame struct {
@@ -58,6 +62,18 @@ func (t *TableFrame) SitDown(userItem *UserItem) {
 	t.users[chair] = userItem
 	userItem.SetChairID(chair)
 	userItem.SetTableFrame(t)
+
+	// 广播我的坐下
+	t.SendTableJSONMessage(define.GameCommon, define.GameNotifySitDown, userItem.TableUserInfo())
+
+	for _, v := range t.users {
+		if v == nil || v == userItem {
+			continue
+		}
+
+		// 已有用户坐下
+		userItem.SendJSONMessage(define.GameCommon, define.GameNotifySitDown, v.TableUserInfo())
+	}
 }
 
 // StandUp 站起
@@ -116,10 +132,30 @@ func (t *TableFrame) OnMessage(mcmd uint16, scmd uint16, data []byte) {
 
 // SendTableMessage 发送桌子消息
 func (t *TableFrame) SendTableMessage(mcmd uint16, scmd uint16, data []byte) {
+	for _, v := range t.users {
+		if v != nil {
+			v.SendMessage(mcmd, scmd, data)
+		}
+	}
+}
 
+// SendTableJSONMessage 发送桌子消息
+func (t *TableFrame) SendTableJSONMessage(mcmd uint16, scmd uint16, js interface{}) {
+	if data, err := json.Marshal(js); err == nil {
+		t.SendTableMessage(mcmd, scmd, data)
+	}
 }
 
 // SendChairMessage 发送椅子消息
-func (t *TableFrame) SendChairMessage(mcmd uint16, scmd uint16, data []byte) {
+func (t *TableFrame) SendChairMessage(chair int, mcmd uint16, scmd uint16, data []byte) {
+	if userItem := t.users[chair]; userItem != nil {
+		userItem.SendMessage(mcmd, scmd, data)
+	}
+}
 
+// SendChairJSONMessage 发送椅子消息
+func (t *TableFrame) SendChairJSONMessage(chair int, mcmd uint16, scmd uint16, js interface{}) {
+	if data, err := json.Marshal(js); err == nil {
+		t.SendChairMessage(chair, mcmd, scmd, data)
+	}
 }

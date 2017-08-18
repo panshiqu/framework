@@ -113,6 +113,12 @@ const (
 
 	// GameLogout 登出
 	GameLogout = 2
+
+	// GameNotifySitDown 通知坐下
+	GameNotifySitDown = 101
+
+	// GameNotifyStandUp 通知站起
+	GameNotifyStandUp = 102
 )
 
 const (
@@ -211,6 +217,14 @@ type UserInfo struct {
 	BindPhone   string `json:",omitempty"` // 绑定手机
 	UserScore   int64  `json:",omitempty"` // 分数
 	UserDiamond int64  `json:",omitempty"` // 钻石
+}
+
+// TableUserInfo 桌子用户信息
+type TableUserInfo struct {
+	UserInfo
+	TableID    int `json:",omitempty"` // 桌子编号
+	ChairID    int `json:",omitempty"` // 椅子编号
+	UserStatus int `json:",omitempty"` // 用户状态
 }
 
 // FastRegister 快速注册
