@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"log"
 	"net"
@@ -10,6 +11,8 @@ import (
 	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/network"
 )
+
+var uid int
 
 // Processor 处理器
 type Processor struct {
@@ -43,15 +46,39 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 
 		// 发送快速登陆消息
 		if err := p.client.SendJSONMessage(define.GameCommon, define.GameFastLogin, fastLogin); err != nil {
-			log.Println("OnClientMessage SendJSONMessage", err)
+			log.Println("GameFastLogin SendJSONMessage", err)
 			return
 		}
 
-		log.Println("OnClientMessage", fastLogin)
+		log.Println("GameFastLogin", fastLogin)
 	}
 
-	if mcmd == define.GameCommon && scmd == define.GameNotifySitDown {
-		p.client.SendMessage(define.GameCommon, define.GameReady, nil)
+	if mcmd == define.GameCommon {
+		switch scmd {
+		case define.GameFastLogin:
+			replyFastLogin := &define.ReplyFastLogin{}
+
+			if err := json.Unmarshal(data, replyFastLogin); err != nil {
+				log.Println("json.Unmarshal ReplyFastLogin", err)
+				return
+			}
+
+			// 记录用户编号
+			uid = replyFastLogin.UserID
+
+		case define.GameNotifySitDown:
+			notifySitDown := &define.NotifySitDown{}
+
+			if err := json.Unmarshal(data, notifySitDown); err != nil {
+				log.Println("json.Unmarshal NotifySitDown", err)
+				return
+			}
+
+			// 自己坐下发送准备
+			if notifySitDown.UserID == uid {
+				p.client.SendMessage(define.GameCommon, define.GameReady, nil)
+			}
+		}
 	}
 }
 
