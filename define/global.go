@@ -122,6 +122,9 @@ const (
 
 	// GameNotifyStandUp 通知站起
 	GameNotifyStandUp = 102
+
+	// GameNotifyStatus 通知状态
+	GameNotifyStatus = 103
 )
 
 const (
@@ -233,6 +236,12 @@ type NotifySitDown struct {
 // NotifyStandUp 通知站起
 type NotifyStandUp struct {
 	ChairID int `json:",omitempty"` // 椅子编号
+}
+
+// NotifyStatus 通知状态
+type NotifyStatus struct {
+	ChairID    int `json:",omitempty"` // 椅子编号
+	UserStatus int `json:",omitempty"` // 用户状态
 }
 
 // FastRegister 快速注册

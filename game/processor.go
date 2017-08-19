@@ -61,6 +61,9 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) error {
 
 	// 查找用户
 	if userItem := uins.Search(fastLogin.UserID); userItem != nil {
+		// 设置网络连接
+		userItem.SetConn(conn)
+
 		// 设置绑定
 		p.server.SetBind(conn, userItem)
 
@@ -102,6 +105,29 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) error {
 
 // OnSubReady 准备子命令
 func (p *Processor) OnSubReady(conn net.Conn, data []byte) error {
+	// 获取绑定用户
+	userItem, ok := p.server.GetBind(conn).(*UserItem)
+	if !ok {
+		return define.ErrNotExistUser
+	}
+
+	// 获取桌子框架
+	tableFrame := userItem.TableFrame()
+	if tableFrame == nil {
+		return define.ErrUserNotSit
+	}
+
+	// 校验桌子状态
+	if tableFrame.TableStatus() == define.TableStatusGame {
+		return define.ErrTableStatus
+	}
+
+	// 设置用户状态
+	userItem.SetUserStatus(define.UserStatusReady)
+
+	// 尝试开始游戏
+	tableFrame.StartGame()
+
 	return nil
 }
 

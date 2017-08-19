@@ -71,6 +71,11 @@ func (u *UserItem) IsRobot() bool {
 	return u.robot
 }
 
+// SetConn 设置网络连接
+func (u *UserItem) SetConn(v net.Conn) {
+	u.conn = v
+}
+
 // UserStatus 用户状态
 func (u *UserItem) UserStatus() int {
 	return u.status
@@ -79,6 +84,15 @@ func (u *UserItem) UserStatus() int {
 // SetUserStatus 设置用户状态
 func (u *UserItem) SetUserStatus(v int) {
 	u.status = v
+
+	if u.tableFrame != nil {
+		notifyStatus := &define.NotifyStatus{
+			ChairID:    u.chairID,
+			UserStatus: u.status,
+		}
+
+		u.tableFrame.SendTableJSONMessage(define.GameCommon, define.GameNotifyStatus, notifyStatus)
+	}
 }
 
 // ChairID 椅子编号

@@ -43,6 +43,15 @@ var (
 
 	// ErrServiceAlreadyShut 服务已经关闭
 	ErrServiceAlreadyShut = &MyError{Errno: ErrnoFailure, Errdesc: "service already shut"}
+
+	// ErrNotExistUser 不存在该用户
+	ErrNotExistUser = &MyError{Errno: ErrnoFailure, Errdesc: "not exist user"}
+
+	// ErrUserNotSit 用户没有坐下
+	ErrUserNotSit = &MyError{Errno: ErrnoFailure, Errdesc: "user not sit"}
+
+	// ErrTableStatus 桌子状态
+	ErrTableStatus = &MyError{Errno: ErrnoFailure, Errdesc: "table status"}
 )
 
 // MyError 错误

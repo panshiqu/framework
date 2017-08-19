@@ -56,6 +56,15 @@ func (t *TableFrame) NilChairID() int {
 	return define.InvalidChair
 }
 
+// SetUserStatus 设置用户状态
+func (t *TableFrame) SetUserStatus(status int) {
+	for _, v := range t.users {
+		if v != nil {
+			v.SetUserStatus(status)
+		}
+	}
+}
+
 // SitDown 坐下
 func (t *TableFrame) SitDown(userItem *UserItem) {
 	chair := t.NilChairID()
@@ -73,6 +82,11 @@ func (t *TableFrame) SitDown(userItem *UserItem) {
 
 		// 已有用户坐下
 		userItem.SendJSONMessage(define.GameCommon, define.GameNotifySitDown, v.TableUserInfo())
+	}
+
+	// 正在游戏设置用户状态
+	if t.status == define.TableStatusGame {
+		userItem.SetUserStatus(define.UserStatusPlaying)
 	}
 }
 
@@ -104,9 +118,7 @@ func (t *TableFrame) StartGame() {
 	}
 
 	// 设置用户状态
-	for _, v := range t.users {
-		v.SetUserStatus(define.UserStatusPlaying)
-	}
+	t.SetUserStatus(define.UserStatusPlaying)
 
 	// 设置桌子状态
 	t.status = define.TableStatusGame
@@ -120,9 +132,7 @@ func (t *TableFrame) ConcludeGame() {
 	}
 
 	// 设置用户状态
-	for _, v := range t.users {
-		v.SetUserStatus(define.UserStatusFree)
-	}
+	t.SetUserStatus(define.UserStatusFree)
 
 	// 设置桌子状态
 	t.status = define.TableStatusFree
@@ -140,10 +150,8 @@ func (t *TableFrame) OnMessage(mcmd uint16, scmd uint16, data []byte) {
 
 // SendTableMessage 发送桌子消息
 func (t *TableFrame) SendTableMessage(mcmd uint16, scmd uint16, data []byte) {
-	for _, v := range t.users {
-		if v != nil {
-			v.SendMessage(mcmd, scmd, data)
-		}
+	for k := range t.users {
+		t.SendChairMessage(k, mcmd, scmd, data)
 	}
 }
 
