@@ -38,6 +38,16 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 	}
 
 	if mcmd == define.LoginCommon && scmd == define.LoginFastRegister {
+		replyFastRegister := &define.ReplyFastRegister{}
+
+		if err := json.Unmarshal(data, replyFastRegister); err != nil {
+			log.Println("json.Unmarshal replyFastRegister", err)
+			return
+		}
+
+		// 记录用户编号
+		uid = replyFastRegister.UserID
+
 		// 快速登陆
 		fastLogin := &define.FastLogin{
 			GameType:  define.GameLandlords,
@@ -56,15 +66,6 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 	if mcmd == define.GameCommon {
 		switch scmd {
 		case define.GameFastLogin:
-			replyFastLogin := &define.ReplyFastLogin{}
-
-			if err := json.Unmarshal(data, replyFastLogin); err != nil {
-				log.Println("json.Unmarshal ReplyFastLogin", err)
-				return
-			}
-
-			// 记录用户编号
-			uid = replyFastLogin.UserID
 
 		case define.GameNotifySitDown:
 			notifySitDown := &define.NotifySitDown{}

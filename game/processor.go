@@ -67,18 +67,7 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) error {
 		// 设置绑定
 		p.server.SetBind(conn, userItem)
 
-		// 回复数据
-		replyFastLogin.UserID = userItem.UserID()
-		replyFastLogin.UserName = userItem.UserName()
-		replyFastLogin.UserIcon = userItem.UserIcon()
-		replyFastLogin.UserLevel = userItem.UserLevel()
-		replyFastLogin.UserGender = userItem.UserGender()
-		replyFastLogin.BindPhone = userItem.BindPhone()
-		replyFastLogin.UserScore = userItem.UserScore()
-		replyFastLogin.UserDiamond = userItem.UserDiamond()
-
-		// 回复客户端
-		return network.SendJSONMessage(conn, define.GameCommon, define.GameFastLogin, replyFastLogin)
+		return nil
 	}
 
 	// 数据库请求
@@ -91,11 +80,6 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) error {
 
 	// 设置绑定
 	p.server.SetBind(conn, userItem)
-
-	// 回复客户端
-	if err := network.SendJSONMessage(conn, define.GameCommon, define.GameFastLogin, replyFastLogin); err != nil {
-		return err
-	}
 
 	// 用户坐下
 	tins.TrySitDown(userItem)
