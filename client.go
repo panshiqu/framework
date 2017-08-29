@@ -12,7 +12,7 @@ import (
 	"github.com/panshiqu/framework/network"
 )
 
-var uid int
+var uid, cid int
 
 // Processor 处理器
 type Processor struct {
@@ -77,6 +77,22 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 
 			// 自己坐下发送准备
 			if notifySitDown.UserID == uid {
+				p.client.SendMessage(define.GameCommon, define.GameReady, nil)
+
+				// 记录椅子编号
+				cid = notifySitDown.ChairID
+			}
+
+		case define.GameNotifyStatus:
+			notifyStatus := &define.NotifyStatus{}
+
+			if err := json.Unmarshal(data, notifyStatus); err != nil {
+				log.Println("json.Unmarshal NotifyStatus", err)
+				return
+			}
+
+			// 自己空闲状态再次发送准备
+			if notifyStatus.ChairID == cid && notifyStatus.UserStatus == define.UserStatusFree {
 				p.client.SendMessage(define.GameCommon, define.GameReady, nil)
 			}
 		}
