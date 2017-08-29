@@ -2,6 +2,8 @@ package game
 
 import (
 	"encoding/json"
+	"fmt"
+	"net/http"
 	"sync"
 	"sync/atomic"
 
@@ -177,5 +179,15 @@ func (t *TableFrame) SendChairMessage(chair int, mcmd uint16, scmd uint16, data 
 func (t *TableFrame) SendChairJSONMessage(chair int, mcmd uint16, scmd uint16, js interface{}) {
 	if data, err := json.Marshal(js); err == nil {
 		t.SendChairMessage(chair, mcmd, scmd, data)
+	}
+}
+
+// Monitor 监视器
+func (t *TableFrame) Monitor(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "id:%3d, status:%d, usercount:%3d\n", t.id, t.TableStatus(), t.UserCount())
+	for i := 0; i < define.CG.UserPerTable; i++ {
+		if user := t.TableUser(i); user != nil {
+			fmt.Fprintf(w, "\tid:%8d, score:%10d, diamond:%8d, status:%d, chair:%3d, name:%s\n", user.UserID(), user.UserScore(), user.UserDiamond(), user.UserStatus(), user.ChairID(), user.UserName())
+		}
 	}
 }

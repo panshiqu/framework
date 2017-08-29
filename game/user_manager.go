@@ -60,10 +60,5 @@ func (u *UserManager) Insert(conn net.Conn, reply *define.ReplyFastLogin) *UserI
 
 // Monitor 监视器
 func (u *UserManager) Monitor(w http.ResponseWriter, r *http.Request) {
-	u.mutex.Lock()
-	fmt.Fprintln(w, "users:")
-	for _, v := range u.users {
-		fmt.Fprintln(w, v)
-	}
-	u.mutex.Unlock()
+	fmt.Fprintln(w, "online:", len(u.users))
 }

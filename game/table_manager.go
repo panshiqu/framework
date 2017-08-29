@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"net/http"
 	"sort"
 	"sync"
@@ -77,9 +76,8 @@ func (t TableFrameSlice) Swap(i, j int) {
 // Monitor 监视器
 func (t *TableManager) Monitor(w http.ResponseWriter, r *http.Request) {
 	t.mutex.Lock()
-	fmt.Fprintln(w, "tables:")
 	for _, v := range t.tables {
-		fmt.Fprintln(w, v)
+		v.Monitor(w, r)
 	}
 	t.mutex.Unlock()
 }
