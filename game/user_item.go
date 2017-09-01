@@ -3,6 +3,7 @@ package game
 import (
 	"encoding/json"
 	"net"
+	"sync/atomic"
 
 	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/network"
@@ -21,7 +22,7 @@ type UserItem struct {
 	robot   bool     // 机器人
 	conn    net.Conn // 网络连接
 
-	status     int         // 状态
+	status     int32       // 状态
 	chairID    int         // 椅子编号
 	tableFrame *TableFrame // 桌子框架
 }
@@ -78,17 +79,17 @@ func (u *UserItem) SetConn(v net.Conn) {
 
 // UserStatus 用户状态
 func (u *UserItem) UserStatus() int {
-	return u.status
+	return int(atomic.LoadInt32(&u.status))
 }
 
 // SetUserStatus 设置用户状态
 func (u *UserItem) SetUserStatus(v int) {
-	u.status = v
+	atomic.StoreInt32(&u.status, int32(v))
 
 	if u.tableFrame != nil {
 		notifyStatus := &define.NotifyStatus{
 			ChairID:    u.chairID,
-			UserStatus: u.status,
+			UserStatus: u.UserStatus(),
 		}
 
 		u.tableFrame.SendTableJSONMessage(define.GameCommon, define.GameNotifyStatus, notifyStatus)
@@ -138,7 +139,7 @@ func (u *UserItem) TableUserInfo() *define.NotifySitDown {
 		},
 		TableID:    u.TableID(),
 		ChairID:    u.chairID,
-		UserStatus: u.status,
+		UserStatus: u.UserStatus(),
 	}
 }
 
