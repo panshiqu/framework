@@ -67,6 +67,18 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) error {
 		// 设置绑定
 		p.server.SetBind(conn, userItem)
 
+		// 获取桌子框架
+		if tableFrame := userItem.TableFrame(); tableFrame != nil {
+			// 发送我的坐下
+			userItem.SendJSONMessage(define.GameCommon, define.GameNotifySitDown, userItem.TableUserInfo())
+
+			// 发送同桌玩家信息
+			tableFrame.SendTableUserInfo(userItem)
+		}
+
+		// 设置游戏状态
+		userItem.SetUserStatus(define.UserStatusPlaying)
+
 		return nil
 	}
 
@@ -82,7 +94,12 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) error {
 	p.server.SetBind(conn, userItem)
 
 	// 用户坐下
-	tins.TrySitDown(userItem)
+	tableFrame := tins.TrySitDown(userItem)
+
+	// 正在游戏设置游戏状态
+	if tableFrame.TableStatus() == define.TableStatusGame {
+		userItem.SetUserStatus(define.UserStatusPlaying)
+	}
 
 	return nil
 }
@@ -106,7 +123,7 @@ func (p *Processor) OnSubReady(conn net.Conn, data []byte) error {
 		return define.ErrTableStatus
 	}
 
-	// 设置用户状态
+	// 设置准备状态
 	userItem.SetUserStatus(define.UserStatusReady)
 
 	// 尝试开始游戏
@@ -121,9 +138,19 @@ func (p *Processor) OnClose(conn net.Conn) {
 
 	// 获取绑定用户
 	if userItem, ok := p.server.GetBind(conn).(*UserItem); ok {
+		// 获取桌子框架
 		if tableFrame := userItem.TableFrame(); tableFrame != nil {
+			// 正在游戏设置离线状态
+			if tableFrame.TableStatus() == define.TableStatusGame {
+				userItem.SetUserStatus(define.UserStatusOffline)
+				return
+			}
+
+			// 用户站起
 			tableFrame.StandUp(userItem)
 		}
+
+		// 删除用户
 		uins.Delete(userItem.UserID())
 	}
 }

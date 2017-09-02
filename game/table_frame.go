@@ -66,6 +66,19 @@ func (t *TableFrame) SetUserStatus(status int) {
 	}
 }
 
+// SendTableUserInfo 发送同桌玩家信息
+func (t *TableFrame) SendTableUserInfo(userItem *UserItem) {
+	for i := 0; i < define.CG.UserPerTable; i++ {
+		if i == userItem.ChairID() {
+			continue
+		}
+
+		if user := t.TableUser(i); user != nil {
+			userItem.SendJSONMessage(define.GameCommon, define.GameNotifySitDown, user.TableUserInfo())
+		}
+	}
+}
+
 // SitDown 坐下
 func (t *TableFrame) SitDown(userItem *UserItem) {
 	t.mutex.Lock()
@@ -84,20 +97,8 @@ func (t *TableFrame) SitDown(userItem *UserItem) {
 	// 广播我的坐下
 	t.SendTableJSONMessage(define.GameCommon, define.GameNotifySitDown, userItem.TableUserInfo())
 
-	for i := 0; i < define.CG.UserPerTable; i++ {
-		if i == chair {
-			continue
-		}
-
-		if user := t.TableUser(i); user != nil {
-			userItem.SendJSONMessage(define.GameCommon, define.GameNotifySitDown, user.TableUserInfo())
-		}
-	}
-
-	// 正在游戏设置用户状态
-	if t.TableStatus() == define.TableStatusGame {
-		userItem.SetUserStatus(define.UserStatusPlaying)
-	}
+	// 发送同桌玩家信息
+	t.SendTableUserInfo(userItem)
 }
 
 // StandUp 站起
@@ -129,7 +130,7 @@ func (t *TableFrame) StartGame() {
 		return
 	}
 
-	// 设置用户状态
+	// 设置游戏状态
 	t.SetUserStatus(define.UserStatusPlaying)
 }
 
@@ -140,7 +141,7 @@ func (t *TableFrame) ConcludeGame() {
 		return
 	}
 
-	// 设置用户状态
+	// 设置空闲状态
 	t.SetUserStatus(define.UserStatusFree)
 }
 

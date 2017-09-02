@@ -18,7 +18,7 @@ type TableManager struct {
 }
 
 // TrySitDown 尝试坐下
-func (t *TableManager) TrySitDown(userItem *UserItem) {
+func (t *TableManager) TrySitDown(userItem *UserItem) *TableFrame {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 	for {
@@ -31,7 +31,7 @@ func (t *TableManager) TrySitDown(userItem *UserItem) {
 		}
 
 		t.tables[0].SitDown(userItem)
-		break
+		return t.tables[0]
 	}
 }
 
