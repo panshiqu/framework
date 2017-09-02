@@ -141,6 +141,16 @@ func (t *TableFrame) ConcludeGame() {
 		return
 	}
 
+	for i := 0; i < define.CG.UserPerTable; i++ {
+		if user := t.TableUser(i); user != nil && user.UserStatus() == define.UserStatusOffline {
+			// 用户站起
+			t.StandUp(user)
+
+			// 删除用户
+			uins.Delete(user.UserID())
+		}
+	}
+
 	// 设置空闲状态
 	t.SetUserStatus(define.UserStatusFree)
 }
