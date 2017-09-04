@@ -30,6 +30,7 @@ type ConfigGame struct {
 	DialIP        string
 	PprofIP       string
 	ListenIP      string
+	GameType      int // 游戏类型
 	UserPerTable  int // 用户数量每桌
 	MinReadyStart int // 最小准备开始
 }

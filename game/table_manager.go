@@ -1,11 +1,13 @@
 package game
 
 import (
+	"log"
 	"net/http"
 	"sort"
 	"sync"
 
 	"github.com/panshiqu/framework/define"
+	"github.com/panshiqu/framework/game/landlords"
 )
 
 var tins TableManager
@@ -80,4 +82,16 @@ func (t *TableManager) Monitor(w http.ResponseWriter, r *http.Request) {
 		v.Monitor(w, r)
 	}
 	t.mutex.Unlock()
+}
+
+// CreateTableLogic 创建桌子逻辑
+func CreateTableLogic(v define.ITableFrame) define.ITableLogic {
+	switch define.CG.GameType {
+	case define.GameLandlords: // 斗地主
+		return landlords.NewTableLogic(v)
+	}
+
+	log.Fatal("no table logic")
+
+	return nil
 }
