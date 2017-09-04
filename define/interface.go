@@ -29,8 +29,8 @@ type ITableFrame interface {
 	// 桌子编号
 	TableID() int
 
-	// 桌子用户
-	TableUser(int) IUserItem
+	// 获取用户
+	GetUser(int) IUserItem
 
 	// 结束游戏
 	ConcludeGame()

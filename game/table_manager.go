@@ -46,6 +46,8 @@ func (t *TableManager) AddTableFrame() {
 		users: make([]*UserItem, define.CG.UserPerTable),
 	}
 
+	tableFrame.SetTableLogic(CreateTableLogic(tableFrame))
+
 	t.tables = append(t.tables, tableFrame)
 }
 

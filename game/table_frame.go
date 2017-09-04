@@ -16,6 +16,8 @@ type TableFrame struct {
 	status int32       // 状态
 	mutex  sync.Mutex  // 加锁
 	users  []*UserItem // 用户
+
+	table define.ITableLogic // 桌子逻辑
 }
 
 // TableID 桌子编号
@@ -28,11 +30,21 @@ func (t *TableFrame) TableStatus() int32 {
 	return atomic.LoadInt32(&t.status)
 }
 
+// SetTableLogic 设置桌子逻辑
+func (t *TableFrame) SetTableLogic(v define.ITableLogic) {
+	t.table = v
+}
+
 // TableUser 桌子用户
 func (t *TableFrame) TableUser(chair int) *UserItem {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 	return t.users[chair]
+}
+
+// GetUser 获取用户
+func (t *TableFrame) GetUser(chair int) define.IUserItem {
+	return t.TableUser(chair)
 }
 
 // UserCount 用户数量
