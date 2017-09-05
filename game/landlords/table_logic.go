@@ -1,6 +1,9 @@
 package landlords
 
 import (
+	"log"
+	"time"
+
 	"github.com/panshiqu/framework/define"
 )
 
@@ -11,31 +14,41 @@ type TableLogic struct {
 
 // OnInit 初始化
 func (t *TableLogic) OnInit() error {
+	log.Println("TableLogic OnInit")
 	return nil
 }
 
 // OnGameStart 游戏开始
 func (t *TableLogic) OnGameStart() error {
+	log.Println("TableLogic OnGameStart")
+	time.AfterFunc(time.Minute, func() {
+		t.OnGameConclude()
+	})
 	return nil
 }
 
 // OnGameConclude 游戏结束
 func (t *TableLogic) OnGameConclude() error {
+	log.Println("TableLogic OnGameConclude")
+	t.tableFrame.ConcludeGame()
 	return nil
 }
 
 // OnUserSitDown 用户坐下
 func (t *TableLogic) OnUserSitDown(userItem define.IUserItem) error {
+	log.Println("TableLogic OnUserSitDown", userItem.UserID())
 	return nil
 }
 
 // OnUserStandUp 用户站起
 func (t *TableLogic) OnUserStandUp(userItem define.IUserItem) error {
+	log.Println("TableLogic OnUserStandUp", userItem.UserID())
 	return nil
 }
 
 // OnUserReconnect 用户重连
 func (t *TableLogic) OnUserReconnect(userItem define.IUserItem) error {
+	log.Println("TableLogic OnUserReconnect", userItem.UserID())
 	return nil
 }
 
@@ -51,7 +64,11 @@ func (t *TableLogic) OnTimer(id int, parameter interface{}) error {
 
 // NewTableLogic 新建桌子逻辑
 func NewTableLogic(v define.ITableFrame) define.ITableLogic {
-	return &TableLogic{
+	t := &TableLogic{
 		tableFrame: v,
 	}
+
+	t.OnInit()
+
+	return t
 }

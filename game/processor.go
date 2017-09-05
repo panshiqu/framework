@@ -74,6 +74,9 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) error {
 
 			// 发送同桌玩家信息
 			tableFrame.SendTableUserInfo(userItem)
+
+			// 断线重连
+			tableFrame.Reconnect(userItem)
 		}
 
 		// 设置游戏状态

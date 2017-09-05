@@ -111,10 +111,16 @@ func (t *TableFrame) SitDown(userItem *UserItem) {
 
 	// 发送同桌玩家信息
 	t.SendTableUserInfo(userItem)
+
+	// 用户坐下
+	t.table.OnUserSitDown(userItem)
 }
 
 // StandUp 站起
 func (t *TableFrame) StandUp(userItem *UserItem) {
+	// 用户站起
+	t.table.OnUserStandUp(userItem)
+
 	t.mutex.Lock()
 	chair := userItem.ChairID()
 	t.users[chair] = nil
@@ -128,6 +134,11 @@ func (t *TableFrame) StandUp(userItem *UserItem) {
 
 	// 广播用户站起
 	t.SendTableJSONMessage(define.GameCommon, define.GameNotifyStandUp, standUp)
+}
+
+// Reconnect 重连
+func (t *TableFrame) Reconnect(userItem *UserItem) {
+	t.table.OnUserReconnect(userItem)
 }
 
 // StartGame 开始游戏
@@ -144,6 +155,9 @@ func (t *TableFrame) StartGame() {
 
 	// 设置游戏状态
 	t.SetUserStatus(define.UserStatusPlaying)
+
+	// 游戏开始
+	t.table.OnGameStart()
 }
 
 // ConcludeGame 结束游戏
