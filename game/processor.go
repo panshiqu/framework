@@ -13,9 +13,15 @@ import (
 
 // Processor 处理器
 type Processor struct {
-	rpc    *network.RPC    // 数据库
-	server *network.Server // 服务器
-	client *network.Client // 客户端
+	rpc      *network.RPC    // 数据库
+	server   *network.Server // 服务器
+	client   *network.Client // 客户端
+	schedule *utils.Schedule // 定时器
+}
+
+// OnTimer 定时器
+func (p *Processor) OnTimer(id int, parameter interface{}) {
+
 }
 
 // OnMessage 收到消息
@@ -186,11 +192,16 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 
 // NewProcessor 创建处理器
 func NewProcessor(server *network.Server, client *network.Client) *Processor {
-	return &Processor{
+	p := &Processor{
 		rpc:    network.NewRPC(define.CG.DBIP),
 		server: server,
 		client: client,
 	}
+
+	p.schedule = utils.NewSchedule(p)
+	go p.schedule.Start()
+
+	return p
 }
 
 // Monitor 监视器
