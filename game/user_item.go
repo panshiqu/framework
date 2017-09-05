@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net"
 	"sync/atomic"
+	"time"
 
 	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/network"
@@ -153,4 +154,16 @@ func (u *UserItem) SendJSONMessage(mcmd uint16, scmd uint16, js interface{}) {
 	if data, err := json.Marshal(js); err == nil {
 		u.SendMessage(mcmd, scmd, data)
 	}
+}
+
+// AddTimer 添加定时器
+func (u *UserItem) AddTimer(id int, duration time.Duration, parameter interface{}, persistence bool) {
+	if id >= 0 && id < define.TimerPerUser {
+		sins.Add(u.TableID()*define.TimerPerTable+define.TimerPerTable+u.ChairID()*define.TimerPerUser+define.TimerPerUser+id, duration, parameter, persistence)
+	}
+}
+
+// OnTimer 定时器
+func (u *UserItem) OnTimer(id int, parameter interface{}) {
+
 }

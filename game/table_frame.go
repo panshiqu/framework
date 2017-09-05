@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/panshiqu/framework/define"
 )
@@ -39,7 +40,10 @@ func (t *TableFrame) SetTableLogic(v define.ITableLogic) {
 func (t *TableFrame) TableUser(chair int) *UserItem {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
-	return t.users[chair]
+	if chair < define.CG.UserPerTable {
+		return t.users[chair]
+	}
+	return nil
 }
 
 // GetUser 获取用户
@@ -181,9 +185,23 @@ func (t *TableFrame) ConcludeGame() {
 	t.SetUserStatus(define.UserStatusFree)
 }
 
+// AddTimer 添加定时器
+func (t *TableFrame) AddTimer(id int, duration time.Duration, parameter interface{}, persistence bool) {
+	if id >= 0 && id < define.TimerPerUser {
+		sins.Add(t.TableID()*define.TimerPerTable+define.TimerPerTable+id, duration, parameter, persistence)
+	}
+}
+
 // OnTimer 定时器
 func (t *TableFrame) OnTimer(id int, parameter interface{}) {
+	if id < define.TimerPerUser {
+		t.table.OnTimer(id, parameter)
+		return
+	}
 
+	if user := t.TableUser((id - define.TimerPerUser) / define.TimerPerUser); user != nil {
+		user.OnTimer((id-define.TimerPerUser)%define.TimerPerUser, parameter)
+	}
 }
 
 // OnMessage 收到消息

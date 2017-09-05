@@ -19,6 +19,16 @@ type TableManager struct {
 	tables []*TableFrame // 桌子
 }
 
+// GetTable 获取桌子
+func (t *TableManager) GetTable(id int) *TableFrame {
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
+	if id < len(t.tables) {
+		return t.tables[id]
+	}
+	return nil
+}
+
 // TrySitDown 尝试坐下
 func (t *TableManager) TrySitDown(userItem *UserItem) *TableFrame {
 	t.mutex.Lock()
@@ -39,8 +49,6 @@ func (t *TableManager) TrySitDown(userItem *UserItem) *TableFrame {
 
 // AddTableFrame 增加桌子
 func (t *TableManager) AddTableFrame() {
-	t.count++
-
 	tableFrame := &TableFrame{
 		id:    t.count,
 		users: make([]*UserItem, define.CG.UserPerTable),
@@ -49,6 +57,8 @@ func (t *TableManager) AddTableFrame() {
 	tableFrame.SetTableLogic(CreateTableLogic(tableFrame))
 
 	t.tables = append(t.tables, tableFrame)
+
+	t.count++
 }
 
 // TableFrameSlice 排序

@@ -11,17 +11,25 @@ import (
 	"github.com/panshiqu/framework/utils"
 )
 
+// 全局定时器
+var sins *utils.Schedule
+
 // Processor 处理器
 type Processor struct {
-	rpc      *network.RPC    // 数据库
-	server   *network.Server // 服务器
-	client   *network.Client // 客户端
-	schedule *utils.Schedule // 定时器
+	rpc    *network.RPC    // 数据库
+	server *network.Server // 服务器
+	client *network.Client // 客户端
 }
 
 // OnTimer 定时器
 func (p *Processor) OnTimer(id int, parameter interface{}) {
+	if id < define.TimerPerTable {
+		return
+	}
 
+	if tableFrame := tins.GetTable((id - define.TimerPerTable) / define.TimerPerTable); tableFrame != nil {
+		tableFrame.OnTimer((id-define.TimerPerTable)%define.TimerPerTable, parameter)
+	}
 }
 
 // OnMessage 收到消息
@@ -198,8 +206,8 @@ func NewProcessor(server *network.Server, client *network.Client) *Processor {
 		client: client,
 	}
 
-	p.schedule = utils.NewSchedule(p)
-	go p.schedule.Start()
+	sins = utils.NewSchedule(p)
+	go sins.Start()
 
 	return p
 }

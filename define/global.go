@@ -201,6 +201,12 @@ const InvalidChair = -1
 // InvalidTable 无效桌子
 const InvalidTable = -1
 
+// TimerPerUser 用户持有
+const TimerPerUser = 100
+
+// TimerPerTable 桌子持有
+const TimerPerTable = 100000
+
 // Service 服务
 type Service struct {
 	ID          int      `json:",omitempty"` // 编号
