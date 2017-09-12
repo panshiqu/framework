@@ -192,6 +192,16 @@ func (t *TableFrame) AddTimer(id int, duration time.Duration, parameter interfac
 	}
 }
 
+// RunAfter 添加定时器
+func (t *TableFrame) RunAfter(id int, duration time.Duration, parameter interface{}) {
+	t.AddTimer(id, duration, parameter, false)
+}
+
+// RunAlways 添加定时器
+func (t *TableFrame) RunAlways(id int, duration time.Duration, parameter interface{}) {
+	t.AddTimer(id, duration, parameter, true)
+}
+
 // OnTimer 定时器
 func (t *TableFrame) OnTimer(id int, parameter interface{}) {
 	if id < define.TimerPerUser {

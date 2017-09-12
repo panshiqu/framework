@@ -163,6 +163,16 @@ func (u *UserItem) AddTimer(id int, duration time.Duration, parameter interface{
 	}
 }
 
+// RunAfter 添加定时器
+func (u *UserItem) RunAfter(id int, duration time.Duration, parameter interface{}) {
+	u.AddTimer(id, duration, parameter, false)
+}
+
+// RunAlways 添加定时器
+func (u *UserItem) RunAlways(id int, duration time.Duration, parameter interface{}) {
+	u.AddTimer(id, duration, parameter, true)
+}
+
 // OnTimer 定时器
 func (u *UserItem) OnTimer(id int, parameter interface{}) {
 
