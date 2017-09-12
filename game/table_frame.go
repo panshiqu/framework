@@ -202,6 +202,22 @@ func (t *TableFrame) RunAlways(id int, duration time.Duration, parameter interfa
 	t.AddTimer(id, duration, parameter, true)
 }
 
+// RemoveTimer 移除定时器
+func (t *TableFrame) RemoveTimer(id int) {
+	if id >= 0 && id < define.TimerPerUser {
+		sins.Remove(t.TableID()*define.TimerPerTable + define.TimerPerTable + id)
+	}
+}
+
+// SurplusDuration 定时器剩余时间
+func (t *TableFrame) SurplusDuration(id int) time.Duration {
+	if id >= 0 && id < define.TimerPerUser {
+		return sins.Surplus(t.TableID()*define.TimerPerTable + define.TimerPerTable + id)
+	}
+
+	return 0
+}
+
 // OnTimer 定时器
 func (t *TableFrame) OnTimer(id int, parameter interface{}) {
 	if id < define.TimerPerUser {

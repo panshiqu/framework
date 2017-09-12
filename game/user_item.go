@@ -173,6 +173,22 @@ func (u *UserItem) RunAlways(id int, duration time.Duration, parameter interface
 	u.AddTimer(id, duration, parameter, true)
 }
 
+// RemoveTimer 移除定时器
+func (u *UserItem) RemoveTimer(id int) {
+	if id >= 0 && id < define.TimerPerUser {
+		sins.Remove(u.TableID()*define.TimerPerTable + define.TimerPerTable + u.ChairID()*define.TimerPerUser + define.TimerPerUser + id)
+	}
+}
+
+// SurplusDuration 定时器剩余时间
+func (u *UserItem) SurplusDuration(id int) time.Duration {
+	if id >= 0 && id < define.TimerPerUser {
+		return sins.Surplus(u.TableID()*define.TimerPerTable + define.TimerPerTable + u.ChairID()*define.TimerPerUser + define.TimerPerUser + id)
+	}
+
+	return 0
+}
+
 // OnTimer 定时器
 func (u *UserItem) OnTimer(id int, parameter interface{}) {
 
