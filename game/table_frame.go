@@ -231,8 +231,8 @@ func (t *TableFrame) OnTimer(id int, parameter interface{}) {
 }
 
 // OnMessage 收到消息
-func (t *TableFrame) OnMessage(mcmd uint16, scmd uint16, data []byte) {
-
+func (t *TableFrame) OnMessage(scmd uint16, data []byte, userItem *UserItem) error {
+	return t.table.OnMessage(scmd, data, userItem)
 }
 
 // SendTableMessage 发送桌子消息

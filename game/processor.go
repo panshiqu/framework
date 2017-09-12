@@ -39,6 +39,8 @@ func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []by
 	switch mcmd {
 	case define.GameCommon:
 		return p.OnMainCommon(conn, scmd, data)
+	case define.GameTable:
+		return p.OnMainTable(conn, scmd, data)
 	}
 
 	return define.ErrUnknownMainCmd
@@ -54,6 +56,24 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) error 
 	}
 
 	return define.ErrUnknownSubCmd
+}
+
+// OnMainTable 桌子主命令
+func (p *Processor) OnMainTable(conn net.Conn, scmd uint16, data []byte) error {
+	// 获取绑定用户
+	userItem, ok := p.server.GetBind(conn).(*UserItem)
+	if !ok {
+		return define.ErrNotExistUser
+	}
+
+	// 获取桌子框架
+	tableFrame := userItem.TableFrame()
+	if tableFrame == nil {
+		return define.ErrUserNotSit
+	}
+
+	// 通知桌子消息
+	return tableFrame.OnMessage(scmd, data, userItem)
 }
 
 // OnSubFastLogin 快速登陆子命令

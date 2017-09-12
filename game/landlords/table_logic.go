@@ -54,6 +54,7 @@ func (t *TableLogic) OnUserReconnect(userItem define.IUserItem) error {
 
 // OnMessage 收到消息
 func (t *TableLogic) OnMessage(scmd uint16, data []byte, userItem define.IUserItem) error {
+	log.Println("TableLogic OnMessage", userItem.UserID(), scmd)
 	return nil
 }
 

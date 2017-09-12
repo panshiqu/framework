@@ -105,6 +105,9 @@ const (
 const (
 	// GameCommon 通用
 	GameCommon = 100
+
+	// GameTable 桌子
+	GameTable = 150
 )
 
 const (
