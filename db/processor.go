@@ -60,6 +60,8 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) interf
 		return p.OnSubFastRegister(conn, data)
 	case define.DBFastLogin:
 		return p.OnSubFastLogin(conn, data)
+	case define.DBChangeTreasure:
+		return p.OnSubChangeTreasure(conn, data)
 	}
 
 	return define.ErrUnknownSubCmd
@@ -193,6 +195,21 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) interface{} {
 	}
 
 	return replyFastLogin
+}
+
+// OnSubChangeTreasure 改变财富
+func (p *Processor) OnSubChangeTreasure(conn net.Conn, data []byte) interface{} {
+	changeTreasure := &define.ChangeTreasure{}
+
+	if err := json.Unmarshal(data, changeTreasure); err != nil {
+		return err
+	}
+
+	// 用户财富变化
+	return p.ChangeUserTreasure(changeTreasure.UserID,
+		0, changeTreasure.VarScore,
+		0, changeTreasure.VarDiamond,
+		changeTreasure.ChangeType)
 }
 
 // OnClose 连接关闭
