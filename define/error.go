@@ -52,6 +52,12 @@ var (
 
 	// ErrTableStatus 桌子状态
 	ErrTableStatus = &MyError{Errno: ErrnoFailure, Errdesc: "table status"}
+
+	// ErrNotEnoughScore 分数不足
+	ErrNotEnoughScore = &MyError{Errno: ErrnoFailure, Errdesc: "not enough score"}
+
+	// ErrNotEnoughDiamond 钻石不足
+	ErrNotEnoughDiamond = &MyError{Errno: ErrnoFailure, Errdesc: "not enough diamond"}
 )
 
 // MyError 错误

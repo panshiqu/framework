@@ -141,6 +141,9 @@ const (
 
 	// DBFastLogin 快速登陆
 	DBFastLogin = 2
+
+	// DBChangeTreasure 改变财富
+	DBChangeTreasure = 3
 )
 
 const (
@@ -282,4 +285,12 @@ type FastLogin struct {
 type ReplyFastLogin struct {
 	UserInfo
 	IsRobot bool `json:",omitempty"` // 机器人
+}
+
+// ChangeTreasure 改变财富
+type ChangeTreasure struct {
+	UserID     int   `json:",omitempty"` // 编号
+	VarScore   int64 `json:",omitempty"` // 分数
+	VarDiamond int64 `json:",omitempty"` // 钻石
+	ChangeType int   `json:",omitempty"` // 类型
 }

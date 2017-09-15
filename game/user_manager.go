@@ -20,6 +20,13 @@ type UserManager struct {
 // Delete 删除用户
 func (u *UserManager) Delete(id int) {
 	u.mutex.Lock()
+	if userItem, ok := u.users[id]; ok {
+		userItem.WriteToDB(
+			userItem.CacheScore(),
+			userItem.CacheDiamond(),
+			define.ChangeTypeWinLose,
+		)
+	}
 	delete(u.users, id)
 	u.mutex.Unlock()
 }

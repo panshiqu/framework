@@ -17,6 +17,9 @@ type IUserItem interface {
 	// 椅子编号
 	ChairID() int
 
+	// 写入财富
+	WriteTreasure(int64, int64, int) error
+
 	// 发送消息
 	SendMessage(uint16, uint16, []byte)
 

@@ -11,12 +11,14 @@ import (
 	"github.com/panshiqu/framework/utils"
 )
 
+// 数据库
+var rpc *network.RPC
+
 // 全局定时器
 var sins *utils.Schedule
 
 // Processor 处理器
 type Processor struct {
-	rpc    *network.RPC    // 数据库
 	server *network.Server // 服务器
 	client *network.Client // 客户端
 }
@@ -120,7 +122,7 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) error {
 	}
 
 	// 数据库请求
-	if err := p.rpc.JSONCall(define.DBCommon, define.DBFastLogin, &fastLogin.UserID, replyFastLogin); err != nil {
+	if err := rpc.JSONCall(define.DBCommon, define.DBFastLogin, &fastLogin.UserID, replyFastLogin); err != nil {
 		return err
 	}
 
@@ -221,10 +223,11 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 // NewProcessor 创建处理器
 func NewProcessor(server *network.Server, client *network.Client) *Processor {
 	p := &Processor{
-		rpc:    network.NewRPC(define.CG.DBIP),
 		server: server,
 		client: client,
 	}
+
+	rpc = network.NewRPC(define.CG.DBIP)
 
 	sins = utils.NewSchedule(p)
 	go sins.Start()

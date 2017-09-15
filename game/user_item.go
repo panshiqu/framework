@@ -12,16 +12,18 @@ import (
 
 // UserItem 用户
 type UserItem struct {
-	id      int      // 编号
-	name    string   // 名称
-	icon    int      // 图标
-	level   int      // 等级
-	gender  int      // 性别
-	phone   string   // 手机
-	score   int64    // 分数
-	diamond int64    // 钻石
-	robot   bool     // 机器人
-	conn    net.Conn // 网络连接
+	id           int      // 编号
+	name         string   // 名称
+	icon         int      // 图标
+	level        int      // 等级
+	gender       int      // 性别
+	phone        string   // 手机
+	score        int64    // 分数
+	cacheScore   int64    // 缓存分数
+	diamond      int64    // 钻石
+	cacheDiamond int64    // 缓存钻石
+	robot        bool     // 机器人
+	conn         net.Conn // 网络连接
 
 	status     int32       // 状态
 	chairID    int         // 椅子编号
@@ -60,12 +62,22 @@ func (u *UserItem) BindPhone() string {
 
 // UserScore 用户分数
 func (u *UserItem) UserScore() int64 {
-	return u.score
+	return u.score + u.cacheScore
+}
+
+// CacheScore 缓存分数
+func (u *UserItem) CacheScore() int64 {
+	return u.cacheScore
 }
 
 // UserDiamond 用户钻石
 func (u *UserItem) UserDiamond() int64 {
-	return u.diamond
+	return u.diamond + u.cacheDiamond
+}
+
+// CacheDiamond 缓存钻石
+func (u *UserItem) CacheDiamond() int64 {
+	return u.cacheDiamond
 }
 
 // IsRobot 是否机器人
@@ -142,6 +154,62 @@ func (u *UserItem) TableUserInfo() *define.NotifySitDown {
 		ChairID:    u.chairID,
 		UserStatus: u.UserStatus(),
 	}
+}
+
+// WriteScore 写入分数
+func (u *UserItem) WriteScore(varScore int64, changeType int) error {
+	return u.WriteTreasure(varScore, 0, changeType)
+}
+
+// WriteDiamond 写入钻石
+func (u *UserItem) WriteDiamond(varDiamond int64, changeType int) error {
+	return u.WriteTreasure(0, varDiamond, changeType)
+}
+
+// WriteTreasure 写入财富
+func (u *UserItem) WriteTreasure(varScore int64, varDiamond int64, changeType int) error {
+	// 分数不足
+	if u.score+u.cacheScore+varScore < 0 {
+		return define.ErrNotEnoughScore
+	}
+
+	// 钻石不足
+	if u.diamond+u.cacheDiamond+varDiamond < 0 {
+		return define.ErrNotEnoughDiamond
+	}
+
+	// 缓存输赢
+	if changeType == define.ChangeTypeWinLose {
+		u.cacheScore += varScore
+		u.cacheDiamond += varDiamond
+		return nil
+	}
+
+	// 写入数据库
+	if err := u.WriteToDB(varScore, varDiamond, changeType); err != nil {
+		return err
+	}
+
+	// 更新财富
+	u.score += varScore
+	u.diamond += varDiamond
+
+	return nil
+}
+
+// WriteToDB 写入数据库
+func (u *UserItem) WriteToDB(varScore int64, varDiamond int64, changeType int) error {
+	if varScore == 0 && varDiamond == 0 {
+		return nil
+	}
+
+	return rpc.JSONCall(define.DBCommon, define.DBChangeTreasure,
+		define.ChangeTreasure{
+			UserID:     u.id,
+			VarScore:   varScore,
+			VarDiamond: varDiamond,
+			ChangeType: changeType,
+		}, nil)
 }
 
 // SendMessage 发送消息
