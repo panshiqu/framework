@@ -207,8 +207,8 @@ func (p *Processor) OnSubChangeTreasure(conn net.Conn, data []byte) interface{} 
 
 	// 用户财富变化
 	return p.ChangeUserTreasure(changeTreasure.UserID,
-		0, changeTreasure.VarScore,
-		0, changeTreasure.VarDiamond,
+		-1, changeTreasure.VarScore,
+		-1, changeTreasure.VarDiamond,
 		changeTreasure.ChangeType)
 }
 
