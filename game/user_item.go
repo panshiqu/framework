@@ -3,6 +3,7 @@ package game
 import (
 	"encoding/json"
 	"net"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -28,6 +29,8 @@ type UserItem struct {
 	status     int32       // 状态
 	chairID    int         // 椅子编号
 	tableFrame *TableFrame // 桌子框架
+
+	mutex sync.Mutex // 财富加锁
 }
 
 // UserID 用户编号
@@ -62,21 +65,29 @@ func (u *UserItem) BindPhone() string {
 
 // UserScore 用户分数
 func (u *UserItem) UserScore() int64 {
+	u.mutex.Lock()
+	defer u.mutex.Unlock()
 	return u.score + u.cacheScore
 }
 
 // CacheScore 缓存分数
 func (u *UserItem) CacheScore() int64 {
+	u.mutex.Lock()
+	defer u.mutex.Unlock()
 	return u.cacheScore
 }
 
 // UserDiamond 用户钻石
 func (u *UserItem) UserDiamond() int64 {
+	u.mutex.Lock()
+	defer u.mutex.Unlock()
 	return u.diamond + u.cacheDiamond
 }
 
 // CacheDiamond 缓存钻石
 func (u *UserItem) CacheDiamond() int64 {
+	u.mutex.Lock()
+	defer u.mutex.Unlock()
 	return u.cacheDiamond
 }
 
@@ -147,8 +158,8 @@ func (u *UserItem) TableUserInfo() *define.NotifySitDown {
 			UserIcon:    u.icon,
 			UserLevel:   u.level,
 			UserGender:  u.gender,
-			UserScore:   u.score,
-			UserDiamond: u.diamond,
+			UserScore:   u.UserScore(),
+			UserDiamond: u.UserDiamond(),
 		},
 		TableID:    u.TableID(),
 		ChairID:    u.chairID,
@@ -168,6 +179,9 @@ func (u *UserItem) WriteDiamond(varDiamond int64, changeType int) error {
 
 // WriteTreasure 写入财富
 func (u *UserItem) WriteTreasure(varScore int64, varDiamond int64, changeType int) error {
+	u.mutex.Lock()
+	defer u.mutex.Unlock()
+
 	// 分数不足
 	if u.score+u.cacheScore+varScore < 0 {
 		return define.ErrNotEnoughScore
