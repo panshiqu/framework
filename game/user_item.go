@@ -179,7 +179,19 @@ func (u *UserItem) WriteDiamond(varDiamond int64, changeType int) error {
 }
 
 // WriteTreasure 写入财富
-func (u *UserItem) WriteTreasure(varScore int64, varDiamond int64, changeType int) error {
+func (u *UserItem) WriteTreasure(varScore int64, varDiamond int64, changeType int) (err error) {
+	defer func() {
+		if err == nil && u.tableFrame != nil {
+			u.tableFrame.SendTableJSONMessage(define.GameCommon, define.GameNotifyTreasure,
+				define.ChangeTreasure{
+					UserID:     u.id,
+					VarScore:   varScore,
+					VarDiamond: varDiamond,
+					ChangeType: changeType,
+				})
+		}
+	}()
+
 	u.mutex.Lock()
 	defer u.mutex.Unlock()
 

@@ -128,6 +128,9 @@ const (
 
 	// GameNotifyStatus 通知状态
 	GameNotifyStatus = 103
+
+	// GameNotifyTreasure 通知财富
+	GameNotifyTreasure = 104
 )
 
 const (
