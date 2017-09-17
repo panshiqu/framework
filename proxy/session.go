@@ -127,7 +127,9 @@ func (s *Session) RecvMessage(conn net.Conn) {
 			s.userid = replyFastRegister.UserID
 		}
 
-		network.SendMessage(s.client, mcmd, scmd, data)
+		if err := network.SendMessage(s.client, mcmd, scmd, data); err != nil {
+			break
+		}
 	}
 
 	s.client.Close()

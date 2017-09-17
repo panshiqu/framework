@@ -3,6 +3,7 @@ package game
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"sync"
 	"sync/atomic"
@@ -117,13 +118,17 @@ func (t *TableFrame) SitDown(userItem *UserItem) {
 	t.SendTableUserInfo(userItem)
 
 	// 用户坐下
-	t.table.OnUserSitDown(userItem)
+	if err := t.table.OnUserSitDown(userItem); err != nil {
+		log.Println("TableFrame OnUserSitDown", err)
+	}
 }
 
 // StandUp 站起
 func (t *TableFrame) StandUp(userItem *UserItem) {
 	// 用户站起
-	t.table.OnUserStandUp(userItem)
+	if err := t.table.OnUserStandUp(userItem); err != nil {
+		log.Println("TableFrame OnUserStandUp", err)
+	}
 
 	t.mutex.Lock()
 	chair := userItem.ChairID()
@@ -142,7 +147,9 @@ func (t *TableFrame) StandUp(userItem *UserItem) {
 
 // Reconnect 重连
 func (t *TableFrame) Reconnect(userItem *UserItem) {
-	t.table.OnUserReconnect(userItem)
+	if err := t.table.OnUserReconnect(userItem); err != nil {
+		log.Println("TableFrame OnUserReconnect", err)
+	}
 }
 
 // StartGame 开始游戏
@@ -161,7 +168,9 @@ func (t *TableFrame) StartGame() {
 	t.SetUserStatus(define.UserStatusPlaying)
 
 	// 游戏开始
-	t.table.OnGameStart()
+	if err := t.table.OnGameStart(); err != nil {
+		log.Println("TableFrame OnGameStart", err)
+	}
 }
 
 // ConcludeGame 结束游戏

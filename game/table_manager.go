@@ -97,13 +97,17 @@ func (t *TableManager) Monitor(w http.ResponseWriter, r *http.Request) {
 }
 
 // CreateTableLogic 创建桌子逻辑
-func CreateTableLogic(v define.ITableFrame) define.ITableLogic {
+func CreateTableLogic(v define.ITableFrame) (ret define.ITableLogic) {
+	defer func() {
+		if ret == nil {
+			log.Fatal("CreateTableLogic fatal")
+		}
+	}()
+
 	switch define.CG.GameType {
 	case define.GameLandlords: // 斗地主
 		return landlords.NewTableLogic(v)
 	}
-
-	log.Fatal("no table logic")
 
 	return nil
 }

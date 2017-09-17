@@ -2,6 +2,7 @@ package game
 
 import (
 	"encoding/json"
+	"log"
 	"net"
 	"sync"
 	"sync/atomic"
@@ -228,7 +229,9 @@ func (u *UserItem) WriteToDB(varScore int64, varDiamond int64, changeType int) e
 
 // SendMessage 发送消息
 func (u *UserItem) SendMessage(mcmd uint16, scmd uint16, data []byte) {
-	network.SendMessage(u.conn, mcmd, scmd, data)
+	if err := network.SendMessage(u.conn, mcmd, scmd, data); err != nil {
+		log.Println("UserItem SendMessage", err)
+	}
 }
 
 // SendJSONMessage 发送消息

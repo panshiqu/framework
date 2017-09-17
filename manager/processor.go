@@ -215,7 +215,9 @@ func (p *Processor) OnSubShutService(conn net.Conn, data []byte) error {
 func (p *Processor) OnClose(conn net.Conn) {
 	defer utils.Trace("Processor OnClose")()
 
-	p.OnSubUnRegisterService(conn, nil)
+	if err := p.OnSubUnRegisterService(conn, nil); err != nil {
+		log.Println("OnClose OnSubUnRegisterService", err)
+	}
 }
 
 // OnClientMessage 客户端收到消息

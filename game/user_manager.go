@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 	"sync"
@@ -21,11 +22,9 @@ type UserManager struct {
 func (u *UserManager) Delete(id int) {
 	u.mutex.Lock()
 	if userItem, ok := u.users[id]; ok {
-		userItem.WriteToDB(
-			userItem.CacheScore(),
-			userItem.CacheDiamond(),
-			define.ChangeTypeWinLose,
-		)
+		if err := userItem.WriteToDB(userItem.CacheScore(), userItem.CacheDiamond(), define.ChangeTypeWinLose); err != nil {
+			log.Println("UserManager WriteToDB", err)
+		}
 	}
 	delete(u.users, id)
 	u.mutex.Unlock()

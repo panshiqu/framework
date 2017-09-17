@@ -108,7 +108,9 @@ func (s *Server) handleConn(conn net.Conn) {
 				}
 			}
 
-			SendMessage(conn, mcmd, scmd, []byte(me.Error()))
+			if err := SendMessage(conn, mcmd, scmd, []byte(me.Error())); err != nil {
+				break
+			}
 		}
 	}
 

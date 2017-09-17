@@ -22,7 +22,9 @@ func (t *TableLogic) OnInit() error {
 func (t *TableLogic) OnGameStart() error {
 	log.Println("TableLogic OnGameStart")
 	time.AfterFunc(time.Minute, func() {
-		t.OnGameConclude()
+		if err := t.OnGameConclude(); err != nil {
+			log.Println("TableLogic OnGameConclude", err)
+		}
 	})
 	return nil
 }
@@ -69,7 +71,10 @@ func NewTableLogic(v define.ITableFrame) define.ITableLogic {
 		tableFrame: v,
 	}
 
-	t.OnInit()
+	if err := t.OnInit(); err != nil {
+		log.Println("TableLogic OnInit", err)
+		return nil
+	}
 
 	return t
 }
