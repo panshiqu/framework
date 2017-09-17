@@ -199,17 +199,17 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) interface{} {
 
 // OnSubChangeTreasure 改变财富
 func (p *Processor) OnSubChangeTreasure(conn net.Conn, data []byte) interface{} {
-	changeTreasure := &define.ChangeTreasure{}
+	notifyTreasure := &define.NotifyTreasure{}
 
-	if err := json.Unmarshal(data, changeTreasure); err != nil {
+	if err := json.Unmarshal(data, notifyTreasure); err != nil {
 		return err
 	}
 
 	// 用户财富变化
-	return p.ChangeUserTreasure(changeTreasure.UserID,
-		-1, changeTreasure.VarScore,
-		-1, changeTreasure.VarDiamond,
-		changeTreasure.ChangeType)
+	return p.ChangeUserTreasure(notifyTreasure.UserID,
+		-1, notifyTreasure.VarScore,
+		-1, notifyTreasure.VarDiamond,
+		notifyTreasure.ChangeType)
 }
 
 // OnClose 连接关闭

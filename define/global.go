@@ -259,6 +259,14 @@ type NotifyStatus struct {
 	UserStatus int `json:",omitempty"` // 用户状态
 }
 
+// NotifyTreasure 通知财富
+type NotifyTreasure struct {
+	UserID     int   `json:",omitempty"` // 编号
+	VarScore   int64 `json:",omitempty"` // 分数
+	VarDiamond int64 `json:",omitempty"` // 钻石
+	ChangeType int   `json:",omitempty"` // 类型
+}
+
 // FastRegister 快速注册
 type FastRegister struct {
 	Account  string `json:",omitempty"` // 账户
@@ -288,12 +296,4 @@ type FastLogin struct {
 type ReplyFastLogin struct {
 	UserInfo
 	IsRobot bool `json:",omitempty"` // 机器人
-}
-
-// ChangeTreasure 改变财富
-type ChangeTreasure struct {
-	UserID     int   `json:",omitempty"` // 编号
-	VarScore   int64 `json:",omitempty"` // 分数
-	VarDiamond int64 `json:",omitempty"` // 钻石
-	ChangeType int   `json:",omitempty"` // 类型
 }

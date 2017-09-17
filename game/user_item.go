@@ -182,13 +182,14 @@ func (u *UserItem) WriteDiamond(varDiamond int64, changeType int) error {
 func (u *UserItem) WriteTreasure(varScore int64, varDiamond int64, changeType int) (err error) {
 	defer func() {
 		if err == nil && u.tableFrame != nil {
-			u.tableFrame.SendTableJSONMessage(define.GameCommon, define.GameNotifyTreasure,
-				define.ChangeTreasure{
-					UserID:     u.id,
-					VarScore:   varScore,
-					VarDiamond: varDiamond,
-					ChangeType: changeType,
-				})
+			notifyTreasure := &define.NotifyTreasure{
+				UserID:     u.id,
+				VarScore:   varScore,
+				VarDiamond: varDiamond,
+				ChangeType: changeType,
+			}
+
+			u.tableFrame.SendTableJSONMessage(define.GameCommon, define.GameNotifyTreasure, notifyTreasure)
 		}
 	}()
 
@@ -230,13 +231,14 @@ func (u *UserItem) WriteToDB(varScore int64, varDiamond int64, changeType int) e
 		return nil
 	}
 
-	return rpc.JSONCall(define.DBCommon, define.DBChangeTreasure,
-		define.ChangeTreasure{
-			UserID:     u.id,
-			VarScore:   varScore,
-			VarDiamond: varDiamond,
-			ChangeType: changeType,
-		}, nil)
+	notifyTreasure := &define.NotifyTreasure{
+		UserID:     u.id,
+		VarScore:   varScore,
+		VarDiamond: varDiamond,
+		ChangeType: changeType,
+	}
+
+	return rpc.JSONCall(define.DBCommon, define.DBChangeTreasure, notifyTreasure, nil)
 }
 
 // SendMessage 发送消息
