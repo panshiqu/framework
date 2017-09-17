@@ -275,6 +275,6 @@ func (u *UserItem) SurplusDuration(id int) time.Duration {
 }
 
 // OnTimer 定时器
-func (u *UserItem) OnTimer(id int, parameter interface{}) {
-
+func (u *UserItem) OnTimer(id int, parameter interface{}) error {
+	return nil
 }

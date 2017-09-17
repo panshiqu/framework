@@ -30,7 +30,9 @@ func (p *Processor) OnTimer(id int, parameter interface{}) {
 	}
 
 	if tableFrame := tins.GetTable((id - define.TimerPerTable) / define.TimerPerTable); tableFrame != nil {
-		tableFrame.OnTimer((id-define.TimerPerTable)%define.TimerPerTable, parameter)
+		if err := tableFrame.OnTimer((id-define.TimerPerTable)%define.TimerPerTable, parameter); err != nil {
+			log.Println("TableFrame OnTimer", err)
+		}
 	}
 }
 

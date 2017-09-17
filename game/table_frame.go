@@ -228,15 +228,16 @@ func (t *TableFrame) SurplusDuration(id int) time.Duration {
 }
 
 // OnTimer 定时器
-func (t *TableFrame) OnTimer(id int, parameter interface{}) {
+func (t *TableFrame) OnTimer(id int, parameter interface{}) error {
 	if id < define.TimerPerUser {
-		t.table.OnTimer(id, parameter)
-		return
+		return t.table.OnTimer(id, parameter)
 	}
 
 	if user := t.TableUser((id - define.TimerPerUser) / define.TimerPerUser); user != nil {
-		user.OnTimer((id-define.TimerPerUser)%define.TimerPerUser, parameter)
+		return user.OnTimer((id-define.TimerPerUser)%define.TimerPerUser, parameter)
 	}
+
+	return nil
 }
 
 // OnMessage 收到消息
