@@ -25,7 +25,7 @@ type UserItem struct {
 	diamond      int64    // 钻石
 	cacheDiamond int64    // 缓存钻石
 	robot        bool     // 机器人
-	conn         net.Conn // 网络连接
+	conn         net.Conn // 网络连接（暂不为它考虑加锁）
 
 	status     int32       // 状态
 	chairID    int         // 椅子编号
@@ -111,30 +111,34 @@ func (u *UserItem) UserStatus() int {
 func (u *UserItem) SetUserStatus(v int) {
 	atomic.StoreInt32(&u.status, int32(v))
 
-	if u.tableFrame != nil {
+	if tableFrame := u.TableFrame(); tableFrame != nil {
 		notifyStatus := &define.NotifyStatus{
-			ChairID:    u.chairID,
+			ChairID:    u.ChairID(),
 			UserStatus: u.UserStatus(),
 		}
 
-		u.tableFrame.SendTableJSONMessage(define.GameCommon, define.GameNotifyStatus, notifyStatus)
+		tableFrame.SendTableJSONMessage(define.GameCommon, define.GameNotifyStatus, notifyStatus)
 	}
 }
 
 // ChairID 椅子编号
 func (u *UserItem) ChairID() int {
+	u.mutex.Lock()
+	defer u.mutex.Unlock()
 	return u.chairID
 }
 
 // SetChairID 设置椅子编号
 func (u *UserItem) SetChairID(v int) {
+	u.mutex.Lock()
 	u.chairID = v
+	u.mutex.Unlock()
 }
 
 // TableID 桌子编号
 func (u *UserItem) TableID() int {
-	if u.tableFrame != nil {
-		return u.tableFrame.TableID()
+	if tableFrame := u.TableFrame(); tableFrame != nil {
+		return tableFrame.TableID()
 	}
 
 	return define.InvalidTable
@@ -142,12 +146,16 @@ func (u *UserItem) TableID() int {
 
 // TableFrame 桌子框架
 func (u *UserItem) TableFrame() *TableFrame {
+	u.mutex.Lock()
+	defer u.mutex.Unlock()
 	return u.tableFrame
 }
 
 // SetTableFrame 设置桌子框架
 func (u *UserItem) SetTableFrame(v *TableFrame) {
+	u.mutex.Lock()
 	u.tableFrame = v
+	u.mutex.Unlock()
 }
 
 // TableUserInfo 桌子用户信息
@@ -163,7 +171,7 @@ func (u *UserItem) TableUserInfo() *define.NotifySitDown {
 			UserDiamond: u.UserDiamond(),
 		},
 		TableID:    u.TableID(),
-		ChairID:    u.chairID,
+		ChairID:    u.ChairID(),
 		UserStatus: u.UserStatus(),
 	}
 }
@@ -181,15 +189,17 @@ func (u *UserItem) WriteDiamond(varDiamond int64, changeType int) error {
 // WriteTreasure 写入财富
 func (u *UserItem) WriteTreasure(varScore int64, varDiamond int64, changeType int) (err error) {
 	defer func() {
-		if err == nil && u.tableFrame != nil {
-			notifyTreasure := &define.NotifyTreasure{
-				UserID:     u.id,
-				VarScore:   varScore,
-				VarDiamond: varDiamond,
-				ChangeType: changeType,
-			}
+		if err == nil {
+			if tableFrame := u.TableFrame(); tableFrame != nil {
+				notifyTreasure := &define.NotifyTreasure{
+					UserID:     u.id,
+					VarScore:   varScore,
+					VarDiamond: varDiamond,
+					ChangeType: changeType,
+				}
 
-			u.tableFrame.SendTableJSONMessage(define.GameCommon, define.GameNotifyTreasure, notifyTreasure)
+				tableFrame.SendTableJSONMessage(define.GameCommon, define.GameNotifyTreasure, notifyTreasure)
+			}
 		}
 	}()
 
