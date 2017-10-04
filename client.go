@@ -50,7 +50,7 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 
 		// 快速登陆
 		fastLogin := &define.FastLogin{
-			GameType:  define.GameLandlords,
+			GameType:  define.GameFiveInARow,
 			GameLevel: define.LevelOne,
 		}
 

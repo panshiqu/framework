@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/panshiqu/framework/define"
+	"github.com/panshiqu/framework/game/fiveinarow"
 	"github.com/panshiqu/framework/game/landlords"
 )
 
@@ -107,6 +108,8 @@ func CreateTableLogic(v define.ITableFrame) (ret define.ITableLogic) {
 	switch define.CG.GameType {
 	case define.GameLandlords: // 斗地主
 		return landlords.NewTableLogic(v)
+	case define.GameFiveInARow: // 五子棋
+		return fiveinarow.NewTableLogic(v)
 	}
 
 	return nil

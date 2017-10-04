@@ -24,6 +24,9 @@ const (
 
 	// GameLandlords 斗地主
 	GameLandlords = 1
+
+	// GameFiveInARow 五子棋
+	GameFiveInARow = 2
 )
 
 const (

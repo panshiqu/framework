@@ -207,7 +207,7 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 	service := &define.Service{
 		ID:          define.CG.ID,
 		IP:          define.CG.ListenIP,
-		GameType:    define.GameLandlords,
+		GameType:    define.GameFiveInARow,
 		GameLevel:   define.LevelOne,
 		ServiceType: define.ServiceGame,
 		IsServe:     true,
