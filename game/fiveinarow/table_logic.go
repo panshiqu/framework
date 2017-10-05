@@ -1,6 +1,7 @@
 package fiveinarow
 
 import (
+	"encoding/json"
 	"log"
 	"time"
 
@@ -10,11 +11,24 @@ import (
 // TableLogic 桌子逻辑
 type TableLogic struct {
 	tableFrame define.ITableFrame
+
+	currentChair int     // 当前椅子
+	checkerBoard [][]int // 五子棋盘
 }
 
 // OnInit 初始化
 func (t *TableLogic) OnInit() error {
 	log.Println("TableLogic OnInit")
+
+	// 默认椅子
+	t.currentChair = define.InvalidChair
+
+	// 初始化五子棋盘
+	t.checkerBoard = make([][]int, LineNumber)
+	for i := 0; i < LineNumber; i++ {
+		t.checkerBoard[i] = make([]int, LineNumber)
+	}
+
 	return nil
 }
 
@@ -57,6 +71,19 @@ func (t *TableLogic) OnUserReconnect(userItem define.IUserItem) error {
 // OnMessage 收到消息
 func (t *TableLogic) OnMessage(scmd uint16, data []byte, userItem define.IUserItem) error {
 	log.Println("TableLogic OnMessage", userItem.UserID(), scmd)
+
+	switch scmd {
+	case GamePlaceStone:
+		placeStone := &PlaceStone{}
+
+		if err := json.Unmarshal(data, placeStone); err != nil {
+			return err
+		}
+
+	default:
+		return define.ErrUnknownSubCmd
+	}
+
 	return nil
 }
 
