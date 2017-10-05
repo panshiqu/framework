@@ -3,7 +3,7 @@ package fiveinarow
 import (
 	"encoding/json"
 	"log"
-	"time"
+	"math/rand"
 
 	"github.com/panshiqu/framework/define"
 )
@@ -35,11 +35,15 @@ func (t *TableLogic) OnInit() error {
 // OnGameStart 游戏开始
 func (t *TableLogic) OnGameStart() error {
 	log.Println("TableLogic OnGameStart")
-	time.AfterFunc(time.Minute, func() {
-		if err := t.OnGameConclude(); err != nil {
-			log.Println("TableLogic OnGameConclude", err)
-		}
+
+	// 随机玩家
+	t.currentChair = rand.Intn(define.CG.UserPerTable)
+
+	// 广播开始
+	t.tableFrame.SendTableJSONMessage(define.GameTable, GameBroadcastStart, &BroadcastStart{
+		ChairID: t.currentChair,
 	})
+
 	return nil
 }
 
@@ -53,6 +57,13 @@ func (t *TableLogic) OnGameConclude() error {
 // OnUserSitDown 用户坐下
 func (t *TableLogic) OnUserSitDown(userItem define.IUserItem) error {
 	log.Println("TableLogic OnUserSitDown", userItem.UserID())
+
+	// 通知场景
+	userItem.SendJSONMessage(define.GameTable, GameNotifyScene, &NotifyScene{
+		Timeout:    Timeout,
+		LineNumber: LineNumber,
+	})
+
 	return nil
 }
 
@@ -79,6 +90,29 @@ func (t *TableLogic) OnMessage(scmd uint16, data []byte, userItem define.IUserIt
 		if err := json.Unmarshal(data, placeStone); err != nil {
 			return err
 		}
+
+		// 没轮到你
+		if userItem.ChairID() != t.currentChair {
+			return define.ErrNotYourTurn
+		}
+
+		// 已经落子
+		if t.checkerBoard[placeStone.PositionX][placeStone.PositionY] != 0 {
+			return define.ErrAlreadyPlaceStone
+		}
+
+		// 标记落子
+		t.checkerBoard[placeStone.PositionX][placeStone.PositionY] = t.currentChair + 1
+
+		// 广播落子
+		t.tableFrame.SendTableJSONMessage(define.GameTable, GameBroadcastPlaceStone, &BroadcastPlaceStone{
+			ChairID:   t.currentChair,
+			PositionX: placeStone.PositionX,
+			PositionY: placeStone.PositionY,
+		})
+
+		// 轮转玩家
+		t.currentChair = (t.currentChair + 1) % define.CG.UserPerTable
 
 	default:
 		return define.ErrUnknownSubCmd

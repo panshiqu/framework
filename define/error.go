@@ -58,6 +58,12 @@ var (
 
 	// ErrNotEnoughDiamond 钻石不足
 	ErrNotEnoughDiamond = &MyError{Errno: ErrnoFailure, Errdesc: "not enough diamond"}
+
+	// ErrNotYourTurn 没轮到你
+	ErrNotYourTurn = &MyError{Errno: ErrnoFailure, Errdesc: "not your turn"}
+
+	// ErrAlreadyPlaceStone 已经落子
+	ErrAlreadyPlaceStone = &MyError{Errno: ErrnoFailure, Errdesc: "already place stone"}
 )
 
 // MyError 错误

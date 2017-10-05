@@ -27,29 +27,29 @@ const (
 
 // NotifyScene 通知场景
 type NotifyScene struct {
-	Timeout    int
-	LineNumber int
+	Timeout    int `json:",omitempty"` // 超时
+	LineNumber int `json:",omitempty"` // 线数
 }
 
 // BroadcastStart 广播开始
 type BroadcastStart struct {
-	ChairID int
+	ChairID int `json:",omitempty"` // 玩家
 }
 
 // PlaceStone 落子
 type PlaceStone struct {
-	PositionX int
-	PositionY int
+	PositionX int `json:",omitempty"` // 位置
+	PositionY int `json:",omitempty"` // 位置
 }
 
 // BroadcastPlaceStone 广播落子
 type BroadcastPlaceStone struct {
-	ChairID   int
-	PositionX int
-	PositionY int
+	ChairID   int `json:",omitempty"` // 玩家
+	PositionX int `json:",omitempty"` // 位置
+	PositionY int `json:",omitempty"` // 位置
 }
 
 // BroadcastConclude 广播结束
 type BroadcastConclude struct {
-	ChairID int // 赢家
+	ChairID int `json:",omitempty"` // 赢家
 }
