@@ -20,9 +20,6 @@ const (
 
 	// GameBroadcastStart 广播开始
 	GameBroadcastStart = 202
-
-	// GameBroadcastConclude 广播结束
-	GameBroadcastConclude = 203
 )
 
 // NotifyScene 通知场景
@@ -44,12 +41,8 @@ type PlaceStone struct {
 
 // BroadcastPlaceStone 广播落子
 type BroadcastPlaceStone struct {
-	ChairID   int `json:",omitempty"` // 玩家
-	PositionX int `json:",omitempty"` // 位置
-	PositionY int `json:",omitempty"` // 位置
-}
-
-// BroadcastConclude 广播结束
-type BroadcastConclude struct {
-	ChairID int `json:",omitempty"` // 赢家
+	IsWin     bool `json:",omitempty"` // 胜利
+	ChairID   int  `json:",omitempty"` // 玩家
+	PositionX int  `json:",omitempty"` // 位置
+	PositionY int  `json:",omitempty"` // 位置
 }

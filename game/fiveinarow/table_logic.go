@@ -100,24 +100,23 @@ func (t *TableLogic) OnMessage(scmd uint16, data []byte, userItem define.IUserIt
 		// 标记落子
 		t.checkerBoard[placeStone.PositionX][placeStone.PositionY] = t.currentChair + 1
 
+		// 是否胜利
+		win := isWin(t.checkerBoard, placeStone.PositionX, placeStone.PositionY, t.currentChair+1)
+
 		// 广播落子
 		t.tableFrame.SendTableJSONMessage(define.GameTable, GameBroadcastPlaceStone, &BroadcastPlaceStone{
+			IsWin:     win,
 			ChairID:   t.currentChair,
 			PositionX: placeStone.PositionX,
 			PositionY: placeStone.PositionY,
 		})
 
-		// 赢广播结束
-		if isWin(t.checkerBoard, placeStone.PositionX, placeStone.PositionY, t.currentChair+1) {
-			t.tableFrame.SendTableJSONMessage(define.GameTable, GameBroadcastConclude, &BroadcastConclude{
-				ChairID: t.currentChair,
-			})
-
-			return t.OnGameConclude()
-		}
-
 		// 轮转玩家
 		t.currentChair = (t.currentChair + 1) % define.CG.UserPerTable
+
+		if win {
+			t.OnGameConclude()
+		}
 
 	default:
 		return define.ErrUnknownSubCmd

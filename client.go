@@ -3,12 +3,14 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"net"
 	"os"
 	"os/signal"
 
 	"github.com/panshiqu/framework/define"
+	"github.com/panshiqu/framework/game/fiveinarow"
 	"github.com/panshiqu/framework/network"
 )
 
@@ -97,6 +99,43 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 			}
 		}
 	}
+
+	// 五子棋
+	if mcmd == define.GameTable {
+		switch scmd {
+		// 广播开始
+		case fiveinarow.GameBroadcastStart:
+			broadcastStart := &fiveinarow.BroadcastStart{}
+
+			if err := json.Unmarshal(data, broadcastStart); err != nil {
+				log.Println("json.Unmarshal BroadcastStart", err)
+				return
+			}
+
+			if broadcastStart.ChairID == cid {
+				p.onUserInput()
+			}
+
+		// 广播落子
+		case fiveinarow.GameBroadcastPlaceStone:
+			broadcastPlaceStone := &fiveinarow.BroadcastPlaceStone{}
+
+			if err := json.Unmarshal(data, broadcastPlaceStone); err != nil {
+				log.Println("json.Unmarshal BroadcastPlaceStone", err)
+				return
+			}
+
+			if !broadcastPlaceStone.IsWin && broadcastPlaceStone.ChairID != cid {
+				p.onUserInput()
+			}
+		}
+	}
+}
+
+func (p *Processor) onUserInput() {
+	placeStone := &fiveinarow.PlaceStone{}
+	fmt.Scan(&placeStone.PositionX, &placeStone.PositionY)
+	p.client.SendJSONMessage(define.GameTable, fiveinarow.GamePlaceStone, placeStone)
 }
 
 // OnClientConnect 客户端连接成功
