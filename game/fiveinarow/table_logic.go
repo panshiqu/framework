@@ -19,22 +19,18 @@ type TableLogic struct {
 // OnInit 初始化
 func (t *TableLogic) OnInit() error {
 	log.Println("TableLogic OnInit")
-
-	// 默认椅子
-	t.currentChair = define.InvalidChair
-
-	// 初始化五子棋盘
-	t.checkerBoard = make([][]int, LineNumber)
-	for i := 0; i < LineNumber; i++ {
-		t.checkerBoard[i] = make([]int, LineNumber)
-	}
-
 	return nil
 }
 
 // OnGameStart 游戏开始
 func (t *TableLogic) OnGameStart() error {
 	log.Println("TableLogic OnGameStart")
+
+	// 初始化五子棋盘
+	t.checkerBoard = make([][]int, LineNumber)
+	for i := 0; i < LineNumber; i++ {
+		t.checkerBoard[i] = make([]int, LineNumber)
+	}
 
 	// 随机玩家
 	t.currentChair = rand.Intn(define.CG.UserPerTable)
@@ -110,6 +106,15 @@ func (t *TableLogic) OnMessage(scmd uint16, data []byte, userItem define.IUserIt
 			PositionX: placeStone.PositionX,
 			PositionY: placeStone.PositionY,
 		})
+
+		// 赢广播结束
+		if isWin(t.checkerBoard, placeStone.PositionX, placeStone.PositionY, t.currentChair+1) {
+			t.tableFrame.SendTableJSONMessage(define.GameTable, GameBroadcastConclude, &BroadcastConclude{
+				ChairID: t.currentChair,
+			})
+
+			return t.OnGameConclude()
+		}
 
 		// 轮转玩家
 		t.currentChair = (t.currentChair + 1) % define.CG.UserPerTable
