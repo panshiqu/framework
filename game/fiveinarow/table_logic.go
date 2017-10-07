@@ -139,3 +139,41 @@ func NewTableLogic(v define.ITableFrame) define.ITableLogic {
 
 	return t
 }
+
+func isWin(board [][]int, x, y, v int) bool {
+	if same(board, x, y, v, 1, 1)+same(board, x, y, v, -1, -1) >= 4 {
+		return true
+	}
+
+	if same(board, x, y, v, -1, 1)+same(board, x, y, v, 1, -1) >= 4 {
+		return true
+	}
+
+	if same(board, x, y, v, 1, 0)+same(board, x, y, v, -1, 0) >= 4 {
+		return true
+	}
+
+	if same(board, x, y, v, 0, 1)+same(board, x, y, v, 0, -1) >= 4 {
+		return true
+	}
+
+	return false
+}
+
+func same(board [][]int, x, y, v, ox, oy int) (n int) {
+	for {
+		if x += ox; x < 0 || x >= LineNumber {
+			return
+		}
+
+		if y += oy; y < 0 || y >= LineNumber {
+			return
+		}
+
+		if board[x][y] != v {
+			return
+		}
+
+		n++
+	}
+}
