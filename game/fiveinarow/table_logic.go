@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"math/rand"
+	"sync"
 
 	"github.com/panshiqu/framework/define"
 )
@@ -11,6 +12,7 @@ import (
 // TableLogic 桌子逻辑
 type TableLogic struct {
 	tableFrame define.ITableFrame
+	mutex      sync.Mutex // 加锁
 
 	currentChair int     // 当前椅子
 	checkerBoard [][]int // 五子棋盘
@@ -25,6 +27,9 @@ func (t *TableLogic) OnInit() error {
 // OnGameStart 游戏开始
 func (t *TableLogic) OnGameStart() error {
 	log.Println("TableLogic OnGameStart")
+
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
 
 	// 初始化五子棋盘
 	t.checkerBoard = make([][]int, LineNumber)
@@ -78,6 +83,9 @@ func (t *TableLogic) OnUserReconnect(userItem define.IUserItem) error {
 // OnMessage 收到消息
 func (t *TableLogic) OnMessage(scmd uint16, data []byte, userItem define.IUserItem) error {
 	log.Println("TableLogic OnMessage", userItem.UserID(), scmd)
+
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
 
 	switch scmd {
 	case GamePlaceStone:
