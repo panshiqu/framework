@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -24,9 +25,13 @@ func handleSignal(server *network.Server, client *network.Client) {
 }
 
 func main() {
+	//读取命令行参数
+	args := utils.GetLoginArgs()
+	fmt.Println(args.ConfigPath)
+	
 	//读取login配置文件
 	config := &define.ConfigLogin{}
-	if err := utils.ReadJSON("./config/login.json", config); err != nil {
+	if err := utils.ReadJSON(args.ConfigPath, config); err != nil {
 		log.Println("ReadJSON ConfigLogin", err)
 		return
 	}
