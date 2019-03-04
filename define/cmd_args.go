@@ -9,3 +9,8 @@ type CommonArgs struct {
 type LoginArgs struct {
 	CommonArgs
 }
+
+//数据库参数
+type DBArgs struct {
+	CommonArgs
+} 

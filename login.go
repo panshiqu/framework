@@ -28,7 +28,8 @@ func main() {
 	//读取命令行参数
 	args := utils.GetLoginArgs()
 	fmt.Println(args.ConfigPath)
-	
+	return
+
 	//读取login配置文件
 	config := &define.ConfigLogin{}
 	if err := utils.ReadJSON(args.ConfigPath, config); err != nil {
