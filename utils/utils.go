@@ -11,7 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/panshiqu/framework/define"
+	"../define"
+	"github.com/tidwall/gjson"
+	"github.com/mitchellh/mapstructure"
 )
 
 // Date 日期
@@ -32,17 +34,40 @@ func Signature(timestamp int64) string {
 
 // ReadJSON 打开读取解析JSON文件
 func ReadJSON(name string, js interface{}) error {
-	f, err := os.Open(name)
+	body,err := readFileContent(name)
 	if err != nil {
 		return err
+	}
+	return json.Unmarshal(body, js)
+}
+
+// 读取文件内容
+func readFileContent(path string)([]byte,error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil,err
 	}
 
 	defer f.Close()
 
 	body, err := ioutil.ReadAll(f)
 	if err != nil {
+		return nil,err
+	}
+	return body,nil
+}
+
+func InitConfig(path string, config *define.GConfig) error {
+	content, err := readFileContent(path)
+	if err != nil {
 		return err
 	}
+	m, _ := gjson.Parse(string(content)).Value().(map[string]interface{})
 
-	return json.Unmarshal(body, js)
+	//读取db信息
+	mapstructure.Decode(m["db"], &config.DB)
+	mapstructure.Decode(m["login"], &config.Login)
+	mapstructure.Decode(m["game"], &config.Game)
+
+	return nil
 }

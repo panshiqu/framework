@@ -45,3 +45,10 @@ type ConfigDB struct {
 	GameTablePrefix	string
 	LogTablePrefix string
 }
+
+// 全局配置信息
+type GConfig struct {
+	DB ConfigDB
+	Login ConfigLogin
+	Game ConfigGame
+}

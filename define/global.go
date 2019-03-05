@@ -237,7 +237,7 @@ type UserInfo struct {
 	UserName    string `json:",omitempty"` // 名称
 	UserIcon    int    `json:",omitempty"` // 图标
 	UserLevel   int    `json:",omitempty"` // 等级
-	UserGender  int    `json:",omitempty"` // 性别
+	UserGender  uint8    `json:",omitempty"` // 性别
 	BindPhone   string `json:",omitempty"` // 绑定手机
 	UserScore   int64  `json:",omitempty"` // 分数
 	UserDiamond int64  `json:",omitempty"` // 钻石

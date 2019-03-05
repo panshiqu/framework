@@ -28,18 +28,20 @@ func main() {
 	//读取命令行参数
 	args := utils.GetLoginArgs()
 	fmt.Println(args.ConfigPath)
-	return
 
 	//读取login配置文件
-	config := &define.ConfigLogin{}
-	if err := utils.ReadJSON(args.ConfigPath, config); err != nil {
+	config := &define.GConfig{}
+	err := utils.InitConfig(args.ConfigPath, config)
+
+	if err != nil {
 		log.Println("ReadJSON ConfigLogin", err)
 		return
 	}
 
-	server := network.NewServer(config.ListenIP)
-	client := network.NewClient(config.DialIP)
-	processor := login.NewProcessor(server, client, config)
+	server := network.NewServer(config.Login.ListenIP)
+	client := network.NewClient(config.Login.DialIP)
+
+	processor := login.NewProcessor(server, client, &config.Login)
 
 	server.Register(processor)
 	client.Register(processor)

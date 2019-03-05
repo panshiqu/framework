@@ -1,0 +1,34 @@
+{
+  "db": {
+    "PprofIP": "127.0.0.1:1011",
+    "ListenIP": "127.0.0.1:1010",
+    "GameTablePrefix" : "game_",
+    "LogTablePrefix" : "log_"
+  },
+  "login": {
+    "ID": 1,
+    "DialIP": "127.0.0.1:8080",
+    "PprofIP": "127.0.0.1:10002",
+    "ListenIP": "127.0.0.1:10001"
+  },
+  "game" : {
+    "ID": 2,
+    "DBIP": "127.0.0.1:1010",
+    "DialIP": "127.0.0.1:8080",
+    "PprofIP": "127.0.0.1:9092",
+    "ListenIP": "127.0.0.1:8082",
+    "GameType": 2,
+    "UserPerTable": 2,
+    "MinReadyStart": 2
+  },
+  "manager" : {
+    "PprofIP": "127.0.0.1:9090",
+    "ListenIP": "127.0.0.1:8080"
+  },
+  "proxy": {
+    "ID": 3,
+    "DialIP": "127.0.0.1:8080",
+    "PprofIP": "127.0.0.1:9090",
+    "ListenIP": "127.0.0.1:8083"
+  }
+}
