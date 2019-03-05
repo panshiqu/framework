@@ -71,22 +71,23 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) interf
 }
 
 // ChangeUserTreasure 改变用户财富
-func (p *Processor) ChangeUserTreasure(id int, score int64, varScore int64, diamond int64, varDiamond int64, changeType int) error {
+func (p *Processor) ChangeUserTreasure(userId int, score int64, varScore int64, diamond int64, varDiamond int64, changeType int) error {
 	var userTreasure UserTreasure
 	// 当前分数钻石
 	if score < 0 || diamond < 0 {
-		res, err := GameEngine.Where("user_id=?",id).Get(&userTreasure); err != nil {
+		_, err := GameEngine.Where("user_id=?", userId).Get(&userTreasure);
+		err != nil{
 			return err
 		}
 	}
 
 	// 更新分数钻石
-	if _, err := GameEngine.Exec("UPDATE user_treasure SET user_score = user_score + ?, user_diamond = user_diamond + ? WHERE user_id = ?", varScore, varDiamond, id); err != nil {
+	if _, err := GameEngine.Exec("UPDATE user_treasure SET user_score = user_score + ?, user_diamond = user_diamond + ? WHERE user_id = ?", varScore, varDiamond, userId); err != nil {
 		return err
 	}
 
 	// 记录财富日志
-	if _, err := LogEngine.Exec(fmt.Sprintf("INSERT INTO user_treasure_log_%d (user_id, cur_score, var_score, cur_diamond, var_diamond, change_type) VALUES (?, ?, ?, ?, ?, ?)", utils.Date()), id, userTreasure.UserScore, varScore, userTreasure.UserDiamond, varDiamond, changeType); err != nil {
+	if _, err := LogEngine.Exec(fmt.Sprintf("INSERT INTO user_treasure_log_%d (user_id, cur_score, var_score, cur_diamond, var_diamond, change_type) VALUES (?, ?, ?, ?, ?, ?)", utils.Date()), userId, userTreasure.UserScore, varScore, userTreasure.UserDiamond, varDiamond, changeType); err != nil {
 		return err
 	}
 
@@ -103,71 +104,84 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 	}
 
 	// 查询用户信息
-	if err := GameEngine.QueryRow("SELECT user_id, user_level, bind_phone, user_score, user_diamond FROM view_information_treasure WHERE user_account = ?", fastRegister.Account).Scan(
-		&replyFastRegister.UserID,
-		&replyFastRegister.UserLevel,
-		&replyFastRegister.BindPhone,
-		&replyFastRegister.UserScore,
-		&replyFastRegister.UserDiamond,
-	); err == sql.ErrNoRows {
-		// 插入用户信息
-		res, err := GameEngine.Exec("INSERT INTO user_information (user_account, user_name, user_icon, user_gender, register_ip, register_machine) VALUES (?, ?, ?, ?, ?, ?)",
-			fastRegister.Account,
-			fastRegister.Name,
-			fastRegister.Icon,
-			fastRegister.Gender,
-			fastRegister.IP,
-			fastRegister.Machine,
-		)
+	userInfo := new(UserInformation)
+	_, err := GameEngine.Where("user_account = ?", fastRegister.Account).Get(&userInfo)
+
+	if err == sql.ErrNoRows {
+		// 新建用户信息
+		newUser := User{
+			Account:  fastRegister.Account,
+			Password: fastRegister.Password,
+			Name:     fastRegister.Name,
+			Icon:     fastRegister.Icon,
+			Ip:       fastRegister.IP,
+			Gender:   uint8(fastRegister.Gender),
+		}
+		_, err := GameEngine.Insert(&newUser)
+
 		if err != nil {
 			return err
 		}
 
-		// 获取用户编号
-		uid, err := res.LastInsertId()
+		// 新建用户附加信息
+		userInfo.UserId = newUser.Id
+		userInfo.UserDiamond = 0
+		userInfo.UserScore = 0
+		userInfo.UserLevel = 1
+		userInfo.UserName = newUser.Name
+
+		_,err =GameEngine.Insert(userInfo)
 		if err != nil {
 			return err
 		}
 
-		replyFastRegister.UserID = int(uid)
+		replyFastRegister.UserID = int(newUser.Id)
 
 		// 插入用户财富
-		if _, err = GameEngine.Exec("INSERT INTO user_treasure (user_id) VALUES (?)", uid); err != nil {
+		newUserTreasure := UserTreasure{
+			UserId:      newUser.Id,
+			UserScore:   0,
+			UserDiamond: 0
+		}
+		_,err = GameEngine.Insert(newUserTreasure)
+		if err != nil {
 			return err
 		}
 
 		// 用户初始分数钻石
 		var score, diamond int64
 
-		if err := GameEngine.QueryRow(`SELECT Content FROM game_config WHERE Title = "InitScore"`).Scan(&score); err != nil {
-			return err
-		}
+		// @todo 配置信息建议从redis中读取
+		//if err := GameEngine.QueryRow(`SELECT Content FROM game_config WHERE Title = "InitScore"`).Scan(&score); err != nil {
+		//	return err
+		//}
+		//
+		//if err := GameEngine.QueryRow(`SELECT Content FROM game_config WHERE Title = "InitDiamond"`).Scan(&diamond); err != nil {
+		//	return err
+		//}
 
-		if err := GameEngine.QueryRow(`SELECT Content FROM game_config WHERE Title = "InitDiamond"`).Scan(&diamond); err != nil {
-			return err
-		}
-
+		score = 10
+		diamond = 10
 		replyFastRegister.UserScore = score
 		replyFastRegister.UserDiamond = diamond
 
 		// 用户财富变化
-		if err := p.ChangeUserTreasure(int(uid), 0, score, 0, diamond, define.ChangeTypeRegister); err != nil {
+		if err := p.ChangeUserTreasure(int(newUser.Id), 0, score, 0, diamond, define.ChangeTypeRegister); err != nil {
 			return err
 		}
 
 		// 初始用户等级
-		replyFastRegister.UserLevel = 1
+		replyFastRegister.UserLevel = userInfo.UserLevel
 	} else if err != nil {
 		return err
 	}
 
 	// 总是更新这些字段
-	if _, err := GameEngine.Exec("UPDATE user_information SET user_name = ?, user_icon = ?, user_gender = ? WHERE user_id = ?",
-		fastRegister.Name,
-		fastRegister.Icon,
-		fastRegister.Gender,
-		replyFastRegister.UserID,
-	); err != nil {
+	userInfo.UserName = fastRegister.Name
+	userInfo.UserIcon = fastRegister.Icon
+	userInfo.UserGender = fastRegister.Gender
+	_,err = GameEngine.Where("user_id = ?", userInfo.UserId).Update(userInfo)
+	if err != nil {
 		return err
 	}
 
@@ -184,21 +198,14 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) interface{} {
 	}
 
 	// 查询用户信息
-	if err := GameEngine.QueryRow("SELECT user_id, user_name, user_icon, user_level, user_gender+0, bind_phone, user_score, user_diamond, is_robot FROM view_information_treasure WHERE user_id = ?", id).Scan(
-		&replyFastLogin.UserID,
-		&replyFastLogin.UserName,
-		&replyFastLogin.UserIcon,
-		&replyFastLogin.UserLevel,
-		&replyFastLogin.UserGender,
-		&replyFastLogin.BindPhone,
-		&replyFastLogin.UserScore,
-		&replyFastLogin.UserDiamond,
-		&replyFastLogin.IsRobot,
-	); err != nil {
+	userInfo := new(UserInformation);
+	_, err := GameEngine.Where("user_id=?", id).Get(&userInfo)
+
+	if err != nil {
 		return err
 	}
 
-	return replyFastLogin
+	return userInfo
 }
 
 // OnSubChangeTreasure 改变财富
@@ -247,7 +254,7 @@ func NewProcessor(server *network.Server, config define.ConfigDB) *Processor {
 		return nil
 	}
 
-	if GameEngine, err = xorm.NewEngine("mysql", "root:123456@/card_game"); err != nil {
+	if GameEngine, err = xorm.NewEngine("mysql", "root:123456@/game_db"); err != nil {
 		log.Println("Open game", err)
 		return nil
 	}
@@ -265,17 +272,16 @@ func NewProcessor(server *network.Server, config define.ConfigDB) *Processor {
 	}
 }
 
-
 func GameDbInit(config define.ConfigDB) {
 	// 设置表前缀
-	tableMapper := core.NewPrefixMapper(core.SnakeMapper{}, config.GameTablePrefix)
+	tableMapper := core.NewPrefixMapper(core.GonicMapper{}, config.GameTablePrefix)
 	GameEngine.SetTableMapper(tableMapper)
 
 	//初始化用户表
 	//if tbExist, err := GameEngine.IsTableExist(&User{}); err != nil && !tbExist {
 	//
 	//}
-	err := GameEngine.Sync2(new(User), new(UserTreasure))
+	err := GameEngine.Sync2(new(User), new(UserTreasure), new(UserInformation))
 	if err != nil {
 		log.Println("sync table failed:", err.Error())
 	}

@@ -16,8 +16,8 @@ import (
 
 // Date 日期
 func Date() int {
-	y, m, d := time.Now().Date()
-	return y*10000 + int(m)*100 + d
+	y, m, _ := time.Now().Date()
+	return y*100 + int(m)
 }
 
 // Signature 签名

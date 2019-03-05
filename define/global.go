@@ -277,7 +277,7 @@ type FastRegister struct {
 	Machine  string `json:",omitempty"` // 机器码
 	Name     string `json:",omitempty"` // 名称
 	Icon     int    `json:",omitempty"` // 图标
-	Gender   int    `json:",omitempty"` // 性别
+	Gender   uint8    `json:",omitempty"` // 性别
 	IP       string `json:",omitempty"` // 地址
 }
 
