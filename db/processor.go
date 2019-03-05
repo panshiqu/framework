@@ -75,8 +75,7 @@ func (p *Processor) ChangeUserTreasure(userId int, score int64, varScore int64, 
 	var userTreasure UserTreasure
 	// 当前分数钻石
 	if score < 0 || diamond < 0 {
-		_, err := GameEngine.Where("user_id=?", userId).Get(&userTreasure);
-		err != nil{
+		if _, err := GameEngine.Where("user_id=?", userId).Get(&userTreasure); err != nil {
 			return err
 		}
 	}
@@ -141,7 +140,7 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 		newUserTreasure := UserTreasure{
 			UserId:      newUser.Id,
 			UserScore:   0,
-			UserDiamond: 0
+			UserDiamond: 0,
 		}
 		_,err = GameEngine.Insert(newUserTreasure)
 		if err != nil {
@@ -191,7 +190,7 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 // OnSubFastLogin 快速登陆子命令
 func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) interface{} {
 	var id int
-	replyFastLogin := &define.ReplyFastLogin{}
+	//replyFastLogin := &define.ReplyFastLogin{}
 
 	if err := json.Unmarshal(data, &id); err != nil {
 		return err
@@ -239,7 +238,7 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 }
 
 // NewProcessor 创建处理器
-func NewProcessor(server *network.Server, config define.ConfigDB) *Processor {
+func NewProcessor(server *network.Server, config *define.ConfigDB) *Processor {
 	var err error
 
 	// todo SetMaxOpenConns, SetMaxIdleConns
@@ -272,7 +271,7 @@ func NewProcessor(server *network.Server, config define.ConfigDB) *Processor {
 	}
 }
 
-func GameDbInit(config define.ConfigDB) {
+func GameDbInit(config *define.ConfigDB) {
 	// 设置表前缀
 	tableMapper := core.NewPrefixMapper(core.GonicMapper{}, config.GameTablePrefix)
 	GameEngine.SetTableMapper(tableMapper)
