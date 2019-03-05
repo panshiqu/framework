@@ -42,4 +42,6 @@ var CG ConfigGame
 type ConfigDB struct {
 	PprofIP  string
 	ListenIP string
+	GameTablePrefix	string
+	LogTablePrefix string
 }

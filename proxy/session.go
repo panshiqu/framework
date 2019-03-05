@@ -6,9 +6,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/panshiqu/framework/define"
-	"github.com/panshiqu/framework/network"
-	"github.com/panshiqu/framework/utils"
+	"../define"
+	"../network"
+	"../utils"
 )
 
 // Session 会话

@@ -6,7 +6,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/panshiqu/framework/define"
+	"../define"
 )
 
 // RPC 远程过程调用

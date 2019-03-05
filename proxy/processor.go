@@ -5,8 +5,8 @@ import (
 	"log"
 	"net"
 
-	"github.com/panshiqu/framework/define"
-	"github.com/panshiqu/framework/network"
+	"../define"
+	"../network"
 )
 
 // Processor 处理器

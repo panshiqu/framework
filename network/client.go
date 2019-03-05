@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/panshiqu/framework/define"
+	"../define"
 )
 
 // Client 客户端
@@ -64,6 +64,7 @@ func (c *Client) Start() {
 			case <-c.stop:
 				c.mutex.Unlock() // 防止goroutine正阻塞在mutex.RLock
 				return
+			//一次定时器，延迟c.delay时间
 			case <-time.After(c.delay):
 			}
 		}
@@ -75,6 +76,7 @@ func (c *Client) Start() {
 		c.processor.OnClientConnect(c.conn)
 
 		for {
+			//解析数据消息
 			mcmd, scmd, data, err := RecvMessage(c.conn)
 			if err != nil {
 				break

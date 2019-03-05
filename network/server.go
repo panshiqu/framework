@@ -5,7 +5,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/panshiqu/framework/define"
+	"../define"
 )
 
 // Server 服务器
