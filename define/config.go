@@ -51,4 +51,6 @@ type GConfig struct {
 	DB ConfigDB
 	Login ConfigLogin
 	Game ConfigGame
+	Manager ConfigManager
+	Proxy ConfigProxy
 }

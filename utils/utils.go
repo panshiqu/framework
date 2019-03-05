@@ -57,17 +57,20 @@ func readFileContent(path string)([]byte,error) {
 	return body,nil
 }
 
-func InitConfig(path string, config *define.GConfig) error {
+func GetGConfig(path string)(*define.GConfig, error)  {
+	config := new(define.GConfig)
 	content, err := readFileContent(path)
 	if err != nil {
-		return err
+		return nil,err
 	}
 	m, _ := gjson.Parse(string(content)).Value().(map[string]interface{})
 
-	//读取db信息
+	//读取相关配置信息
 	mapstructure.Decode(m["db"], &config.DB)
 	mapstructure.Decode(m["login"], &config.Login)
 	mapstructure.Decode(m["game"], &config.Game)
+	mapstructure.Decode(m["manager"], &config.Manager)
+	mapstructure.Decode(m["proxy"], &config.Proxy)
 
-	return nil
+	return config, nil
 }

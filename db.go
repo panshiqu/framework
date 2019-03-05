@@ -6,12 +6,12 @@ import (
 	"os"
 	"os/signal"
 
-	//“_” 操作引用包是无法通过包名来调用包中的导出函数，而是只是为了简单的调用其 init() 函数。
-	_ "github.com/go-sql-driver/mysql"
 	"./db"
 	"./define"
 	"./network"
 	"./utils"
+	//“_” 操作引用包是无法通过包名来调用包中的导出函数，而是只是为了简单的调用其 init() 函数。
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func handleSignal(server *network.Server) {
@@ -29,16 +29,17 @@ func handleSignal(server *network.Server) {
 func main() {
 	//解析命令行参数
 	args := utils.GetDBArgs()
-	fmt.Println(args)
 
-	config := &define.ConfigDB{}
-	if err := utils.ReadJSON(args.ConfigPath, config); err != nil {
-		log.Println("ReadJSON ConfigDB", err)
+	//读取全局配置文件
+	config,err := utils.GetGConfig(args.ConfigPath)
+
+	if err != nil {
+		log.Println("ReadJSON Config", err)
 		return
 	}
 
-	server := network.NewServer(config.ListenIP)
-	processor := db.NewProcessor(server, config)
+	server := network.NewServer(config.DB.ListenIP)
+	processor := db.NewProcessor(server, &config.DB)
 
 	if processor == nil {
 		return

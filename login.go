@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/signal"
 
-	"./define"
 	"./login"
 	"./network"
 	"./utils"
@@ -29,12 +28,11 @@ func main() {
 	args := utils.GetLoginArgs()
 	fmt.Println(args.ConfigPath)
 
-	//读取login配置文件
-	config := &define.GConfig{}
-	err := utils.InitConfig(args.ConfigPath, config)
+	//读取全局配置文件
+	config,err := utils.GetGConfig(args.ConfigPath)
 
 	if err != nil {
-		log.Println("ReadJSON ConfigLogin", err)
+		log.Println("ReadJSON Config", err)
 		return
 	}
 
