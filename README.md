@@ -8,4 +8,4 @@ a simple game framework
 ## 修改
 
  + 数据库由golang database改[xorm](https://github.com/go-xorm/xorm)
- + @todo 增加redis内存支持
+ + @todo 增加redis缓存支持
