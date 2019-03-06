@@ -146,6 +146,7 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 		userInfo.UserScore = 0
 		userInfo.UserLevel = 1
 		userInfo.UserName = newUser.Name
+		userInfo.UserAccount = newUser.Account
 
 		_,err =GameEngine.Insert(userInfo)
 		if err != nil {
