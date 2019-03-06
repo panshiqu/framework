@@ -103,6 +103,7 @@ const (
 const (
 	// LoginFastRegister 快速注册
 	LoginFastRegister = 1
+	LoginRegisterCheck = 2
 )
 
 const (
@@ -150,6 +151,9 @@ const (
 
 	// DBChangeTreasure 改变财富
 	DBChangeTreasure = 3
+
+	// 快速注册检车
+	DBRegisterCheck = 4
 )
 
 const (
@@ -279,6 +283,12 @@ type FastRegister struct {
 	Icon     int    `json:",omitempty"` // 图标
 	Gender   uint8    `json:",omitempty"` // 性别
 	IP       string `json:",omitempty"` // 地址
+}
+
+//注册检查账号名称是否存在
+type FastRegisterCheck struct {
+	Account string `json:",omitempty"` //账户
+	Name string `json:",omitempty"` //名称
 }
 
 // ReplyFastRegister 回复快速注册

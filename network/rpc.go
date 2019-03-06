@@ -90,3 +90,5 @@ func (r *RPC) JSONCall(mcmd uint16, scmd uint16, in interface{}, out interface{}
 
 	return json.Unmarshal(outdata, out)
 }
+
+

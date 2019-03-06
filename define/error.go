@@ -11,6 +11,9 @@ const (
 
 	// ErrnoFailure 失败
 	ErrnoFailure int = 1
+
+	// 注册相关错误
+	ErrnoRegister int = 2
 )
 
 var (
@@ -64,6 +67,12 @@ var (
 
 	// ErrAlreadyPlaceStone 已经落子
 	ErrAlreadyPlaceStone = &MyError{Errno: ErrnoFailure, Errdesc: "already place stone"}
+
+	// 注册错误账号已存在
+	ErrRegisterAccountExist = &MyError{Errno: ErrnoRegister, Errdesc:"账号已注册"}
+
+	// 注册错误名称已存在
+	ErrRegisterNameExist = &MyError{Errno:ErrnoRegister,Errdesc:"名称已注册"}
 )
 
 // MyError 错误

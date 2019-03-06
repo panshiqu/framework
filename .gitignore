@@ -27,3 +27,4 @@ bin/log/*
 bin/db
 bin/manager
 bin/proxy
+bin/login

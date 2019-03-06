@@ -50,6 +50,14 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 			if data, err = json.Marshal(fastRegister); err != nil {
 				return err
 			}
+		}else if mcmd == define.LoginCommon && scmd == define.LoginRegisterCheck {
+			s.closeLogin()
+
+			if s.login, err = sins.Dial(define.ServiceLogin,
+				define.GameUnknown, define.LevelUnknown); err != nil {
+				return err
+			}
+			go s.RecvMessage(s.login)
 		}
 
 		if s.login == nil {
