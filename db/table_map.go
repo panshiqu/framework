@@ -16,8 +16,9 @@ type User struct {
 }
 
 type UserInformation struct {
-	Id uint32
+	Id uint32 `xorm:"autoincr pk notnull"`
 	UserId uint32 `xorm:"notnull unique"`
+	UserAccount string `xorm:"varchar(30) notnull unique"`
 	UserName string `xorm:"notnull unique"`
 	UserIcon int `xorm:"notnull"`
 	UserGender uint8 `xorm:"notnull"` //性别

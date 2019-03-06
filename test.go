@@ -16,11 +16,11 @@ func main()  {
 	//network.SendMessage()
 	defer conn.Close()
 	register := define.FastRegister{
-		Account:"king",
+		Account:"king123",
 		Gender:  1,
 		Icon: 1,
 		Password: "123456",
-		Name: "big king",
+		Name: "big king2",
 		IP: "127.0.0.1",
 	}
 

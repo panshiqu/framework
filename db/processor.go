@@ -1,7 +1,6 @@
 package db
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -105,14 +104,21 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 	replyFastRegister := &define.ReplyFastRegister{}
 
 	if err := json.Unmarshal(data, fastRegister); err != nil {
+		logger.WithFields(log.Fields{
+			"error": err.Error(),
+		}).Error("OnSubFastRegister json unmarshal")
 		return err
 	}
 
+	logger.WithFields(log.Fields{
+		"RegisterInfo" : fastRegister,
+	}).Info("FastRegister data")
+
 	// 查询用户信息
 	userInfo := new(UserInformation)
-	_, err := GameEngine.Where("user_account = ?", fastRegister.Account).Get(&userInfo)
+	res, err := GameEngine.Where("user_account = ?", fastRegister.Account).Get(userInfo)
 
-	if err == sql.ErrNoRows {
+	if !res {
 		// 新建用户信息
 		newUser := User{
 			Account:  fastRegister.Account,
@@ -125,8 +131,14 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 		_, err := GameEngine.Insert(&newUser)
 
 		if err != nil {
+			logger.WithFields(log.Fields{
+				"error": err.Error(),
+			}).Error("db insert user error")
 			return err
 		}
+		logger.WithFields(log.Fields{
+			"user" : newUser,
+		}).Info("add new user")
 
 		// 新建用户附加信息
 		userInfo.UserId = newUser.Id
@@ -137,6 +149,9 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 
 		_,err =GameEngine.Insert(userInfo)
 		if err != nil {
+			logger.WithFields(log.Fields{
+				"error": err.Error(),
+			}).Error("db insert user info error")
 			return err
 		}
 
@@ -148,8 +163,11 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 			UserScore:   0,
 			UserDiamond: 0,
 		}
-		_,err = GameEngine.Insert(newUserTreasure)
+		_,err = GameEngine.Insert(&newUserTreasure)
 		if err != nil {
+			logger.WithFields(log.Fields{
+				"error": err.Error(),
+			}).Error("db insert user treasure error")
 			return err
 		}
 
@@ -178,6 +196,9 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 		// 初始用户等级
 		replyFastRegister.UserLevel = userInfo.UserLevel
 	} else if err != nil {
+		logger.WithFields(log.Fields{
+			"error": err.Error(),
+		}).Error("db query user info by account error")
 		return err
 	}
 
@@ -187,6 +208,10 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 	userInfo.UserGender = fastRegister.Gender
 	_,err = GameEngine.Where("user_id = ?", userInfo.UserId).Update(userInfo)
 	if err != nil {
+		logger.WithFields(log.Fields{
+			"error": err.Error(),
+			"user_id": userInfo.Id,
+		}).Error("db query user info by userId error")
 		return err
 	}
 
