@@ -7,10 +7,10 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/panshiqu/framework/define"
-	"github.com/panshiqu/framework/game"
-	"github.com/panshiqu/framework/network"
-	"github.com/panshiqu/framework/utils"
+	"./utils"
+	"./define"
+	"./game"
+	"./network"
 )
 
 func handleSignal(server *network.Server, client *network.Client) {
@@ -25,14 +25,19 @@ func handleSignal(server *network.Server, client *network.Client) {
 }
 
 func main() {
-	if err := utils.ReadJSON("./config/game.json", &define.CG); err != nil {
-		log.Println("ReadJSON ConfigGame", err)
+	//读取命令行参数
+	args := utils.GetLoginArgs()
+
+	//读取全局配置文件
+	config,err := utils.GetGConfig(args.ConfigPath)
+	if err != nil {
+		log.Println("ReadJSON Config", err)
 		return
 	}
 
-	server := network.NewServer(define.CG.ListenIP)
-	client := network.NewClient(define.CG.DialIP)
-	processor := game.NewProcessor(server, client)
+	server := network.NewServer(config.Game.ListenIP)
+	client := network.NewClient(config.Manager.ListenIP)
+	processor := game.NewProcessor(server, client, config)
 
 	server.Register(processor)
 	client.Register(processor)

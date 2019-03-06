@@ -17,7 +17,8 @@ func main()  {
 	//network.SendMessage()
 	defer conn.Close()
 
-	registerCheck(conn)
+	//registerCheck(conn)
+	fastLogin(conn)
 	//
 	//register := define.FastRegister{
 	//	Account:"king111",
@@ -30,6 +31,14 @@ func main()  {
 	//doSendMessage(conn,define.LoginCommon,define.LoginFastRegister,register)
 
 	return
+}
+
+func fastLogin(conn net.Conn)  {
+	login := new(define.FastLogin)
+	login.GameType=define.GameFiveInARow
+	login.GameLevel=define.LevelOne
+	login.UserID = 1
+	doSendMessage(conn,define.GameCommon,define.GameFastLogin,*login)
 }
 
 func doSendMessage(conn net.Conn,mcmd uint16, scmd uint16,inMsg interface{}) {

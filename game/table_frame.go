@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/panshiqu/framework/define"
+	"../define"
 )
 
 // TableFrame 桌子框架

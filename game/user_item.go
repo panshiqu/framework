@@ -8,8 +8,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/panshiqu/framework/define"
-	"github.com/panshiqu/framework/network"
+	"../define"
+	"../network"
 )
 
 // UserItem 用户
@@ -18,7 +18,7 @@ type UserItem struct {
 	name         string   // 名称
 	icon         int      // 图标
 	level        int      // 等级
-	gender       int      // 性别
+	gender       uint8      // 性别
 	phone        string   // 手机
 	score        int64    // 分数
 	cacheScore   int64    // 缓存分数
@@ -55,7 +55,7 @@ func (u *UserItem) UserLevel() int {
 }
 
 // UserGender 用户性别
-func (u *UserItem) UserGender() int {
+func (u *UserItem) UserGender() uint8 {
 	return u.gender
 }
 
@@ -166,7 +166,7 @@ func (u *UserItem) TableUserInfo() *define.NotifySitDown {
 			UserName:    u.name,
 			UserIcon:    u.icon,
 			UserLevel:   u.level,
-			UserGender:  u.gender,
+			UserGender:  uint8(u.gender),
 			UserScore:   u.UserScore(),
 			UserDiamond: u.UserDiamond(),
 		},

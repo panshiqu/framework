@@ -28,3 +28,4 @@ bin/db
 bin/manager
 bin/proxy
 bin/login
+bin/game

@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/panshiqu/framework/define"
+	"../define"
 )
 
 var uins UserManager

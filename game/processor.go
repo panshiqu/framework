@@ -6,9 +6,9 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/panshiqu/framework/define"
-	"github.com/panshiqu/framework/network"
-	"github.com/panshiqu/framework/utils"
+	"../define"
+	"../network"
+	"../utils"
 )
 
 // 数据库
@@ -21,6 +21,7 @@ var sins *utils.Schedule
 type Processor struct {
 	server *network.Server // 服务器
 	client *network.Client // 客户端
+	config *define.GConfig
 }
 
 // OnTimer 定时器
@@ -205,8 +206,8 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 func (p *Processor) OnClientConnect(conn net.Conn) {
 	// 构造服务
 	service := &define.Service{
-		ID:          define.CG.ID,
-		IP:          define.CG.ListenIP,
+		ID:          p.config.Game.ID,
+		IP:          p.config.Game.ListenIP,
 		GameType:    define.GameFiveInARow,
 		GameLevel:   define.LevelOne,
 		ServiceType: define.ServiceGame,
@@ -223,13 +224,14 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 }
 
 // NewProcessor 创建处理器
-func NewProcessor(server *network.Server, client *network.Client) *Processor {
+func NewProcessor(server *network.Server, client *network.Client,config *define.GConfig) *Processor {
 	p := &Processor{
 		server: server,
 		client: client,
+		config: config,
 	}
 
-	rpc = network.NewRPC(define.CG.DBIP)
+	rpc = network.NewRPC(config.DB.ListenIP)
 
 	sins = utils.NewSchedule(p)
 	go sins.Start()

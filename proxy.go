@@ -25,7 +25,6 @@ func handleSignal(server *network.Server, client *network.Client) {
 func main() {
 	//读取命令行参数
 	args := utils.GetLoginArgs()
-	fmt.Println(args.ConfigPath)
 
 	//读取全局配置文件
 	config,err := utils.GetGConfig(args.ConfigPath)
