@@ -14,7 +14,7 @@ type Processor struct {
 	rpc    *network.RPC        // 数据库
 	server *network.Server     // 服务器
 	client *network.Client     // 客户端
-	config *define.ConfigLogin // 配置
+	config *define.GConfig // 配置
 }
 
 // OnMessage 收到消息
@@ -76,8 +76,8 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 func (p *Processor) OnClientConnect(conn net.Conn) {
 	// 构造服务
 	service := &define.Service{
-		ID:          p.config.ID,
-		IP:          p.config.ListenIP,
+		ID:          p.config.Login.ID,
+		IP:          p.config.Login.ListenIP,
 		ServiceType: define.ServiceLogin,
 		IsServe:     true,
 	}
@@ -92,9 +92,9 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 }
 
 // NewProcessor 创建处理器
-func NewProcessor(server *network.Server, client *network.Client, config *define.ConfigLogin) *Processor {
+func NewProcessor(server *network.Server, client *network.Client, config *define.GConfig) *Processor {
 	return &Processor{
-		rpc:    network.NewRPC(config.DBIP),
+		rpc:    network.NewRPC(config.DB.ListenIP),
 		server: server,
 		client: client,
 		config: config,

@@ -1,13 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
 
 	"./db"
-	"./define"
 	"./network"
 	"./utils"
 	//“_” 操作引用包是无法通过包名来调用包中的导出函数，而是只是为了简单的调用其 init() 函数。
@@ -39,7 +37,7 @@ func main() {
 	}
 
 	server := network.NewServer(config.DB.ListenIP)
-	processor := db.NewProcessor(server, &config.DB)
+	processor := db.NewProcessor(server, config)
 
 	if processor == nil {
 		return

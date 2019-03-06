@@ -1,6 +1,0 @@
-{
-    "PprofIP": "127.0.0.1:1011",
-    "ListenIP": "127.0.0.1:1010",
-    "GameTablePrefix" : "game_",
-    "LogTablePrefix" : "log_"
-}

@@ -23,3 +23,7 @@ _testmain.go
 *.test
 *.prof
 .idea/
+bin/log/*
+bin/db
+bin/manager
+bin/proxy

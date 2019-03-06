@@ -1,15 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 
-	"github.com/panshiqu/framework/define"
-	"github.com/panshiqu/framework/manager"
-	"github.com/panshiqu/framework/network"
-	"github.com/panshiqu/framework/utils"
+	"./manager"
+	"./network"
+	"./utils"
 )
 
 func handleSignal(server *network.Server) {
@@ -23,20 +23,27 @@ func handleSignal(server *network.Server) {
 }
 
 func main() {
-	config := &define.ConfigManager{}
-	if err := utils.ReadJSON("./config/manager.json", config); err != nil {
-		log.Println("ReadJSON ConfigManager", err)
+	//读取命令行参数
+	args := utils.GetLoginArgs()
+	fmt.Println(args.ConfigPath)
+
+	//读取全局配置文件
+	config,err := utils.GetGConfig(args.ConfigPath)
+
+	if  err != nil {
+		log.Println("ReadJSON Config", err)
 		return
 	}
 
-	server := network.NewServer(config.ListenIP)
+	server := network.NewServer(config.Manager.ListenIP)
 	processor := manager.NewProcessor(server)
 	server.Register(processor)
+
 	go handleSignal(server)
 
 	go func() {
 		http.HandleFunc("/", processor.Monitor)
-		log.Println(http.ListenAndServe(config.PprofIP, nil))
+		log.Println(http.ListenAndServe(config.Manager.PprofIP, nil))
 	}()
 
 	if err := server.Start(); err != nil {

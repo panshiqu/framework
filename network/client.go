@@ -19,7 +19,7 @@ type Client struct {
 	conn      net.Conn
 }
 
-// NewClient 创建客户端
+// NewClient 创建客户端,客户端连接的是Manager服务器
 func NewClient(address string) *Client {
 	return &Client{
 		stop:    make(chan bool),

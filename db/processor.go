@@ -4,15 +4,15 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/go-xorm/core"
-	"github.com/go-xorm/xorm"
-	"log"
 	"net"
 
 	"../define"
 	"../network"
 	"../utils"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-xorm/core"
+	"github.com/go-xorm/xorm"
+	log "github.com/sirupsen/logrus"
 )
 
 // LogEngine 日志数据库
@@ -20,6 +20,8 @@ var LogEngine *xorm.Engine
 
 // GameEngine 游戏数据库
 var GameEngine *xorm.Engine
+
+var logger *log.Logger
 
 // Processor 处理器
 type Processor struct {
@@ -46,7 +48,11 @@ func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []by
 
 // OnMessageEx 收到消息
 func (p *Processor) OnMessageEx(conn net.Conn, mcmd uint16, scmd uint16, data []byte) interface{} {
-	log.Println("OnMessage", mcmd, scmd, string(data))
+	logger.WithFields(log.Fields{
+		"mcmd": mcmd,
+		"scmd": scmd,
+		"data": string(data),
+	}).Info("db OnMessage")
 
 	switch mcmd {
 	case define.DBCommon:
@@ -238,42 +244,52 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 }
 
 // NewProcessor 创建处理器
-func NewProcessor(server *network.Server, config *define.ConfigDB) *Processor {
+func NewProcessor(server *network.Server, config *define.GConfig) *Processor {
+	logger = utils.GetLogger("db")
 	var err error
 
 	// todo SetMaxOpenConns, SetMaxIdleConns
 
 	if LogEngine, err = xorm.NewEngine("mysql", "root:123456@/game_log"); err != nil {
-		log.Println("Open log", err)
+		logger.WithFields(log.Fields{
+			"error": err.Error(),
+		}).Error("Open log db")
 		return nil
 	}
 
 	if err = LogEngine.Ping(); err != nil {
-		log.Println("Ping log", err)
+		logger.WithFields(log.Fields{
+			"error": err.Error(),
+		}).Error("Ping log")
 		return nil
 	}
 
 	if GameEngine, err = xorm.NewEngine("mysql", "root:123456@/game_db"); err != nil {
-		log.Println("Open game", err)
+		logger.WithFields(log.Fields{
+			"error": err.Error(),
+		}).Error("Open game")
 		return nil
 	}
 
 	if err = GameEngine.Ping(); err != nil {
-		log.Println("Ping game", err)
+		logger.WithFields(log.Fields{
+			"error": err.Error(),
+		}).Error("Ping game")
 		return nil
 	}
 
 	//初始化游戏数据库
 	GameDbInit(config)
+	logger.Info("db init finished")
 
 	return &Processor{
 		server: server,
 	}
 }
 
-func GameDbInit(config *define.ConfigDB) {
+func GameDbInit(config *define.GConfig) {
 	// 设置表前缀
-	tableMapper := core.NewPrefixMapper(core.GonicMapper{}, config.GameTablePrefix)
+	tableMapper := core.NewPrefixMapper(core.GonicMapper{}, config.DB.GameTablePrefix)
 	GameEngine.SetTableMapper(tableMapper)
 
 	//初始化用户表
@@ -282,6 +298,8 @@ func GameDbInit(config *define.ConfigDB) {
 	//}
 	err := GameEngine.Sync2(new(User), new(UserTreasure), new(UserInformation))
 	if err != nil {
-		log.Println("sync table failed:", err.Error())
+		logger.WithFields(log.Fields{
+			"db_error" : err.Error(),
+		}).Error("sync table failed")
 	}
 }

@@ -7,7 +7,7 @@ import (
 
 //解析通用参数
 func getCommonArgs(args *define.CommonArgs)  {
-	flag.StringVar(& args.ConfigPath, "config", "./config/login.json", "config log path")
+	flag.StringVar(& args.ConfigPath, "config", "./config/config.json", "config log path")
 }
 
 //解析登录参数

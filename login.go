@@ -37,9 +37,9 @@ func main() {
 	}
 
 	server := network.NewServer(config.Login.ListenIP)
-	client := network.NewClient(config.Login.DialIP)
+	client := network.NewClient(config.Manager.ListenIP)
 
-	processor := login.NewProcessor(server, client, &config.Login)
+	processor := login.NewProcessor(server, client, config)
 
 	server.Register(processor)
 	client.Register(processor)

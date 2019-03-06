@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/panshiqu/framework/define"
-	"github.com/panshiqu/framework/network"
-	"github.com/panshiqu/framework/utils"
+	"../define"
+	"../network"
+	"../utils"
 )
 
 // Processor 处理器
