@@ -10,3 +10,6 @@ a simple game framework
  + 数据库由golang database改[xorm](https://github.com/go-xorm/xorm)
  + @todo 增加redis缓存支持
  + 增加logrus日志组件
+ 
+## 问题
+每个game服务器只能对应一个类型和等级的游戏(如五子棋新手),这样有个问题就是如果某个游戏的阶段分布很少时会造成服务器资源的严重浪费。

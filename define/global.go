@@ -310,3 +310,4 @@ type ReplyFastLogin struct {
 	UserInfo
 	IsRobot bool `json:",omitempty"` // 机器人
 }
+

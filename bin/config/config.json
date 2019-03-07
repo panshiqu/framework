@@ -2,15 +2,15 @@
   "db": {
     "PprofIP": "127.0.0.1:10051",
     "ListenIP": "127.0.0.1:10050",
-    "GameTablePrefix" : "game_",
-    "LogTablePrefix" : "log_"
+    "GameTablePrefix": "game_",
+    "LogTablePrefix": "log_"
   },
   "login": {
     "ID": 1,
     "PprofIP": "127.0.0.1:10011",
     "ListenIP": "127.0.0.1:10010"
   },
-  "game" : {
+  "game": {
     "ID": 2,
     "PprofIP": "127.0.0.1:10021",
     "ListenIP": "127.0.0.1:10020",
@@ -18,7 +18,7 @@
     "UserPerTable": 2,
     "MinReadyStart": 2
   },
-  "manager" : {
+  "manager": {
     "PprofIP": "127.0.0.1:10001",
     "ListenIP": "127.0.0.1:10000"
   },

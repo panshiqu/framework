@@ -25,11 +25,8 @@ type Session struct {
 // OnMessage 收到消息
 func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 	defer utils.Trace("Session OnMessage", mcmd, scmd)()
-	s.log.WithFields(log.Fields{
-		"mcmd": mcmd,
-		"scmd": scmd,
-		"data": string(data),
-	}).Info("Session OnMessage")
+	utils.LogMessage(s.log, "Session OnMessage", mcmd,scmd,data)
+	
 	atomic.StoreInt32(&s.status, define.KeepAliveSafe)
 
 	switch mcmd {
@@ -97,6 +94,7 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 				}
 
 				newFastLogin.Signature = utils.Signature(newFastLogin.Timestamp)
+
 				s.log.WithFields(log.Fields{
 					"NewFastLogin": newFastLogin,
 				}).Info("FastLogin NewFastLogin Info")
