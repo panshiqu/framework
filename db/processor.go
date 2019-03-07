@@ -169,7 +169,7 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 		// 新建用户附加信息
 		userInfoModel := models.NewUserInfo()
 		userInfo,err := userInfoModel.AddUserInfoByUser(newUser)
-		replyFastRegister.UserID = int(newUser.Id)
+		replyFastRegister.UserID = uint32(newUser.Id)
 
 		// 插入用户财富
 		userTreasureModel := models.NewUserTreasure()
@@ -214,7 +214,6 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 // OnSubFastLogin 快速登陆子命令
 func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) interface{} {
 	var id uint32
-	//replyFastLogin := &define.ReplyFastLogin{}
 
 	if err := json.Unmarshal(data, &id); err != nil {
 		return err
@@ -226,8 +225,17 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) interface{} {
 	if err != nil {
 		return err
 	}
+	replyFastLogin := &define.ReplyFastLogin{}
+	replyFastLogin.UserID = userInfo.UserId
+	replyFastLogin.UserName=userInfo.UserName
+	replyFastLogin.IsRobot= (userInfo.IsRobot > 0)
+	replyFastLogin.UserGender=userInfo.UserGender
+	replyFastLogin.UserIcon=userInfo.UserIcon
+	replyFastLogin.UserScore=userInfo.UserScore
+	replyFastLogin.UserDiamond=userInfo.UserDiamond
+	replyFastLogin.BindPhone = userInfo.BindPhone
 
-	return userInfo
+	return replyFastLogin
 }
 
 // OnSubChangeTreasure 改变财富

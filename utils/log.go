@@ -15,6 +15,14 @@ func GetLogger(fileName string)*log.Logger {
 	return logger
 }
 
+func LogMessage(useLog *log.Logger, msg string, mcmd uint16, scmd uint16, data []byte) {
+	useLog.WithFields(log.Fields{
+		"mcmd": mcmd,
+		"scmd": scmd,
+		"data": string(data),
+	}).Info(msg)
+}
+
 func ConfigLocalFilesystemLogger(logger *log.Logger,logPath string, logFileName string, maxAge time.Duration) {
 	baseLogPaht := path.Join(logPath, logFileName)
 	writer, err := rotatelogs.New(

@@ -2,12 +2,16 @@ package proxy
 
 import (
 	"encoding/json"
-	"log"
 	"net"
 
 	"../define"
 	"../network"
+	"../utils"
+	log "github.com/sirupsen/logrus"
+
 )
+
+var logger *log.Logger
 
 // Processor 处理器
 type Processor struct {
@@ -18,7 +22,11 @@ type Processor struct {
 
 // OnMessage 收到消息
 func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []byte) error {
-	log.Println("OnMessage", mcmd, scmd, string(data))
+	logger.WithFields(log.Fields{
+		"mcmd": mcmd,
+		"scmd": scmd,
+		"data": string(data),
+	}).Info("Proxy processor OnMessage")
 
 	session, ok := p.server.GetBind(conn).(*Session)
 	if !ok {
@@ -98,8 +106,16 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 	log.Println("OnClientConnect", service)
 }
 
+//返回proxy logger
+func GetProxyLogger()*log.Logger  {
+	return logger
+}
+
 // NewProcessor 创建处理器
 func NewProcessor(server *network.Server, client *network.Client, config *define.GConfig) *Processor {
+	if logger == nil {
+		logger = utils.GetLogger("proxy")
+	}
 	return &Processor{
 		server: server,
 		client: client,

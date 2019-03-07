@@ -14,8 +14,8 @@ type UserInformation struct {
 	UserGender  uint8     `xorm:"notnull"` //性别
 	UserLevel   int       `xorm:"notnull"`
 	BindPhone   string    `xorm:"char(11) notnull"`
-	UserScore   uint32    `xorm:"notnull"`
-	UserDiamond uint32    `xorm:"notnull"`
+	UserScore   int64    `xorm:"notnull"`
+	UserDiamond int64    `xorm:"notnull"`
 	IsRobot     uint8     `xorm:"notnull"`
 	CreatedAt   time.Time `xorm:"created notnull"`
 	UpdatedAt   time.Time `xorm:"updated notnull"`

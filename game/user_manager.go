@@ -15,11 +15,11 @@ var uins UserManager
 // UserManager 用户管理
 type UserManager struct {
 	mutex sync.Mutex
-	users map[int]*UserItem
+	users map[uint32]*UserItem
 }
 
 // Delete 删除用户
-func (u *UserManager) Delete(id int) {
+func (u *UserManager) Delete(id uint32) {
 	u.mutex.Lock()
 	if userItem, ok := u.users[id]; ok {
 		if err := userItem.WriteToDB(userItem.CacheScore(), userItem.CacheDiamond(), define.ChangeTypeWinLose); err != nil {
@@ -31,7 +31,7 @@ func (u *UserManager) Delete(id int) {
 }
 
 // Search 查找用户
-func (u *UserManager) Search(id int) *UserItem {
+func (u *UserManager) Search(id uint32) *UserItem {
 	u.mutex.Lock()
 	defer u.mutex.Unlock()
 

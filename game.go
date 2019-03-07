@@ -34,6 +34,7 @@ func main() {
 		log.Println("ReadJSON Config", err)
 		return
 	}
+	define.CG = config.Game
 
 	server := network.NewServer(config.Game.ListenIP)
 	client := network.NewClient(config.Manager.ListenIP)

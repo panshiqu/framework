@@ -6,6 +6,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"../define"
 	"../network"
 	"../utils"
@@ -15,15 +16,20 @@ import (
 type Session struct {
 	client, login, game net.Conn
 
-	userid int   // 用户编号
+	userid uint32   // 用户编号
 	status int32 // 会话状态
 	close  chan bool
+	log *log.Logger
 }
 
 // OnMessage 收到消息
 func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 	defer utils.Trace("Session OnMessage", mcmd, scmd)()
-
+	s.log.WithFields(log.Fields{
+		"mcmd": mcmd,
+		"scmd": scmd,
+		"data": string(data),
+	}).Info("Session OnMessage")
 	atomic.StoreInt32(&s.status, define.KeepAliveSafe)
 
 	switch mcmd {
@@ -86,11 +92,14 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 				go s.RecvMessage(s.game)
 
 				newFastLogin := &define.FastLogin{
-					UserID:    s.userid,
+					UserID:    fastLogin.UserID,
 					Timestamp: time.Now().Unix(),
 				}
 
 				newFastLogin.Signature = utils.Signature(newFastLogin.Timestamp)
+				s.log.WithFields(log.Fields{
+					"NewFastLogin": newFastLogin,
+				}).Info("FastLogin NewFastLogin Info")
 
 				if data, err = json.Marshal(newFastLogin); err != nil {
 					return err
@@ -180,6 +189,7 @@ func NewSession(client net.Conn) *Session {
 		client: client,
 		status: define.KeepAliveSafe,
 		close:  make(chan bool),
+		log: GetProxyLogger(),
 	}
 
 	go ses.KeepAlive()

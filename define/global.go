@@ -237,7 +237,7 @@ type Service struct {
 
 // UserInfo 用户信息
 type UserInfo struct {
-	UserID      int    `json:",omitempty"` // 编号
+	UserID      uint32    `json:",omitempty"` // 编号
 	UserName    string `json:",omitempty"` // 名称
 	UserIcon    int    `json:",omitempty"` // 图标
 	UserLevel   int    `json:",omitempty"` // 等级
@@ -298,7 +298,7 @@ type ReplyFastRegister struct {
 
 // FastLogin 快速登陆
 type FastLogin struct {
-	UserID    int    `json:",omitempty"` // 编号
+	UserID    uint32    `json:",omitempty"` // 编号
 	GameType  int    `json:",omitempty"` // 类型
 	GameLevel int    `json:",omitempty"` // 等级
 	Timestamp int64  `json:",omitempty"` // 时间戳
