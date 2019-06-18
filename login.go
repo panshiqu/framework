@@ -1,16 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
 
-	"github.com/panshiqu/framework/define"
-	"github.com/panshiqu/framework/login"
-	"github.com/panshiqu/framework/network"
-	"github.com/panshiqu/framework/utils"
+	"./login"
+	"./network"
+	"./utils"
 )
 
+//信号处理函数
 func handleSignal(server *network.Server, client *network.Client) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
@@ -23,14 +24,21 @@ func handleSignal(server *network.Server, client *network.Client) {
 }
 
 func main() {
-	config := &define.ConfigLogin{}
-	if err := utils.ReadJSON("./config/login.json", config); err != nil {
-		log.Println("ReadJSON ConfigLogin", err)
+	//读取命令行参数
+	args := utils.GetLoginArgs()
+	fmt.Println(args.ConfigPath)
+
+	//读取全局配置文件
+	config,err := utils.GetGConfig(args.ConfigPath)
+
+	if err != nil {
+		log.Println("ReadJSON Config", err)
 		return
 	}
 
-	server := network.NewServer(config.ListenIP)
-	client := network.NewClient(config.DialIP)
+	server := network.NewServer(config.Login.ListenIP)
+	client := network.NewClient(config.Manager.ListenIP)
+
 	processor := login.NewProcessor(server, client, config)
 
 	server.Register(processor)

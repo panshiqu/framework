@@ -6,24 +6,27 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/panshiqu/framework/define"
-	"github.com/panshiqu/framework/network"
-	"github.com/panshiqu/framework/utils"
+	log "github.com/sirupsen/logrus"
+	"../define"
+	"../network"
+	"../utils"
 )
 
 // Session 会话
 type Session struct {
 	client, login, game net.Conn
 
-	userid int   // 用户编号
+	userid uint32   // 用户编号
 	status int32 // 会话状态
 	close  chan bool
+	log *log.Logger
 }
 
 // OnMessage 收到消息
 func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 	defer utils.Trace("Session OnMessage", mcmd, scmd)()
-
+	utils.LogMessage(s.log, "Session OnMessage", mcmd,scmd,data)
+	
 	atomic.StoreInt32(&s.status, define.KeepAliveSafe)
 
 	switch mcmd {
@@ -50,6 +53,14 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 			if data, err = json.Marshal(fastRegister); err != nil {
 				return err
 			}
+		}else if mcmd == define.LoginCommon && scmd == define.LoginRegisterCheck {
+			s.closeLogin()
+
+			if s.login, err = sins.Dial(define.ServiceLogin,
+				define.GameUnknown, define.LevelUnknown); err != nil {
+				return err
+			}
+			go s.RecvMessage(s.login)
 		}
 
 		if s.login == nil {
@@ -78,11 +89,15 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 				go s.RecvMessage(s.game)
 
 				newFastLogin := &define.FastLogin{
-					UserID:    s.userid,
+					UserID:    fastLogin.UserID,
 					Timestamp: time.Now().Unix(),
 				}
 
 				newFastLogin.Signature = utils.Signature(newFastLogin.Timestamp)
+
+				s.log.WithFields(log.Fields{
+					"NewFastLogin": newFastLogin,
+				}).Info("FastLogin NewFastLogin Info")
 
 				if data, err = json.Marshal(newFastLogin); err != nil {
 					return err
@@ -172,6 +187,7 @@ func NewSession(client net.Conn) *Session {
 		client: client,
 		status: define.KeepAliveSafe,
 		close:  make(chan bool),
+		log: GetProxyLogger(),
 	}
 
 	go ses.KeepAlive()

@@ -5,10 +5,9 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/panshiqu/framework/define"
-	"github.com/panshiqu/framework/network"
-	"github.com/panshiqu/framework/proxy"
-	"github.com/panshiqu/framework/utils"
+	"./network"
+	"./proxy"
+	"./utils"
 )
 
 func handleSignal(server *network.Server, client *network.Client) {
@@ -23,14 +22,19 @@ func handleSignal(server *network.Server, client *network.Client) {
 }
 
 func main() {
-	config := &define.ConfigProxy{}
-	if err := utils.ReadJSON("./config/proxy.json", config); err != nil {
+	//读取命令行参数
+	args := utils.GetLoginArgs()
+
+	//读取全局配置文件
+	config,err := utils.GetGConfig(args.ConfigPath)
+
+	if err != nil {
 		log.Println("ReadJSON ConfigProxy", err)
 		return
 	}
 
-	server := network.NewServer(config.ListenIP)
-	client := network.NewClient(config.DialIP)
+	server := network.NewServer(config.Proxy.ListenIP)
+	client := network.NewClient(config.Manager.ListenIP)
 	processor := proxy.NewProcessor(server, client, config)
 
 	server.Register(processor)

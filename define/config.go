@@ -9,7 +9,6 @@ type ConfigManager struct {
 // ConfigProxy 代理服务器配置
 type ConfigProxy struct {
 	ID       int
-	DialIP   string
 	PprofIP  string
 	ListenIP string
 }
@@ -26,8 +25,7 @@ type ConfigLogin struct {
 // ConfigGame 游戏服务器配置
 type ConfigGame struct {
 	ID            int
-	DBIP          string
-	DialIP        string
+	//DialIP        string
 	PprofIP       string
 	ListenIP      string
 	GameType      int // 游戏类型
@@ -42,4 +40,15 @@ var CG ConfigGame
 type ConfigDB struct {
 	PprofIP  string
 	ListenIP string
+	GameTablePrefix	string
+	LogTablePrefix string
+}
+
+// 全局配置信息
+type GConfig struct {
+	DB ConfigDB
+	Login ConfigLogin
+	Game ConfigGame
+	Manager ConfigManager
+	Proxy ConfigProxy
 }

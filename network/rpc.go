@@ -6,7 +6,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/panshiqu/framework/define"
+	"../define"
 )
 
 // RPC 远程过程调用
@@ -90,3 +90,5 @@ func (r *RPC) JSONCall(mcmd uint16, scmd uint16, in interface{}, out interface{}
 
 	return json.Unmarshal(outdata, out)
 }
+
+

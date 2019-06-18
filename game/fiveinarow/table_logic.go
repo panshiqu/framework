@@ -6,7 +6,7 @@ import (
 	"math/rand"
 	"sync"
 
-	"github.com/panshiqu/framework/define"
+	"../../define"
 )
 
 // TableLogic 桌子逻辑

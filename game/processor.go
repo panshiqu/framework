@@ -2,13 +2,13 @@ package game
 
 import (
 	"encoding/json"
-	"log"
+
 	"net"
 	"net/http"
-
-	"github.com/panshiqu/framework/define"
-	"github.com/panshiqu/framework/network"
-	"github.com/panshiqu/framework/utils"
+	log "github.com/sirupsen/logrus"
+	"../define"
+	"../network"
+	"../utils"
 )
 
 // 数据库
@@ -17,10 +17,14 @@ var rpc *network.RPC
 // 全局定时器
 var sins *utils.Schedule
 
+var logger *log.Logger
+
 // Processor 处理器
 type Processor struct {
 	server *network.Server // 服务器
 	client *network.Client // 客户端
+	config *define.GConfig
+	log *log.Logger
 }
 
 // OnTimer 定时器
@@ -38,7 +42,7 @@ func (p *Processor) OnTimer(id int, parameter interface{}) {
 
 // OnMessage 收到消息
 func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []byte) error {
-	log.Println("OnMessage", mcmd, scmd, string(data))
+	utils.LogMessage(p.log, "processor OnMessage", mcmd,scmd,data)
 
 	switch mcmd {
 	case define.GameCommon:
@@ -205,8 +209,8 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 func (p *Processor) OnClientConnect(conn net.Conn) {
 	// 构造服务
 	service := &define.Service{
-		ID:          define.CG.ID,
-		IP:          define.CG.ListenIP,
+		ID:          p.config.Game.ID,
+		IP:          p.config.Game.ListenIP,
 		GameType:    define.GameFiveInARow,
 		GameLevel:   define.LevelOne,
 		ServiceType: define.ServiceGame,
@@ -222,14 +226,24 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 	log.Println("OnClientConnect", service)
 }
 
+func GetGameLogger()*log.Logger  {
+	return logger
+}
+
 // NewProcessor 创建处理器
-func NewProcessor(server *network.Server, client *network.Client) *Processor {
+func NewProcessor(server *network.Server, client *network.Client,config *define.GConfig) *Processor {
+	// 游戏日志初始化
+	if logger == nil {
+		logger = utils.GetLogger("game")
+	}
 	p := &Processor{
 		server: server,
 		client: client,
+		config: config,
+		log: logger,
 	}
 
-	rpc = network.NewRPC(define.CG.DBIP)
+	rpc = network.NewRPC(config.DB.ListenIP)
 
 	sins = utils.NewSchedule(p)
 	go sins.Start()
@@ -244,5 +258,5 @@ func (p *Processor) Monitor(w http.ResponseWriter, r *http.Request) {
 }
 
 func init() {
-	uins.users = make(map[int]*UserItem)
+	uins.users = make(map[uint32]*UserItem)
 }

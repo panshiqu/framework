@@ -3,7 +3,7 @@ package define
 // IUserItem 用户接口
 type IUserItem interface {
 	// 用户编号
-	UserID() int
+	UserID() uint32
 
 	// 用户分数
 	UserScore() int64

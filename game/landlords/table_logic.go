@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/panshiqu/framework/define"
+	"../../define"
 )
 
 // TableLogic 桌子逻辑

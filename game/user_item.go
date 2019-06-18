@@ -8,17 +8,17 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/panshiqu/framework/define"
-	"github.com/panshiqu/framework/network"
+	"../define"
+	"../network"
 )
 
 // UserItem 用户
 type UserItem struct {
-	id           int      // 编号
+	id           uint32      // 编号
 	name         string   // 名称
 	icon         int      // 图标
 	level        int      // 等级
-	gender       int      // 性别
+	gender       uint8      // 性别
 	phone        string   // 手机
 	score        int64    // 分数
 	cacheScore   int64    // 缓存分数
@@ -35,7 +35,7 @@ type UserItem struct {
 }
 
 // UserID 用户编号
-func (u *UserItem) UserID() int {
+func (u *UserItem) UserID() uint32 {
 	return u.id
 }
 
@@ -55,7 +55,7 @@ func (u *UserItem) UserLevel() int {
 }
 
 // UserGender 用户性别
-func (u *UserItem) UserGender() int {
+func (u *UserItem) UserGender() uint8 {
 	return u.gender
 }
 
@@ -166,7 +166,7 @@ func (u *UserItem) TableUserInfo() *define.NotifySitDown {
 			UserName:    u.name,
 			UserIcon:    u.icon,
 			UserLevel:   u.level,
-			UserGender:  u.gender,
+			UserGender:  uint8(u.gender),
 			UserScore:   u.UserScore(),
 			UserDiamond: u.UserDiamond(),
 		},
@@ -192,7 +192,7 @@ func (u *UserItem) WriteTreasure(varScore int64, varDiamond int64, changeType in
 		if err == nil {
 			if tableFrame := u.TableFrame(); tableFrame != nil {
 				notifyTreasure := &define.NotifyTreasure{
-					UserID:     u.id,
+					UserID:     int(u.id),
 					VarScore:   varScore,
 					VarDiamond: varDiamond,
 					ChangeType: changeType,
@@ -242,7 +242,7 @@ func (u *UserItem) WriteToDB(varScore int64, varDiamond int64, changeType int) e
 	}
 
 	notifyTreasure := &define.NotifyTreasure{
-		UserID:     u.id,
+		UserID:     int(u.id),
 		VarScore:   varScore,
 		VarDiamond: varDiamond,
 		ChangeType: changeType,

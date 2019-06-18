@@ -103,6 +103,7 @@ const (
 const (
 	// LoginFastRegister 快速注册
 	LoginFastRegister = 1
+	LoginRegisterCheck = 2
 )
 
 const (
@@ -150,6 +151,9 @@ const (
 
 	// DBChangeTreasure 改变财富
 	DBChangeTreasure = 3
+
+	// 快速注册检车
+	DBRegisterCheck = 4
 )
 
 const (
@@ -233,11 +237,11 @@ type Service struct {
 
 // UserInfo 用户信息
 type UserInfo struct {
-	UserID      int    `json:",omitempty"` // 编号
+	UserID      uint32    `json:",omitempty"` // 编号
 	UserName    string `json:",omitempty"` // 名称
 	UserIcon    int    `json:",omitempty"` // 图标
 	UserLevel   int    `json:",omitempty"` // 等级
-	UserGender  int    `json:",omitempty"` // 性别
+	UserGender  uint8    `json:",omitempty"` // 性别
 	BindPhone   string `json:",omitempty"` // 绑定手机
 	UserScore   int64  `json:",omitempty"` // 分数
 	UserDiamond int64  `json:",omitempty"` // 钻石
@@ -277,8 +281,14 @@ type FastRegister struct {
 	Machine  string `json:",omitempty"` // 机器码
 	Name     string `json:",omitempty"` // 名称
 	Icon     int    `json:",omitempty"` // 图标
-	Gender   int    `json:",omitempty"` // 性别
+	Gender   uint8    `json:",omitempty"` // 性别
 	IP       string `json:",omitempty"` // 地址
+}
+
+//注册检查账号名称是否存在
+type FastRegisterCheck struct {
+	Account string `json:",omitempty"` //账户
+	Name string `json:",omitempty"` //名称
 }
 
 // ReplyFastRegister 回复快速注册
@@ -288,7 +298,7 @@ type ReplyFastRegister struct {
 
 // FastLogin 快速登陆
 type FastLogin struct {
-	UserID    int    `json:",omitempty"` // 编号
+	UserID    uint32    `json:",omitempty"` // 编号
 	GameType  int    `json:",omitempty"` // 类型
 	GameLevel int    `json:",omitempty"` // 等级
 	Timestamp int64  `json:",omitempty"` // 时间戳
@@ -300,3 +310,4 @@ type ReplyFastLogin struct {
 	UserInfo
 	IsRobot bool `json:",omitempty"` // 机器人
 }
+

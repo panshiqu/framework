@@ -4,7 +4,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/panshiqu/framework/define"
+	"../define"
 )
 
 var sins Selected

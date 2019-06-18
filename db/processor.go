@@ -1,22 +1,27 @@
 package db
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net"
 
-	"github.com/panshiqu/framework/define"
-	"github.com/panshiqu/framework/network"
-	"github.com/panshiqu/framework/utils"
+	"../define"
+	"../network"
+	"../utils"
+	"./models"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-xorm/xorm"
+	log "github.com/sirupsen/logrus"
 )
 
-// LOG 日志数据库
-var LOG *sql.DB
+// LogEngine 日志数据库
+var LogEngine *xorm.Engine
 
-// GAME 游戏数据库
-var GAME *sql.DB
+// GameEngine 游戏数据库
+var GameEngine *xorm.Engine
+
+//  日志
+var logger *log.Logger
 
 // Processor 处理器
 type Processor struct {
@@ -43,7 +48,11 @@ func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []by
 
 // OnMessageEx 收到消息
 func (p *Processor) OnMessageEx(conn net.Conn, mcmd uint16, scmd uint16, data []byte) interface{} {
-	log.Println("OnMessage", mcmd, scmd, string(data))
+	logger.WithFields(log.Fields{
+		"mcmd": mcmd,
+		"scmd": scmd,
+		"data": string(data),
+	}).Info("db OnMessage")
 
 	switch mcmd {
 	case define.DBCommon:
@@ -62,30 +71,57 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) interf
 		return p.OnSubFastLogin(conn, data)
 	case define.DBChangeTreasure:
 		return p.OnSubChangeTreasure(conn, data)
+	case define.DBRegisterCheck:
+		return p.OnSubRegisterCheck(conn, data)
 	}
 
 	return define.ErrUnknownSubCmd
 }
 
 // ChangeUserTreasure 改变用户财富
-func (p *Processor) ChangeUserTreasure(id int, score int64, varScore int64, diamond int64, varDiamond int64, changeType int) error {
+func (p *Processor) ChangeUserTreasure(userId int, varScore int64, varDiamond int64, changeType int) error {
+	var userTreasure *models.UserTreasure
+	userTreasureModel := models.NewUserTreasure()
 	// 当前分数钻石
-	if score < 0 || diamond < 0 {
-		if err := GAME.QueryRow("SELECT user_score, user_diamond FROM user_treasure WHERE user_id = ?", id).Scan(&score, &diamond); err != nil {
-			return err
-		}
+	userTreasure,err := userTreasureModel.GetTreasureByUserId(uint32(userId))
+	if err != nil {
+		return err
 	}
 
 	// 更新分数钻石
-	if _, err := GAME.Exec("UPDATE user_treasure SET user_score = user_score + ?, user_diamond = user_diamond + ? WHERE user_id = ?", varScore, varDiamond, id); err != nil {
+	if err := userTreasureModel.UpdateUserTreasure(uint32(userId),varScore, varDiamond); err !=nil {
 		return err
 	}
 
 	// 记录财富日志
-	if _, err := LOG.Exec(fmt.Sprintf("INSERT INTO user_treasure_log_%d (user_id, cur_score, var_score, cur_diamond, var_diamond, change_type) VALUES (?, ?, ?, ?, ?, ?)", utils.Date()), id, score, varScore, diamond, varDiamond, changeType); err != nil {
+	if _, err := models.LogEngine.Exec(fmt.Sprintf("INSERT INTO user_treasure_log_%d (user_id, cur_score, var_score, cur_diamond, var_diamond, change_type) VALUES (?, ?, ?, ?, ?, ?)", utils.Date()), userId, userTreasure.UserScore, varScore, userTreasure.UserDiamond, varDiamond, changeType); err != nil {
 		return err
 	}
 
+	return nil
+}
+
+func (p *Processor) OnSubRegisterCheck(conn net.Conn, data []byte)error {
+	registerCheck := &define.FastRegisterCheck{}
+	if err := json.Unmarshal(data, registerCheck); err != nil {
+		logger.WithFields(log.Fields{
+			"error": err.Error(),
+		}).Error("OnSubRegisterCheck json unmarshal")
+		return err
+	}
+	userInfoModel := models.NewUserInfo()
+	userInfo,err := userInfoModel.GetInfoByAccount(registerCheck.Account)
+	if err != nil {
+		return err
+	}else if userInfo != nil {
+		return define.ErrRegisterAccountExist
+	}
+	userInfo,err = userInfoModel.GetInfoByName(registerCheck.Name)
+	if err != nil {
+		return err
+	}else if userInfo != nil {
+		return define.ErrRegisterNameExist
+	}
 	return nil
 }
 
@@ -95,76 +131,81 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 	replyFastRegister := &define.ReplyFastRegister{}
 
 	if err := json.Unmarshal(data, fastRegister); err != nil {
+		logger.WithFields(log.Fields{
+			"error": err.Error(),
+		}).Error("OnSubFastRegister json unmarshal")
 		return err
 	}
 
+	logger.WithFields(log.Fields{
+		"RegisterInfo" : fastRegister,
+	}).Info("FastRegister data")
+
 	// 查询用户信息
-	if err := GAME.QueryRow("SELECT user_id, user_level, bind_phone, user_score, user_diamond FROM view_information_treasure WHERE user_account = ?", fastRegister.Account).Scan(
-		&replyFastRegister.UserID,
-		&replyFastRegister.UserLevel,
-		&replyFastRegister.BindPhone,
-		&replyFastRegister.UserScore,
-		&replyFastRegister.UserDiamond,
-	); err == sql.ErrNoRows {
-		// 插入用户信息
-		res, err := GAME.Exec("INSERT INTO user_information (user_account, user_name, user_icon, user_gender, register_ip, register_machine) VALUES (?, ?, ?, ?, ?, ?)",
-			fastRegister.Account,
-			fastRegister.Name,
-			fastRegister.Icon,
-			fastRegister.Gender,
-			fastRegister.IP,
-			fastRegister.Machine,
-		)
+	userInfoModel := new(models.UserInformation)
+	userInfoModel,err := userInfoModel.GetInfoByName(fastRegister.Name)
+	if userInfoModel != nil {
+		return define.ErrRegisterNameExist
+	}
+
+	userInfo,err := userInfoModel.GetInfoByAccount(fastRegister.Account)
+
+	logger.WithFields(log.Fields{
+		"UserInfo" : userInfo,
+	}).Info("query user info data")
+
+	if userInfo == nil {
+		// 新建用户信息
+		userModel := models.NewUser()
+		newUser,err := userModel.RegisterUser(fastRegister)
 		if err != nil {
 			return err
 		}
 
-		// 获取用户编号
-		uid, err := res.LastInsertId()
-		if err != nil {
-			return err
-		}
+		logger.WithFields(log.Fields{
+			"user" : newUser,
+		}).Info("add new user")
 
-		replyFastRegister.UserID = int(uid)
+		// 新建用户附加信息
+		userInfoModel := models.NewUserInfo()
+		userInfo,err := userInfoModel.AddUserInfoByUser(newUser)
+		replyFastRegister.UserID = uint32(newUser.Id)
 
 		// 插入用户财富
-		if _, err = GAME.Exec("INSERT INTO user_treasure (user_id) VALUES (?)", uid); err != nil {
-			return err
-		}
+		userTreasureModel := models.NewUserTreasure()
+		userTreasureModel.InitUserTreasure(newUser.Id)
 
 		// 用户初始分数钻石
 		var score, diamond int64
 
-		if err := GAME.QueryRow(`SELECT Content FROM game_config WHERE Title = "InitScore"`).Scan(&score); err != nil {
-			return err
-		}
+		// @todo 配置信息建议从redis中读取
+		//if err := GameEngine.QueryRow(`SELECT Content FROM game_config WHERE Title = "InitScore"`).Scan(&score); err != nil {
+		//	return err
+		//}
+		//
+		//if err := GameEngine.QueryRow(`SELECT Content FROM game_config WHERE Title = "InitDiamond"`).Scan(&diamond); err != nil {
+		//	return err
+		//}
 
-		if err := GAME.QueryRow(`SELECT Content FROM game_config WHERE Title = "InitDiamond"`).Scan(&diamond); err != nil {
-			return err
-		}
-
+		score = 10
+		diamond = 10
 		replyFastRegister.UserScore = score
 		replyFastRegister.UserDiamond = diamond
 
 		// 用户财富变化
-		if err := p.ChangeUserTreasure(int(uid), 0, score, 0, diamond, define.ChangeTypeRegister); err != nil {
+		if err := p.ChangeUserTreasure(int(newUser.Id), score, diamond, define.ChangeTypeRegister); err != nil {
 			return err
 		}
 
 		// 初始用户等级
-		replyFastRegister.UserLevel = 1
+		replyFastRegister.UserLevel = userInfo.UserLevel
 	} else if err != nil {
+		logger.WithFields(log.Fields{
+			"error": err.Error(),
+		}).Error("db query user info by account error")
 		return err
-	}
-
-	// 总是更新这些字段
-	if _, err := GAME.Exec("UPDATE user_information SET user_name = ?, user_icon = ?, user_gender = ? WHERE user_id = ?",
-		fastRegister.Name,
-		fastRegister.Icon,
-		fastRegister.Gender,
-		replyFastRegister.UserID,
-	); err != nil {
-		return err
+	} else {//新增逻辑账号存在返回错误信息
+		return define.ErrRegisterAccountExist
 	}
 
 	return replyFastRegister
@@ -172,27 +213,27 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 
 // OnSubFastLogin 快速登陆子命令
 func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) interface{} {
-	var id int
-	replyFastLogin := &define.ReplyFastLogin{}
+	var id uint32
 
 	if err := json.Unmarshal(data, &id); err != nil {
 		return err
 	}
 
 	// 查询用户信息
-	if err := GAME.QueryRow("SELECT user_id, user_name, user_icon, user_level, user_gender+0, bind_phone, user_score, user_diamond, is_robot FROM view_information_treasure WHERE user_id = ?", id).Scan(
-		&replyFastLogin.UserID,
-		&replyFastLogin.UserName,
-		&replyFastLogin.UserIcon,
-		&replyFastLogin.UserLevel,
-		&replyFastLogin.UserGender,
-		&replyFastLogin.BindPhone,
-		&replyFastLogin.UserScore,
-		&replyFastLogin.UserDiamond,
-		&replyFastLogin.IsRobot,
-	); err != nil {
+	userInfoModel := models.NewUserInfo()
+	userInfo,err :=userInfoModel.GetInfoByUserId(id)
+	if err != nil {
 		return err
 	}
+	replyFastLogin := &define.ReplyFastLogin{}
+	replyFastLogin.UserID = userInfo.UserId
+	replyFastLogin.UserName=userInfo.UserName
+	replyFastLogin.IsRobot= (userInfo.IsRobot > 0)
+	replyFastLogin.UserGender=userInfo.UserGender
+	replyFastLogin.UserIcon=userInfo.UserIcon
+	replyFastLogin.UserScore=userInfo.UserScore
+	replyFastLogin.UserDiamond=userInfo.UserDiamond
+	replyFastLogin.BindPhone = userInfo.BindPhone
 
 	return replyFastLogin
 }
@@ -207,8 +248,8 @@ func (p *Processor) OnSubChangeTreasure(conn net.Conn, data []byte) interface{} 
 
 	// 用户财富变化
 	return p.ChangeUserTreasure(notifyTreasure.UserID,
-		-1, notifyTreasure.VarScore,
-		-1, notifyTreasure.VarDiamond,
+		 notifyTreasure.VarScore,
+		 notifyTreasure.VarDiamond,
 		notifyTreasure.ChangeType)
 }
 
@@ -228,32 +269,16 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 }
 
 // NewProcessor 创建处理器
-func NewProcessor(server *network.Server) *Processor {
-	var err error
+func NewProcessor(server *network.Server, config *define.GConfig) *Processor {
 
 	// todo SetMaxOpenConns, SetMaxIdleConns
-
-	if LOG, err = sql.Open("mysql", "root:@/log"); err != nil {
-		log.Println("Open log", err)
-		return nil
-	}
-
-	if err = LOG.Ping(); err != nil {
-		log.Println("Ping log", err)
-		return nil
-	}
-
-	if GAME, err = sql.Open("mysql", "root:@/game"); err != nil {
-		log.Println("Open game", err)
-		return nil
-	}
-
-	if err = GAME.Ping(); err != nil {
-		log.Println("Ping game", err)
-		return nil
-	}
+	models.InitDB(config)
+	logger = models.GetDBLogger()
+	//初始化游戏数据库
+	logger.Info("db init finished")
 
 	return &Processor{
 		server: server,
 	}
 }
+

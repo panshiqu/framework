@@ -6,9 +6,9 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/panshiqu/framework/define"
-	"github.com/panshiqu/framework/game/fiveinarow"
-	"github.com/panshiqu/framework/game/landlords"
+	"../define"
+	"./fiveinarow"
+	"./landlords"
 )
 
 var tins TableManager
