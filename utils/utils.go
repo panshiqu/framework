@@ -9,16 +9,9 @@ import (
 	"os"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/panshiqu/framework/define"
 )
-
-// Date 日期
-func Date() int {
-	y, m, d := time.Now().Date()
-	return y*10000 + int(m)*100 + d
-}
 
 // Signature 签名
 func Signature(timestamp int64) string {

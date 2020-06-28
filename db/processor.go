@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"time"
 
 	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/network"
@@ -83,7 +84,7 @@ func (p *Processor) ChangeUserTreasure(id int, score int64, varScore int64, diam
 	}
 
 	// 记录财富日志
-	if _, err := LOG.Exec(fmt.Sprintf("INSERT INTO user_treasure_log_%d (user_id, cur_score, var_score, cur_diamond, var_diamond, change_type) VALUES (?, ?, ?, ?, ?, ?)", utils.Date()), id, score, varScore, diamond, varDiamond, changeType); err != nil {
+	if _, err := LOG.Exec(fmt.Sprintf("INSERT INTO user_treasure_log_%s (user_id, cur_score, var_score, cur_diamond, var_diamond, change_type) VALUES (?, ?, ?, ?, ?, ?)", time.Now().Format("20060102")), id, score, varScore, diamond, varDiamond, changeType); err != nil {
 		return utils.Wrap(err)
 	}
 
