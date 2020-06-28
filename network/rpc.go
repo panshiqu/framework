@@ -80,7 +80,7 @@ func (r *RPC) JSONCall(mcmd uint16, scmd uint16, in interface{}, out interface{}
 		return
 	}
 
-	if err = define.CheckError(outdata); err != nil {
+	if err = utils.CheckError(outdata); err != nil {
 		return
 	}
 

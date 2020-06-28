@@ -1,7 +1,6 @@
 package define
 
 import (
-	"encoding/json"
 	"fmt"
 )
 
@@ -74,19 +73,4 @@ type MyError struct {
 
 func (m *MyError) Error() string {
 	return fmt.Sprintf(`{"Errno":%d,"Errdesc":"%s"}`, m.Errno, m.Errdesc)
-}
-
-// CheckError 检查错误
-func CheckError(data []byte) error {
-	me := &MyError{}
-
-	if err := json.Unmarshal(data, me); err != nil {
-		return err
-	}
-
-	if me.Errno != ErrnoSuccess {
-		return me
-	}
-
-	return nil
 }

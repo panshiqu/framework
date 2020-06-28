@@ -46,3 +46,18 @@ func ReadJSON(name string, js interface{}) error {
 
 	return json.Unmarshal(body, js)
 }
+
+// CheckError 检查错误
+func CheckError(data []byte) error {
+	me := &define.MyError{}
+
+	if err := json.Unmarshal(data, me); err != nil {
+		return err
+	}
+
+	if me.Errno != define.ErrnoSuccess {
+		return me
+	}
+
+	return nil
+}
