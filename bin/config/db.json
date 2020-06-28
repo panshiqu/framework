@@ -1,4 +1,6 @@
 {
     "PprofIP": "127.0.0.1:9090",
-    "ListenIP": "127.0.0.1:8000"
+    "ListenIP": "127.0.0.1:8000",
+    "GameDSN": "root:123456@tcp(localhost:3306)/game",
+    "LogDSN": "root:123456@tcp(localhost:3306)/log"
 }

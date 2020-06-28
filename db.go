@@ -32,7 +32,7 @@ func main() {
 	}
 
 	server := network.NewServer(config.ListenIP)
-	processor := db.NewProcessor(server)
+	processor := db.NewProcessor(server, config)
 
 	if processor == nil {
 		return

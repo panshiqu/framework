@@ -230,12 +230,12 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 }
 
 // NewProcessor 创建处理器
-func NewProcessor(server *network.Server) *Processor {
+func NewProcessor(server *network.Server, config *define.ConfigDB) *Processor {
 	var err error
 
 	// todo SetMaxOpenConns, SetMaxIdleConns
 
-	if LOG, err = sql.Open("mysql", "root:@/log"); err != nil {
+	if LOG, err = sql.Open("mysql", config.LogDSN); err != nil {
 		log.Println("Open log", err)
 		return nil
 	}
@@ -245,7 +245,7 @@ func NewProcessor(server *network.Server) *Processor {
 		return nil
 	}
 
-	if GAME, err = sql.Open("mysql", "root:@/game"); err != nil {
+	if GAME, err = sql.Open("mysql", config.GameDSN); err != nil {
 		log.Println("Open game", err)
 		return nil
 	}
