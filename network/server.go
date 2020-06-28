@@ -1,6 +1,7 @@
 package network
 
 import (
+	"errors"
 	"log"
 	"net"
 	"sync"
@@ -99,9 +100,9 @@ func (s *Server) handleConn(conn net.Conn) {
 		}
 
 		if err := s.processor.OnMessage(conn, mcmd, scmd, data); err != nil {
-			me, ok := err.(*define.MyError)
+			var me *define.MyError
 
-			if !ok {
+			if !errors.As(err, &me) {
 				me = &define.MyError{
 					Errno:   define.ErrnoFailure,
 					Errdesc: err.Error(),
