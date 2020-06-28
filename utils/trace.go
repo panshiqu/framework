@@ -3,7 +3,9 @@ package utils
 import (
 	"fmt"
 	"log"
+	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 )
 
@@ -26,12 +28,7 @@ func Trace(name string, param ...interface{}) func() {
 			line = 0
 		}
 
-		for i := len(file) - 1; i > 0; i-- {
-			if file[i] == '/' {
-				file = file[i+1:]
-				break
-			}
-		}
+		file = strings.TrimSuffix(filepath.Base(file), ".go")
 
 		log.Println("#####Exit", name, fmt.Sprintf("%s:%d", file, line), time.Since(start))
 	}
