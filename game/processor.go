@@ -42,9 +42,9 @@ func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []by
 
 	switch mcmd {
 	case define.GameCommon:
-		return p.OnMainCommon(conn, scmd, data)
+		return utils.Wrap(p.OnMainCommon(conn, scmd, data))
 	case define.GameTable:
-		return p.OnMainTable(conn, scmd, data)
+		return utils.Wrap(p.OnMainTable(conn, scmd, data))
 	}
 
 	return define.ErrUnknownMainCmd
@@ -54,9 +54,9 @@ func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []by
 func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) error {
 	switch scmd {
 	case define.GameFastLogin:
-		return p.OnSubFastLogin(conn, data)
+		return utils.Wrap(p.OnSubFastLogin(conn, data))
 	case define.GameReady:
-		return p.OnSubReady(conn, data)
+		return utils.Wrap(p.OnSubReady(conn, data))
 	}
 
 	return define.ErrUnknownSubCmd
@@ -77,7 +77,7 @@ func (p *Processor) OnMainTable(conn net.Conn, scmd uint16, data []byte) error {
 	}
 
 	// 通知桌子消息
-	return tableFrame.OnMessage(scmd, data, userItem)
+	return utils.Wrap(tableFrame.OnMessage(scmd, data, userItem))
 }
 
 // OnSubFastLogin 快速登陆子命令
@@ -88,7 +88,7 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) error {
 	replyFastLogin := &define.ReplyFastLogin{}
 
 	if err := json.Unmarshal(data, fastLogin); err != nil {
-		return err
+		return utils.Wrap(err)
 	}
 
 	// 可以判断时间戳是否接近当前时间
@@ -125,7 +125,7 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) error {
 
 	// 数据库请求
 	if err := rpc.JSONCall(define.DBCommon, define.DBFastLogin, &fastLogin.UserID, replyFastLogin); err != nil {
-		return err
+		return utils.Wrap(err)
 	}
 
 	// 插入用户

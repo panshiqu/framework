@@ -27,7 +27,7 @@ func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []by
 
 	switch mcmd {
 	case define.ManagerCommon:
-		return p.OnMainCommon(conn, scmd, data)
+		return utils.Wrap(p.OnMainCommon(conn, scmd, data))
 	}
 
 	return define.ErrUnknownMainCmd
@@ -37,13 +37,13 @@ func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []by
 func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) error {
 	switch scmd {
 	case define.ManagerRegisterService:
-		return p.OnSubRegisterService(conn, data)
+		return utils.Wrap(p.OnSubRegisterService(conn, data))
 	case define.ManagerUpdateCount:
-		return p.OnSubUpdateCount(conn, data)
+		return utils.Wrap(p.OnSubUpdateCount(conn, data))
 	case define.ManagerOpenService:
-		return p.OnSubOpenService(conn, data)
+		return utils.Wrap(p.OnSubOpenService(conn, data))
 	case define.ManagerShutService:
-		return p.OnSubShutService(conn, data)
+		return utils.Wrap(p.OnSubShutService(conn, data))
 	}
 
 	return define.ErrUnknownSubCmd
@@ -54,7 +54,7 @@ func (p *Processor) OnSubRegisterService(conn net.Conn, data []byte) error {
 	service := &define.Service{}
 
 	if err := json.Unmarshal(data, service); err != nil {
-		return err
+		return utils.Wrap(err)
 	}
 
 	// 加锁
@@ -117,7 +117,7 @@ func (p *Processor) OnSubUpdateCount(conn net.Conn, data []byte) error {
 	updateCount := &define.Service{}
 
 	if err := json.Unmarshal(data, updateCount); err != nil {
-		return err
+		return utils.Wrap(err)
 	}
 
 	// 加锁
@@ -149,7 +149,7 @@ func (p *Processor) OnSubOpenService(conn net.Conn, data []byte) error {
 	openService := &define.Service{}
 
 	if err := json.Unmarshal(data, openService); err != nil {
-		return err
+		return utils.Wrap(err)
 	}
 
 	// 加锁
@@ -184,7 +184,7 @@ func (p *Processor) OnSubShutService(conn net.Conn, data []byte) error {
 	shutService := &define.Service{}
 
 	if err := json.Unmarshal(data, shutService); err != nil {
-		return err
+		return utils.Wrap(err)
 	}
 
 	// 加锁

@@ -34,17 +34,17 @@ func Signature(timestamp int64) string {
 func ReadJSON(name string, js interface{}) error {
 	f, err := os.Open(name)
 	if err != nil {
-		return err
+		return Wrap(err)
 	}
 
 	defer f.Close()
 
 	body, err := ioutil.ReadAll(f)
 	if err != nil {
-		return err
+		return Wrap(err)
 	}
 
-	return json.Unmarshal(body, js)
+	return Wrap(json.Unmarshal(body, js))
 }
 
 // CheckError 检查错误
@@ -52,11 +52,11 @@ func CheckError(data []byte) error {
 	me := &define.MyError{}
 
 	if err := json.Unmarshal(data, me); err != nil {
-		return err
+		return Wrap(err)
 	}
 
 	if me.Errno != define.ErrnoSuccess {
-		return me
+		return Wrap(me)
 	}
 
 	return nil

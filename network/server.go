@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/panshiqu/framework/define"
+	"github.com/panshiqu/framework/utils"
 )
 
 // Server 服务器
@@ -43,7 +44,7 @@ func (s *Server) Start() error {
 		conn, err := s.listener.Accept()
 		if err != nil {
 			s.stop()
-			return err
+			return utils.Wrap(err)
 		}
 
 		go s.handleConn(conn)

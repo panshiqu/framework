@@ -7,6 +7,7 @@ import (
 
 	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/network"
+	"github.com/panshiqu/framework/utils"
 )
 
 // Processor 处理器
@@ -27,7 +28,7 @@ func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []by
 		p.server.SetBind(conn, session)
 	}
 
-	return session.OnMessage(mcmd, scmd, data)
+	return utils.Wrap(session.OnMessage(mcmd, scmd, data))
 }
 
 // OnClose 连接关闭

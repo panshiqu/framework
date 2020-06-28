@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/panshiqu/framework/define"
+	"github.com/panshiqu/framework/utils"
 )
 
 // Client 客户端
@@ -108,7 +109,7 @@ func (c *Client) SendMessage(mcmd uint16, scmd uint16, data []byte) error {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 	if c.conn != nil { // 担心正在重连时发送conn==nil
-		return SendMessage(c.conn, mcmd, scmd, data)
+		return utils.Wrap(SendMessage(c.conn, mcmd, scmd, data))
 	}
 	return define.ErrDisconnect
 }
@@ -118,7 +119,7 @@ func (c *Client) SendJSONMessage(mcmd uint16, scmd uint16, js interface{}) error
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 	if c.conn != nil { // 担心正在重连时发送conn==nil
-		return SendJSONMessage(c.conn, mcmd, scmd, js)
+		return utils.Wrap(SendJSONMessage(c.conn, mcmd, scmd, js))
 	}
 	return define.ErrDisconnect
 }

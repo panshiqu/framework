@@ -6,7 +6,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/panshiqu/framework/define"
+	"github.com/panshiqu/framework/utils"
 )
 
 // RPC 远程过程调用
@@ -48,7 +48,7 @@ func (r *RPC) Call(mcmd uint16, scmd uint16, data []byte) (dt []byte, err error)
 	for {
 		var conn net.Conn
 		if conn, err = r.get(); err != nil {
-			return
+			return nil, utils.Wrap(err)
 		}
 
 		if err = SendMessage(conn, mcmd, scmd, data); err != nil {
@@ -73,20 +73,20 @@ func (r *RPC) JSONCall(mcmd uint16, scmd uint16, in interface{}, out interface{}
 	var indata, outdata []byte
 
 	if indata, err = json.Marshal(in); err != nil {
-		return
+		return utils.Wrap(err)
 	}
 
 	if outdata, err = r.Call(mcmd, scmd, indata); err != nil {
-		return
+		return utils.Wrap(err)
 	}
 
 	if err = utils.CheckError(outdata); err != nil {
-		return
+		return utils.Wrap(err)
 	}
 
 	if out == nil {
 		return
 	}
 
-	return json.Unmarshal(outdata, out)
+	return utils.Wrap(json.Unmarshal(outdata, out))
 }

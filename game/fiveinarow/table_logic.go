@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/panshiqu/framework/define"
+	"github.com/panshiqu/framework/utils"
 )
 
 // TableLogic 桌子逻辑
@@ -92,7 +93,7 @@ func (t *TableLogic) OnMessage(scmd uint16, data []byte, userItem define.IUserIt
 		placeStone := &PlaceStone{}
 
 		if err := json.Unmarshal(data, placeStone); err != nil {
-			return err
+			return utils.Wrap(err)
 		}
 
 		// 没轮到你

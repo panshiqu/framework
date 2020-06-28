@@ -7,6 +7,7 @@ import (
 
 	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/network"
+	"github.com/panshiqu/framework/utils"
 )
 
 // Processor 处理器
@@ -23,7 +24,7 @@ func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []by
 
 	switch mcmd {
 	case define.LoginCommon:
-		return p.OnMainCommon(conn, scmd, data)
+		return utils.Wrap(p.OnMainCommon(conn, scmd, data))
 	}
 
 	return define.ErrUnknownMainCmd
@@ -33,7 +34,7 @@ func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []by
 func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) error {
 	switch scmd {
 	case define.LoginFastRegister:
-		return p.OnSubFastRegister(conn, data)
+		return utils.Wrap(p.OnSubFastRegister(conn, data))
 	}
 
 	return define.ErrUnknownSubCmd
@@ -45,12 +46,12 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) error {
 	replyFastRegister := &define.ReplyFastRegister{}
 
 	if err := json.Unmarshal(data, fastRegister); err != nil {
-		return err
+		return utils.Wrap(err)
 	}
 
 	// 数据库请求
 	if err := p.rpc.JSONCall(define.DBCommon, define.DBFastRegister, fastRegister, replyFastRegister); err != nil {
-		return err
+		return utils.Wrap(err)
 	}
 
 	// 只更新不查询字段
@@ -59,7 +60,7 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) error {
 	replyFastRegister.UserGender = fastRegister.Gender
 
 	// 回复客户端
-	return network.SendJSONMessage(conn, define.LoginCommon, define.LoginFastRegister, replyFastRegister)
+	return utils.Wrap(network.SendJSONMessage(conn, define.LoginCommon, define.LoginFastRegister, replyFastRegister))
 }
 
 // OnClose 连接关闭

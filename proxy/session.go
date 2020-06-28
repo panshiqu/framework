@@ -33,7 +33,7 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 
 			if s.login, err = sins.Dial(define.ServiceLogin,
 				define.GameUnknown, define.LevelUnknown); err != nil {
-				return err
+				return utils.Wrap(err)
 			}
 
 			go s.RecvMessage(s.login)
@@ -42,13 +42,13 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 			fastRegister := &define.FastRegister{}
 
 			if err = json.Unmarshal(data, fastRegister); err != nil {
-				return err
+				return utils.Wrap(err)
 			}
 
 			fastRegister.IP, _, _ = net.SplitHostPort(s.client.RemoteAddr().String())
 
 			if data, err = json.Marshal(fastRegister); err != nil {
-				return err
+				return utils.Wrap(err)
 			}
 		}
 
@@ -57,7 +57,7 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 			return nil
 		}
 
-		return network.SendMessage(s.login, mcmd, scmd, data)
+		return utils.Wrap(network.SendMessage(s.login, mcmd, scmd, data))
 
 	case define.GameCommon, define.GameTable:
 		if mcmd == define.GameCommon {
@@ -67,12 +67,12 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 				fastLogin := &define.FastLogin{}
 
 				if err = json.Unmarshal(data, fastLogin); err != nil {
-					return err
+					return utils.Wrap(err)
 				}
 
 				if s.game, err = sins.Dial(define.ServiceGame,
 					fastLogin.GameType, fastLogin.GameLevel); err != nil {
-					return err
+					return utils.Wrap(err)
 				}
 
 				go s.RecvMessage(s.game)
@@ -85,7 +85,7 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 				newFastLogin.Signature = utils.Signature(newFastLogin.Timestamp)
 
 				if data, err = json.Marshal(newFastLogin); err != nil {
-					return err
+					return utils.Wrap(err)
 				}
 			} else if scmd == define.GameLogout {
 				s.closeGame()
@@ -98,7 +98,7 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 			return nil
 		}
 
-		return network.SendMessage(s.game, mcmd, scmd, data)
+		return utils.Wrap(network.SendMessage(s.game, mcmd, scmd, data))
 	}
 
 	return nil

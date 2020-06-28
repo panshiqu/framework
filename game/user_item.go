@@ -10,6 +10,7 @@ import (
 
 	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/network"
+	"github.com/panshiqu/framework/utils"
 )
 
 // UserItem 用户
@@ -178,12 +179,12 @@ func (u *UserItem) TableUserInfo() *define.NotifySitDown {
 
 // WriteScore 写入分数
 func (u *UserItem) WriteScore(varScore int64, changeType int) error {
-	return u.WriteTreasure(varScore, 0, changeType)
+	return utils.Wrap(u.WriteTreasure(varScore, 0, changeType))
 }
 
 // WriteDiamond 写入钻石
 func (u *UserItem) WriteDiamond(varDiamond int64, changeType int) error {
-	return u.WriteTreasure(0, varDiamond, changeType)
+	return utils.Wrap(u.WriteTreasure(0, varDiamond, changeType))
 }
 
 // WriteTreasure 写入财富
@@ -225,7 +226,7 @@ func (u *UserItem) WriteTreasure(varScore int64, varDiamond int64, changeType in
 
 	// 写入数据库
 	if err := u.WriteToDB(varScore, varDiamond, changeType); err != nil {
-		return err
+		return utils.Wrap(err)
 	}
 
 	// 更新财富
@@ -248,7 +249,7 @@ func (u *UserItem) WriteToDB(varScore int64, varDiamond int64, changeType int) e
 		ChangeType: changeType,
 	}
 
-	return rpc.JSONCall(define.DBCommon, define.DBChangeTreasure, notifyTreasure, nil)
+	return utils.Wrap(rpc.JSONCall(define.DBCommon, define.DBChangeTreasure, notifyTreasure, nil))
 }
 
 // SendMessage 发送消息

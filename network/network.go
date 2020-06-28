@@ -16,6 +16,8 @@ import (
 	"encoding/json"
 	"io"
 	"net"
+
+	"github.com/panshiqu/framework/utils"
 )
 
 // Processor 处理器
@@ -32,7 +34,7 @@ func RecvMessage(conn net.Conn) (uint16, uint16, []byte, error) {
 	size := make([]byte, 2)
 
 	if _, err := io.ReadFull(conn, size); err != nil {
-		return 0, 0, nil, err
+		return 0, 0, nil, utils.Wrap(err)
 	}
 
 	n := binary.BigEndian.Uint16(size)
@@ -40,7 +42,7 @@ func RecvMessage(conn net.Conn) (uint16, uint16, []byte, error) {
 	copy(message, size)
 
 	if _, err := io.ReadFull(conn, message[2:]); err != nil {
-		return 0, 0, nil, err
+		return 0, 0, nil, utils.Wrap(err)
 	}
 
 	return binary.BigEndian.Uint16(message[2:]), binary.BigEndian.Uint16(message[4:]), message[6:], nil
@@ -56,7 +58,7 @@ func SendMessage(conn net.Conn, mcmd uint16, scmd uint16, data []byte) error {
 	copy(message[6:], data)
 
 	if _, err := conn.Write(message); err != nil {
-		return err
+		return utils.Wrap(err)
 	}
 
 	return nil
@@ -66,8 +68,8 @@ func SendMessage(conn net.Conn, mcmd uint16, scmd uint16, data []byte) error {
 func SendJSONMessage(conn net.Conn, mcmd uint16, scmd uint16, js interface{}) error {
 	data, err := json.Marshal(js)
 	if err != nil {
-		return err
+		return utils.Wrap(err)
 	}
 
-	return SendMessage(conn, mcmd, scmd, data)
+	return utils.Wrap(SendMessage(conn, mcmd, scmd, data))
 }

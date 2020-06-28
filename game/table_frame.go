@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/panshiqu/framework/define"
+	"github.com/panshiqu/framework/utils"
 )
 
 // TableFrame 桌子框架
@@ -230,11 +231,11 @@ func (t *TableFrame) SurplusDuration(id int) time.Duration {
 // OnTimer 定时器
 func (t *TableFrame) OnTimer(id int, parameter interface{}) error {
 	if id < define.TimerPerUser {
-		return t.table.OnTimer(id, parameter)
+		return utils.Wrap(t.table.OnTimer(id, parameter))
 	}
 
 	if user := t.TableUser((id - define.TimerPerUser) / define.TimerPerUser); user != nil {
-		return user.OnTimer((id-define.TimerPerUser)%define.TimerPerUser, parameter)
+		return utils.Wrap(user.OnTimer((id-define.TimerPerUser)%define.TimerPerUser, parameter))
 	}
 
 	return nil
@@ -242,7 +243,7 @@ func (t *TableFrame) OnTimer(id int, parameter interface{}) error {
 
 // OnMessage 收到消息
 func (t *TableFrame) OnMessage(scmd uint16, data []byte, userItem *UserItem) error {
-	return t.table.OnMessage(scmd, data, userItem)
+	return utils.Wrap(t.table.OnMessage(scmd, data, userItem))
 }
 
 // SendTableMessage 发送桌子消息
