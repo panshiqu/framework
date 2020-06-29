@@ -78,13 +78,23 @@ func (p *Processor) ChangeUserTreasure(id int, score int64, varScore int64, diam
 		}
 	}
 
+	tx, err := GAME.Begin()
+	if err != nil {
+		return utils.Wrap(err)
+	}
+	defer tx.Rollback()
+
 	// 更新分数钻石
-	if _, err := GAME.Exec("UPDATE user_treasure SET user_score = user_score + ?, user_diamond = user_diamond + ? WHERE user_id = ?", varScore, varDiamond, id); err != nil {
+	if _, err := tx.Exec("UPDATE user_treasure SET user_score = user_score + ?, user_diamond = user_diamond + ? WHERE user_id = ?", varScore, varDiamond, id); err != nil {
 		return utils.Wrap(err)
 	}
 
 	// 记录财富日志
-	if _, err := LOG.Exec(fmt.Sprintf("INSERT INTO user_treasure_log_%s (user_id, cur_score, var_score, cur_diamond, var_diamond, change_type) VALUES (?, ?, ?, ?, ?, ?)", time.Now().Format("20060102")), id, score, varScore, diamond, varDiamond, changeType); err != nil {
+	if _, err := tx.Exec(fmt.Sprintf("INSERT INTO log.user_treasure_log_%s (user_id, cur_score, var_score, cur_diamond, var_diamond, change_type) VALUES (?, ?, ?, ?, ?, ?)", time.Now().Format("20060102")), id, score, varScore, diamond, varDiamond, changeType); err != nil {
+		return utils.Wrap(err)
+	}
+
+	if err := tx.Commit(); err != nil {
 		return utils.Wrap(err)
 	}
 
@@ -108,8 +118,14 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 		&replyFastRegister.UserScore,
 		&replyFastRegister.UserDiamond,
 	); errors.Is(err, sql.ErrNoRows) {
+		tx, err := GAME.Begin()
+		if err != nil {
+			return utils.Wrap(err)
+		}
+		defer tx.Rollback()
+
 		// 插入用户信息
-		res, err := GAME.Exec("INSERT INTO user_information (user_account, user_name, user_icon, user_gender, register_ip, register_machine) VALUES (?, ?, ?, ?, ?, ?)",
+		res, err := tx.Exec("INSERT INTO user_information (user_account, user_name, user_icon, user_gender, register_ip, register_machine) VALUES (?, ?, ?, ?, ?, ?)",
 			fastRegister.Account,
 			fastRegister.Name,
 			fastRegister.Icon,
@@ -130,7 +146,11 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 		replyFastRegister.UserID = int(uid)
 
 		// 插入用户财富
-		if _, err = GAME.Exec("INSERT INTO user_treasure (user_id) VALUES (?)", uid); err != nil {
+		if _, err = tx.Exec("INSERT INTO user_treasure (user_id) VALUES (?)", uid); err != nil {
+			return utils.Wrap(err)
+		}
+
+		if err := tx.Commit(); err != nil {
 			return utils.Wrap(err)
 		}
 
