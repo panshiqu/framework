@@ -47,7 +47,9 @@ func (s *Server) Start() error {
 			return utils.Wrap(err)
 		}
 
-		go s.handleConn(conn)
+		go utils.SafeCall(func(...interface{}) {
+			s.handleConn(conn)
+		})
 	}
 }
 

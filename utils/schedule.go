@@ -72,7 +72,11 @@ func (s *Schedule) Start() {
 				if v.ticker != nil {
 					v.endtime = v.endtime.Add(v.duration)
 				}
-				go s.scheduler.OnTimer(k, v.parameter)
+				go SafeCall(func(args ...interface{}) {
+					if n, ok := args[0].(int); ok {
+						s.scheduler.OnTimer(n, args[1])
+					}
+				}, k, v.parameter)
 			}
 		}
 
