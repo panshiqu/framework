@@ -63,7 +63,7 @@ func (c *Client) Start() {
 
 			select {
 			case <-c.stop:
-				c.mutex.Unlock() // 防止goroutine正阻塞在mutex.RLock
+				c.mutex.Unlock() // 防止goroutine阻塞在mutex.Lock
 				return
 			case <-time.After(c.delay):
 			}
