@@ -58,13 +58,13 @@ const (
 )
 
 const (
-	// GLobalCommon 通用
-	GLobalCommon = 0
+	// GlobalCommon 通用
+	GlobalCommon = 0
 )
 
 const (
-	// GLobalKeepAlive 保活
-	GLobalKeepAlive = 0
+	// GlobalKeepAlive 保活
+	GlobalKeepAlive = 0
 )
 
 const (

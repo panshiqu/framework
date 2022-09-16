@@ -35,7 +35,7 @@ func (p *Processor) OnClose(conn net.Conn) {
 func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, data []byte) {
 	log.Println("OnClientMessage", mcmd, scmd, string(data))
 
-	if mcmd == define.GLobalCommon && scmd == define.GLobalKeepAlive {
+	if mcmd == define.GlobalCommon && scmd == define.GlobalKeepAlive {
 		p.client.SendMessage(mcmd, scmd, nil)
 	}
 
