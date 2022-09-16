@@ -5,6 +5,7 @@
     "PprofIP": "127.0.0.1:9092",
     "ListenIP": "127.0.0.1:8082",
     "GameType": 2,
+    "GameLevel": 1,
     "UserPerTable": 2,
     "MinReadyStart": 2
 }
