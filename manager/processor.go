@@ -72,20 +72,18 @@ func (p *Processor) OnSubRegisterService(conn net.Conn, data []byte) error {
 	// 服务表增加
 	p.services[service.ID] = service
 
+	// 仅通知代理
+	if service.ServiceType == define.ServiceProxy {
+		// 通知已选服务
+		if err := network.SendJSONMessage(conn, define.ManagerCommon, define.ManagerNotifyCurService, p.selected); err != nil {
+			log.Println("OnSubRegisterService SendJSONMessage", err)
+		}
+	}
+
 	// 是否存在类似已选
 	if !p.isExistSimilarSelected(service) {
 		// 增加已选服务
 		p.addSelectedService(service)
-	}
-
-	// 仅通知代理
-	if service.ServiceType != define.ServiceProxy {
-		return nil
-	}
-
-	// 通知已选服务
-	if err := network.SendJSONMessage(conn, define.ManagerCommon, define.ManagerNotifyCurService, p.selected); err != nil {
-		log.Println("OnSubRegisterService SendJSONMessage", err)
 	}
 
 	return nil
@@ -316,11 +314,6 @@ func (p *Processor) notifySelectedService(scmd uint16, service *define.Service) 
 	}
 
 	for _, v := range p.services {
-		// 不通知自己
-		if v.ID == service.ID {
-			continue
-		}
-
 		// 仅通知代理
 		if v.ServiceType != define.ServiceProxy {
 			continue
