@@ -28,7 +28,7 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 
 	switch mcmd {
 	case define.LoginCommon:
-		if mcmd == define.LoginCommon && scmd == define.LoginFastRegister {
+		if scmd == define.LoginFastRegister {
 			s.closeLogin()
 
 			if s.login, err = sins.Dial(define.ServiceLogin,
