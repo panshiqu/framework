@@ -17,6 +17,7 @@ import (
 	"io"
 	"net"
 
+	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/utils"
 )
 
@@ -38,6 +39,10 @@ func RecvMessage(conn net.Conn) (uint16, uint16, []byte, error) {
 	}
 
 	n := binary.BigEndian.Uint16(size)
+	if n > define.LengthLimit {
+		return 0, 0, nil, utils.Wrap(define.ErrLengthLimit)
+	}
+
 	message := make([]byte, n)
 	copy(message, size)
 
@@ -51,6 +56,10 @@ func RecvMessage(conn net.Conn) (uint16, uint16, []byte, error) {
 // SendMessage 发送消息
 func SendMessage(conn net.Conn, mcmd uint16, scmd uint16, data []byte) error {
 	size := len(data) + 6
+	if size > define.LengthLimit {
+		return utils.Wrap(define.ErrLengthLimit)
+	}
+
 	message := make([]byte, size)
 	binary.BigEndian.PutUint16(message, uint16(size))
 	binary.BigEndian.PutUint16(message[2:], mcmd)

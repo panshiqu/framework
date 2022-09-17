@@ -99,6 +99,7 @@ func (s *Server) handleConn(conn net.Conn) {
 	for {
 		mcmd, scmd, data, err := RecvMessage(conn)
 		if err != nil {
+			log.Println(utils.Wrap(err))
 			break
 		}
 
@@ -113,6 +114,7 @@ func (s *Server) handleConn(conn net.Conn) {
 			}
 
 			if err := SendMessage(conn, mcmd, scmd, []byte(me.Error())); err != nil {
+				log.Println(mcmd, scmd, utils.Wrap(err))
 				break
 			}
 		}

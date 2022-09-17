@@ -78,6 +78,7 @@ func (c *Client) Start() {
 		for {
 			mcmd, scmd, data, err := RecvMessage(c.conn)
 			if err != nil {
+				log.Println(utils.Wrap(err))
 				break
 			}
 

@@ -7,6 +7,9 @@ import (
 // Token 令牌
 const Token = "13526535277"
 
+// LengthLimit 长度限制
+const LengthLimit = 8192
+
 const (
 	// ServiceProxy 代理服务
 	ServiceProxy = 1

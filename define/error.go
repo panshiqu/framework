@@ -25,6 +25,9 @@ var (
 	// ErrDisconnect 断开连接
 	ErrDisconnect = &MyError{Errno: ErrnoFailure, Errdesc: "disconnect"}
 
+	// ErrLengthLimit 长度限制
+	ErrLengthLimit = &MyError{Errno: ErrnoFailure, Errdesc: "length limit"}
+
 	// ErrUnknownMainCmd 未知主命令
 	ErrUnknownMainCmd = &MyError{Errno: ErrnoFailure, Errdesc: "unknown main cmd"}
 

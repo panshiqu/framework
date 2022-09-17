@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"encoding/json"
+	"log"
 	"net"
 	"sync/atomic"
 	"time"
@@ -118,6 +119,7 @@ func (s *Session) RecvMessage(conn net.Conn) {
 	for {
 		mcmd, scmd, data, err := network.RecvMessage(conn)
 		if err != nil {
+			log.Println(utils.Wrap(err))
 			break
 		}
 
@@ -128,6 +130,7 @@ func (s *Session) RecvMessage(conn net.Conn) {
 		}
 
 		if err := network.SendMessage(s.client, mcmd, scmd, data); err != nil {
+			log.Println(mcmd, scmd, utils.Wrap(err))
 			break
 		}
 	}
