@@ -15,6 +15,22 @@ type Selected struct {
 	selected map[int]*define.Service
 }
 
+// Get 获取已选代理
+// 已意识到已选代理维护在这里当前无意义
+// 但未来将有能力为已连上代理的客户端快速回复或推送已选代理
+func (s *Selected) Get() string {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	for _, v := range s.selected {
+		if v.ServiceType == define.ServiceProxy {
+			return v.IP
+		}
+	}
+
+	return ""
+}
+
 // Dial 连接
 func (s *Selected) Dial(st, gt, gl int) (net.Conn, error) {
 	s.mutex.RLock()
