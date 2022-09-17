@@ -342,15 +342,13 @@ func (p *Processor) changeSelectedService(id int) {
 		return
 	}
 
-	// 删除已选服务
-	p.delSelectedService(oldService)
-
-	if newService == nil {
-		return
+	if newService != nil {
+		// 增加已选服务
+		p.addSelectedService(newService)
 	}
 
-	// 增加已选服务
-	p.addSelectedService(newService)
+	// 删除已选服务
+	p.delSelectedService(oldService)
 }
 
 // getServiceCapacity 获取服务容量
