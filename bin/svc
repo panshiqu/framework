@@ -1,0 +1,31 @@
+#!/bin/bash
+case $1 in
+"status")
+    ps aux | grep _server | grep -v "grep"
+;;
+"start")
+    ./monit.sh start db_server
+    sleep 1
+    ./monit.sh start manager_server
+    sleep 1
+    ./monit.sh start login_server
+    sleep 1
+    ./monit.sh start game_server
+    sleep 1
+    ./monit.sh start proxy_server
+;;
+"stop")
+    ./monit.sh stop proxy_server
+    sleep 1
+    ./monit.sh stop game_server
+    sleep 1
+    ./monit.sh stop login_server
+    sleep 1
+    ./monit.sh stop manager_server
+    sleep 1
+    ./monit.sh stop db_server
+;;
+*)
+    echo "Usage: ./svc [status|start|stop]"
+;;
+esac

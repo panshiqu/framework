@@ -113,7 +113,7 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 			}
 
 			if broadcastStart.ChairID == cid {
-				p.onUserInput()
+				go p.onUserInput()
 			}
 
 		// 广播落子
@@ -126,13 +126,14 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 			}
 
 			if !broadcastPlaceStone.IsWin && broadcastPlaceStone.ChairID != cid {
-				p.onUserInput()
+				go p.onUserInput()
 			}
 		}
 	}
 }
 
 func (p *Processor) onUserInput() {
+	fmt.Println("onUserInput")
 	placeStone := &fiveinarow.PlaceStone{}
 	fmt.Scan(&placeStone.PositionX, &placeStone.PositionY)
 	p.client.SendJSONMessage(define.GameTable, fiveinarow.GamePlaceStone, placeStone)
@@ -173,7 +174,7 @@ var account = flag.String("account", "panshiqu", "account")
 
 func main() {
 	flag.Parse()
-	client := network.NewClient("127.0.0.1:8083")
+	client := network.NewClient("127.0.0.1:8888")
 	client.Register(&Processor{client: client})
 	go handleSignal(client)
 	client.Start()
