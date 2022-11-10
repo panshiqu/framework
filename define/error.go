@@ -14,62 +14,68 @@ const (
 
 var (
 	// ErrSuccess 成功
-	ErrSuccess = &MyError{Errno: ErrnoSuccess, Errdesc: "success"}
+	ErrSuccess = &MyError{ErrField{Errno: ErrnoSuccess, Errdesc: "success"}}
 
 	// ErrFailure 失败
-	ErrFailure = &MyError{Errno: ErrnoFailure, Errdesc: "failure"}
+	ErrFailure = &MyError{ErrField{Errno: ErrnoFailure, Errdesc: "failure"}}
 
 	// ErrSignature 签名
-	ErrSignature = &MyError{Errno: ErrnoFailure, Errdesc: "signature"}
+	ErrSignature = &MyError{ErrField{Errno: ErrnoFailure, Errdesc: "signature"}}
 
 	// ErrDisconnect 断开连接
-	ErrDisconnect = &MyError{Errno: ErrnoFailure, Errdesc: "disconnect"}
+	ErrDisconnect = &MyError{ErrField{Errno: ErrnoFailure, Errdesc: "disconnect"}}
 
 	// ErrLengthLimit 长度限制
-	ErrLengthLimit = &MyError{Errno: ErrnoFailure, Errdesc: "length limit"}
+	ErrLengthLimit = &MyError{ErrField{Errno: ErrnoFailure, Errdesc: "length limit"}}
 
 	// ErrUnknownMainCmd 未知主命令
-	ErrUnknownMainCmd = &MyError{Errno: ErrnoFailure, Errdesc: "unknown main cmd"}
+	ErrUnknownMainCmd = &MyError{ErrField{Errno: ErrnoFailure, Errdesc: "unknown main cmd"}}
 
 	// ErrUnknownSubCmd 未知子命令
-	ErrUnknownSubCmd = &MyError{Errno: ErrnoFailure, Errdesc: "unknown sub cmd"}
+	ErrUnknownSubCmd = &MyError{ErrField{Errno: ErrnoFailure, Errdesc: "unknown sub cmd"}}
 
 	// ErrRepeatRegisterService 重复注册服务
-	ErrRepeatRegisterService = &MyError{Errno: ErrnoFailure, Errdesc: "repeat register service"}
+	ErrRepeatRegisterService = &MyError{ErrField{Errno: ErrnoFailure, Errdesc: "repeat register service"}}
 
 	// ErrNotExistService 不存在该服务
-	ErrNotExistService = &MyError{Errno: ErrnoFailure, Errdesc: "not exist service"}
+	ErrNotExistService = &MyError{ErrField{Errno: ErrnoFailure, Errdesc: "not exist service"}}
 
 	// ErrServiceAlreadyOpen 服务已经开启
-	ErrServiceAlreadyOpen = &MyError{Errno: ErrnoFailure, Errdesc: "service already open"}
+	ErrServiceAlreadyOpen = &MyError{ErrField{Errno: ErrnoFailure, Errdesc: "service already open"}}
 
 	// ErrServiceAlreadyShut 服务已经关闭
-	ErrServiceAlreadyShut = &MyError{Errno: ErrnoFailure, Errdesc: "service already shut"}
+	ErrServiceAlreadyShut = &MyError{ErrField{Errno: ErrnoFailure, Errdesc: "service already shut"}}
 
 	// ErrNotExistUser 不存在该用户
-	ErrNotExistUser = &MyError{Errno: ErrnoFailure, Errdesc: "not exist user"}
+	ErrNotExistUser = &MyError{ErrField{Errno: ErrnoFailure, Errdesc: "not exist user"}}
 
 	// ErrUserNotSit 用户没有坐下
-	ErrUserNotSit = &MyError{Errno: ErrnoFailure, Errdesc: "user not sit"}
+	ErrUserNotSit = &MyError{ErrField{Errno: ErrnoFailure, Errdesc: "user not sit"}}
 
 	// ErrTableStatus 桌子状态
-	ErrTableStatus = &MyError{Errno: ErrnoFailure, Errdesc: "table status"}
+	ErrTableStatus = &MyError{ErrField{Errno: ErrnoFailure, Errdesc: "table status"}}
 
 	// ErrNotEnoughScore 分数不足
-	ErrNotEnoughScore = &MyError{Errno: ErrnoFailure, Errdesc: "not enough score"}
+	ErrNotEnoughScore = &MyError{ErrField{Errno: ErrnoFailure, Errdesc: "not enough score"}}
 
 	// ErrNotEnoughDiamond 钻石不足
-	ErrNotEnoughDiamond = &MyError{Errno: ErrnoFailure, Errdesc: "not enough diamond"}
+	ErrNotEnoughDiamond = &MyError{ErrField{Errno: ErrnoFailure, Errdesc: "not enough diamond"}}
 
 	// ErrNotYourTurn 没轮到你
-	ErrNotYourTurn = &MyError{Errno: ErrnoFailure, Errdesc: "not your turn"}
+	ErrNotYourTurn = &MyError{ErrField{Errno: ErrnoFailure, Errdesc: "not your turn"}}
 
 	// ErrAlreadyPlaceStone 已经落子
-	ErrAlreadyPlaceStone = &MyError{Errno: ErrnoFailure, Errdesc: "already place stone"}
+	ErrAlreadyPlaceStone = &MyError{ErrField{Errno: ErrnoFailure, Errdesc: "already place stone"}}
 )
 
 // MyError 错误
 type MyError struct {
+	ErrField
+}
+
+// ErrField 错误字段
+// 所有回复结构想嵌套MyError，但db需断言error
+type ErrField struct {
 	Errno   int    `json:",omitempty"` // 错误码
 	Errdesc string `json:",omitempty"` // 错误描述
 }

@@ -286,6 +286,7 @@ type FastRegister struct {
 
 // ReplyFastRegister 回复快速注册
 type ReplyFastRegister struct {
+	ErrField
 	UserInfo
 }
 
@@ -300,6 +301,7 @@ type FastLogin struct {
 
 // ReplyFastLogin 返回快速登陆
 type ReplyFastLogin struct {
+	ErrField
 	UserInfo
 	IsRobot bool `json:",omitempty"` // 机器人
 }

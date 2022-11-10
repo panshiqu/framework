@@ -107,10 +107,10 @@ func (s *Server) handleConn(conn net.Conn) {
 			var me *define.MyError
 
 			if !errors.As(err, &me) {
-				me = &define.MyError{
+				me = &define.MyError{define.ErrField{
 					Errno:   define.ErrnoFailure,
 					Errdesc: err.Error(),
-				}
+				}}
 			}
 
 			if err := SendMessage(conn, mcmd, scmd, []byte(me.Error())); err != nil {
