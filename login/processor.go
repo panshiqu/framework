@@ -54,6 +54,11 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) error {
 		return utils.Wrap(err)
 	}
 
+	// 设置绑定
+	p.server.SetBind(conn, &define.LoginCache{
+		UserID: replyFastRegister.UserID,
+	})
+
 	// 只更新不查询字段
 	replyFastRegister.UserName = fastRegister.Name
 	replyFastRegister.UserIcon = fastRegister.Icon

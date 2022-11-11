@@ -246,6 +246,11 @@ type UserInfo struct {
 	UserDiamond int64  `json:",omitempty"` // 钻石
 }
 
+// LoginCache 登陆缓存
+type LoginCache struct {
+	UserID int `json:",omitempty"` // 编号
+}
+
 // NotifySitDown 通知坐下
 type NotifySitDown struct {
 	UserInfo
