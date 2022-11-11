@@ -64,6 +64,10 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) interf
 		return p.OnSubFastLogin(conn, data)
 	case define.DBChangeTreasure:
 		return p.OnSubChangeTreasure(conn, data)
+	case define.DBSignInDays:
+		return p.OnSubSignInDays(conn, data)
+	case define.DBSignIn:
+		return p.OnSubSignIn(conn, data)
 	}
 
 	return define.ErrUnknownSubCmd
@@ -150,6 +154,11 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 			return utils.Wrap(err)
 		}
 
+		// 插入签到记录
+		if _, err = tx.Exec("INSERT INTO sign_in_record (user_id) VALUES (?)", uid); err != nil {
+			return utils.Wrap(err)
+		}
+
 		if err := tx.Commit(); err != nil {
 			return utils.Wrap(err)
 		}
@@ -192,17 +201,35 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 	return replyFastRegister
 }
 
-// OnSubFastLogin 快速登陆子命令
-func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) interface{} {
-	var id int
-	replyFastLogin := &define.ReplyFastLogin{}
+// OnSubSignInDays 签到天数
+func (p *Processor) OnSubSignInDays(conn net.Conn, data []byte) interface{} {
+	replySignInDays := &define.ReplySignInDays{}
 
-	if err := json.Unmarshal(data, &id); err != nil {
+	if err := GAME.QueryRow("CALL procedure_user_sign_in_days(?)", data).Scan(&replySignInDays.Can, &replySignInDays.Days); err != nil {
 		return utils.Wrap(err)
 	}
 
+	return replySignInDays
+}
+
+// OnSubSignIn 签到
+func (p *Processor) OnSubSignIn(conn net.Conn, data []byte) interface{} {
+	replySignIn := &define.ReplySignIn{}
+
+	if err := GAME.QueryRow("CALL procedure_user_sign_in(?)", data).Scan(&replySignIn.Errno, &replySignIn.Errdesc,
+		&replySignIn.TotalDays, &replySignIn.ScoreReward, &replySignIn.DiamondReward); err != nil {
+		return utils.Wrap(err)
+	}
+
+	return replySignIn
+}
+
+// OnSubFastLogin 快速登陆子命令
+func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) interface{} {
+	replyFastLogin := &define.ReplyFastLogin{}
+
 	// 查询用户信息
-	if err := GAME.QueryRow("SELECT user_id, user_name, user_icon, user_level, user_gender+0, bind_phone, user_score, user_diamond, is_robot FROM view_information_treasure WHERE user_id = ?", id).Scan(
+	if err := GAME.QueryRow("SELECT user_id, user_name, user_icon, user_level, user_gender+0, bind_phone, user_score, user_diamond, is_robot FROM view_information_treasure WHERE user_id = ?", data).Scan(
 		&replyFastLogin.UserID,
 		&replyFastLogin.UserName,
 		&replyFastLogin.UserIcon,

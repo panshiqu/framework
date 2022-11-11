@@ -106,6 +106,12 @@ const (
 const (
 	// LoginFastRegister 快速注册
 	LoginFastRegister = 1
+
+	// LoginSignInDays 签到天数
+	LoginSignInDays = 2
+
+	// LoginSignIn 签到
+	LoginSignIn = 3
 )
 
 const (
@@ -153,6 +159,12 @@ const (
 
 	// DBChangeTreasure 改变财富
 	DBChangeTreasure = 3
+
+	// DBSignInDays 签到天数
+	DBSignInDays = 4
+
+	// DBSignIn 签到
+	DBSignIn = 5
 )
 
 const (
@@ -295,6 +307,21 @@ type ReplyFastRegister struct {
 	UserInfo
 }
 
+// ReplySignInDays 回复签到天数
+type ReplySignInDays struct {
+	ErrField
+	Can  bool `json:",omitempty"` // 是否可以签到
+	Days int  `json:",omitempty"` // 天数
+}
+
+// ReplySignIn 回复签到
+type ReplySignIn struct {
+	ErrField
+	TotalDays     int   `json:",omitempty"` // 总天数
+	ScoreReward   int64 `json:",omitempty"` // 分数奖励
+	DiamondReward int64 `json:",omitempty"` // 钻石奖励
+}
+
 // FastLogin 快速登陆
 type FastLogin struct {
 	UserID    int    `json:",omitempty"` // 编号
@@ -304,7 +331,7 @@ type FastLogin struct {
 	Signature string `json:",omitempty"` // 加密签名
 }
 
-// ReplyFastLogin 返回快速登陆
+// ReplyFastLogin 回复快速登陆
 type ReplyFastLogin struct {
 	ErrField
 	UserInfo

@@ -39,30 +39,61 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 		p.client.SendMessage(mcmd, scmd, nil)
 	}
 
-	if mcmd == define.LoginCommon && scmd == define.LoginFastRegister {
-		replyFastRegister := &define.ReplyFastRegister{}
+	if mcmd == define.LoginCommon {
+		switch scmd {
+		case define.LoginFastRegister:
+			replyFastRegister := &define.ReplyFastRegister{}
 
-		if err := json.Unmarshal(data, replyFastRegister); err != nil {
-			log.Println("json.Unmarshal replyFastRegister", err)
-			return
+			if err := json.Unmarshal(data, replyFastRegister); err != nil {
+				log.Println("json.Unmarshal replyFastRegister", err)
+				return
+			}
+
+			// 记录用户编号
+			uid = replyFastRegister.UserID
+
+			// 快速登陆
+			fastLogin := &define.FastLogin{
+				GameType:  define.GameFiveInARow,
+				GameLevel: define.LevelOne,
+			}
+
+			// 发送快速登陆消息
+			if err := p.client.SendJSONMessage(define.GameCommon, define.GameFastLogin, fastLogin); err != nil {
+				log.Println("GameFastLogin SendJSONMessage", err)
+				return
+			}
+
+			log.Println("GameFastLogin", fastLogin)
+
+			// 发送签到天数
+			if err := p.client.SendMessage(define.LoginCommon, define.LoginSignInDays, nil); err != nil {
+				log.Println("LoginSignInDays SendMessage", err)
+				return
+			}
+
+		case define.LoginSignInDays:
+			replySignInDays := &define.ReplySignInDays{}
+
+			if err := json.Unmarshal(data, replySignInDays); err != nil {
+				log.Println("json.Unmarshal replySignInDays", err)
+				return
+			}
+
+			// 发送签到
+			if err := p.client.SendMessage(define.LoginCommon, define.LoginSignIn, nil); err != nil {
+				log.Println("LoginSignIn SendMessage", err)
+				return
+			}
+
+		case define.LoginSignIn:
+			replySignIn := &define.ReplySignIn{}
+
+			if err := json.Unmarshal(data, replySignIn); err != nil {
+				log.Println("json.Unmarshal replySignIn", err)
+				return
+			}
 		}
-
-		// 记录用户编号
-		uid = replyFastRegister.UserID
-
-		// 快速登陆
-		fastLogin := &define.FastLogin{
-			GameType:  define.GameFiveInARow,
-			GameLevel: define.LevelOne,
-		}
-
-		// 发送快速登陆消息
-		if err := p.client.SendJSONMessage(define.GameCommon, define.GameFastLogin, fastLogin); err != nil {
-			log.Println("GameFastLogin SendJSONMessage", err)
-			return
-		}
-
-		log.Println("GameFastLogin", fastLogin)
 	}
 
 	if mcmd == define.GameCommon {

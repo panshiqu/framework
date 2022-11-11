@@ -35,6 +35,10 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) error 
 	switch scmd {
 	case define.LoginFastRegister:
 		return utils.Wrap(p.OnSubFastRegister(conn, data))
+	case define.LoginSignInDays:
+		return utils.Wrap(p.OnSubSignInDays(conn, data))
+	case define.LoginSignIn:
+		return utils.Wrap(p.OnSubSignIn(conn, data))
 	}
 
 	return define.ErrUnknownSubCmd
@@ -66,6 +70,44 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) error {
 
 	// 回复客户端
 	return utils.Wrap(network.SendJSONMessage(conn, define.LoginCommon, define.LoginFastRegister, replyFastRegister))
+}
+
+// OnSubSignInDays 签到天数
+func (p *Processor) OnSubSignInDays(conn net.Conn, data []byte) error {
+	// 获取绑定
+	loginCache, ok := p.server.GetBind(conn).(*define.LoginCache)
+	if !ok {
+		return define.ErrNotExistUser
+	}
+
+	replySignInDays := &define.ReplySignInDays{}
+
+	// 数据库请求
+	if err := p.rpc.JSONCall(define.DBCommon, define.DBSignInDays, loginCache.UserID, replySignInDays); err != nil {
+		return utils.Wrap(err)
+	}
+
+	// 回复客户端
+	return utils.Wrap(network.SendJSONMessage(conn, define.LoginCommon, define.LoginSignInDays, replySignInDays))
+}
+
+// OnSubSignIn 签到
+func (p *Processor) OnSubSignIn(conn net.Conn, data []byte) error {
+	// 获取绑定
+	loginCache, ok := p.server.GetBind(conn).(*define.LoginCache)
+	if !ok {
+		return define.ErrNotExistUser
+	}
+
+	replySignIn := &define.ReplySignIn{}
+
+	// 数据库请求
+	if err := p.rpc.JSONCall(define.DBCommon, define.DBSignIn, loginCache.UserID, replySignIn); err != nil {
+		return utils.Wrap(err)
+	}
+
+	// 回复客户端
+	return utils.Wrap(network.SendJSONMessage(conn, define.LoginCommon, define.LoginSignIn, replySignIn))
 }
 
 // OnClose 连接关闭
