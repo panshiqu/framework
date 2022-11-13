@@ -76,7 +76,7 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 					return utils.Wrap(err)
 				}
 
-				go s.RecvMessage(s.game)
+				go s.RecvGameMessage(s.game)
 
 				newFastLogin := &define.FastLogin{
 					UserID:    s.userid,
@@ -136,6 +136,25 @@ func (s *Session) RecvMessage(conn net.Conn) {
 	}
 
 	s.client.Close()
+}
+
+// RecvGameMessage 收到游戏消息
+// GameLogout->closeGame 不应关闭客户端连接触发重连
+func (s *Session) RecvGameMessage(conn net.Conn) {
+	defer utils.Trace("Session RecvGameMessage")()
+
+	for {
+		mcmd, scmd, data, err := network.RecvMessage(conn)
+		if err != nil {
+			log.Println(utils.Wrap(err))
+			break
+		}
+
+		if err := network.SendMessage(s.client, mcmd, scmd, data); err != nil {
+			log.Println(mcmd, scmd, utils.Wrap(err))
+			break
+		}
+	}
 }
 
 // KeepAlive 保活
