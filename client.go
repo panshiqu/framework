@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 
 	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/game/fiveinarow"
@@ -201,6 +203,32 @@ func handleSignal(client *network.Client) {
 	client.Stop()
 }
 
+func httpStart(client *network.Client) {
+	http.HandleFunc("/sendmessage", func(w http.ResponseWriter, r *http.Request) {
+		mcmd, merr := strconv.Atoi(r.FormValue("mcmd"))
+		if merr != nil {
+			fmt.Fprintln(w, merr)
+			log.Println(merr)
+			return
+		}
+
+		scmd, serr := strconv.Atoi(r.FormValue("scmd"))
+		if serr != nil {
+			fmt.Fprintln(w, serr)
+			log.Println(serr)
+			return
+		}
+
+		if err := client.SendMessage(uint16(mcmd), uint16(scmd), []byte(r.FormValue("data"))); err != nil {
+			fmt.Fprintln(w, "SendMessage", err)
+			log.Println("SendMessage", err)
+			return
+		}
+	})
+
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
 var account = flag.String("account", "panshiqu", "account")
 
 func main() {
@@ -208,5 +236,6 @@ func main() {
 	client := network.NewClient("127.0.0.1:8888")
 	client.Register(&Processor{client: client})
 	go handleSignal(client)
+	go httpStart(client)
 	client.Start()
 }
