@@ -303,9 +303,23 @@ func (p *Processor) delSelectedService(service *define.Service) {
 	p.notifySelectedService(define.ManagerNotifyDelService, service)
 }
 
+// addDelSelectedService 增加删除已选服务，原子通知避免切换瞬间无服务可用
+func (p *Processor) addDelSelectedService(newService, oldService *define.Service) {
+	defer utils.Trace("Processor addDelSelectedService", newService.ID, oldService.ID)()
+
+	// 已选表增加
+	p.selected[newService.ID] = newService
+
+	// 已选表删除
+	delete(p.selected, oldService.ID)
+
+	// 通知改变已选服务
+	p.notifySelectedService(define.ManagerNotifyChangeService, []*define.Service{newService, oldService})
+}
+
 // notifySelectedService 通知已选服务
-func (p *Processor) notifySelectedService(scmd uint16, service *define.Service) {
-	defer utils.Trace("Processor notifySelectedService", scmd, service.ID)()
+func (p *Processor) notifySelectedService(scmd uint16, service any) {
+	defer utils.Trace("Processor notifySelectedService", scmd)()
 
 	data, err := json.Marshal(service)
 	if err != nil {
@@ -343,8 +357,9 @@ func (p *Processor) changeSelectedService(id int) {
 	}
 
 	if newService != nil {
-		// 增加已选服务
-		p.addSelectedService(newService)
+		// 增加删除已选服务
+		p.addDelSelectedService(newService, oldService)
+		return
 	}
 
 	// 删除已选服务

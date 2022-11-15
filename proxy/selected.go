@@ -65,3 +65,11 @@ func (s *Selected) Del(v *define.Service) {
 	delete(s.selected, v.ID)
 	s.mutex.Unlock()
 }
+
+// Change 改变
+func (s *Selected) Change(v []*define.Service) {
+	s.mutex.Lock()
+	s.selected[v[0].ID] = v[0]
+	delete(s.selected, v[1].ID)
+	s.mutex.Unlock()
+}

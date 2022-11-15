@@ -96,6 +96,9 @@ const (
 
 	// ManagerNotifyDelService 通知删除服务
 	ManagerNotifyDelService = 103
+
+	// ManagerNotifyChangeService 通知改变服务
+	ManagerNotifyChangeService = 104
 )
 
 const (

@@ -77,6 +77,16 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 		}
 
 		sins.Del(service)
+
+	// 改变已选服务
+	case define.ManagerNotifyChangeService:
+		var services []*define.Service
+
+		if err := json.Unmarshal(data, &services); err != nil {
+			return
+		}
+
+		sins.Change(services)
 	}
 }
 
