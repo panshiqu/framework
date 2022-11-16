@@ -48,35 +48,39 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 	}
 
 	switch scmd {
-	// 通知已选服务
-	case define.ManagerNotifyCurService:
+	// 通知已选服务、所有服务
+	case define.ManagerNotifyCurService, define.ManagerNotifyAllService:
 		var selected map[int]*define.Service
 
 		if err := json.Unmarshal(data, &selected); err != nil {
 			return
 		}
 
-		sins.Init(selected)
+		if scmd == define.ManagerNotifyAllService {
+			sins.InitAll(selected)
+		} else {
+			sins.Init(selected)
+		}
 
-	// 增加已选服务
-	case define.ManagerNotifyAddService:
+	// 增加删除服务
+	case define.ManagerNotifyAddService, define.ManagerNotifyDelService,
+		define.ManagerNotifyIncrService, define.ManagerNotifyDecrService:
 		service := &define.Service{}
 
 		if err := json.Unmarshal(data, service); err != nil {
 			return
 		}
 
-		sins.Add(service)
-
-	// 删除已选服务
-	case define.ManagerNotifyDelService:
-		service := &define.Service{}
-
-		if err := json.Unmarshal(data, service); err != nil {
-			return
+		switch scmd {
+		case define.ManagerNotifyAddService:
+			sins.Add(service)
+		case define.ManagerNotifyDelService:
+			sins.Del(service)
+		case define.ManagerNotifyIncrService:
+			sins.Incr(service)
+		case define.ManagerNotifyDecrService:
+			sins.Decr(service)
 		}
-
-		sins.Del(service)
 
 	// 改变已选服务
 	case define.ManagerNotifyChangeService:

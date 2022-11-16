@@ -69,16 +69,24 @@ func (p *Processor) OnSubRegisterService(conn net.Conn, data []byte) error {
 	// 设置网络连接
 	service.Conn = conn
 
-	// 服务表增加
-	p.services[service.ID] = service
-
 	// 仅通知代理
 	if service.ServiceType == define.ServiceProxy {
 		// 通知已选服务
 		if err := network.SendJSONMessage(conn, define.ManagerCommon, define.ManagerNotifyCurService, p.selected); err != nil {
 			log.Println("OnSubRegisterService SendJSONMessage", err)
 		}
+
+		// 通知所有服务
+		if err := network.SendJSONMessage(conn, define.ManagerCommon, define.ManagerNotifyAllService, p.services); err != nil {
+			log.Println("OnSubRegisterService SendJSONMessage", err)
+		}
 	}
+
+	// 服务表增加
+	p.services[service.ID] = service
+
+	// 通知增加所有服务
+	p.notifySelectedService(define.ManagerNotifyIncrService, service)
 
 	// 是否存在类似已选
 	if !p.isExistSimilarSelected(service) {
@@ -99,6 +107,9 @@ func (p *Processor) OnSubUnRegisterService(conn net.Conn, data []byte) error {
 		if v.Conn == conn {
 			// 服务表删除
 			delete(p.services, v.ID)
+
+			// 通知删除所有服务
+			p.notifySelectedService(define.ManagerNotifyDecrService, v)
 
 			// 改变已选服务
 			p.changeSelectedService(v.ID)
@@ -317,7 +328,7 @@ func (p *Processor) addDelSelectedService(newService, oldService *define.Service
 	p.notifySelectedService(define.ManagerNotifyChangeService, []*define.Service{newService, oldService})
 }
 
-// notifySelectedService 通知已选服务
+// notifySelectedService 通知已选服务、所有服务
 func (p *Processor) notifySelectedService(scmd uint16, service any) {
 	defer utils.Trace("Processor notifySelectedService", scmd)()
 
@@ -333,7 +344,7 @@ func (p *Processor) notifySelectedService(scmd uint16, service any) {
 			continue
 		}
 
-		// 通知已选服务
+		// 通知服务增加、删除、改变
 		if err := network.SendMessage(v.Conn, define.ManagerCommon, scmd, data); err != nil {
 			log.Println("notifySelectedService SendMessage", err)
 		}

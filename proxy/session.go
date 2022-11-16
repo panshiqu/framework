@@ -33,7 +33,7 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 			s.closeLogin()
 
 			if s.login, err = sins.Dial(define.ServiceLogin,
-				define.GameUnknown, define.LevelUnknown); err != nil {
+				0, define.GameUnknown, define.LevelUnknown); err != nil {
 				return utils.Wrap(err)
 			}
 
@@ -72,7 +72,7 @@ func (s *Session) OnMessage(mcmd uint16, scmd uint16, data []byte) (err error) {
 				}
 
 				if s.game, err = sins.Dial(define.ServiceGame,
-					fastLogin.GameType, fastLogin.GameLevel); err != nil {
+					fastLogin.GameID, fastLogin.GameType, fastLogin.GameLevel); err != nil {
 					return utils.Wrap(err)
 				}
 

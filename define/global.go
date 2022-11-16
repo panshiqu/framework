@@ -99,6 +99,15 @@ const (
 
 	// ManagerNotifyChangeService 通知改变服务
 	ManagerNotifyChangeService = 104
+
+	// ManagerNotifyAllService 通知所有服务
+	ManagerNotifyAllService = 105
+
+	// ManagerNotifyIncrService 通知增加服务
+	ManagerNotifyIncrService = 106
+
+	// ManagerNotifyDecrService 通知删除服务
+	ManagerNotifyDecrService = 107
 )
 
 const (
@@ -328,6 +337,7 @@ type ReplySignIn struct {
 // FastLogin 快速登陆
 type FastLogin struct {
 	UserID    int    `json:",omitempty"` // 编号
+	GameID    int    `json:",omitempty"` // 编号
 	GameType  int    `json:",omitempty"` // 类型
 	GameLevel int    `json:",omitempty"` // 等级
 	Timestamp int64  `json:",omitempty"` // 时间戳

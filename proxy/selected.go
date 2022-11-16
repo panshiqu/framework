@@ -9,9 +9,11 @@ import (
 
 var sins Selected
 
-// Selected 已选服务
+// Selected 已选服务、所有服务
+// 支持通过游戏编号精准重连
 type Selected struct {
 	mutex    sync.RWMutex
+	services map[int]*define.Service
 	selected map[int]*define.Service
 }
 
@@ -32,13 +34,21 @@ func (s *Selected) Get() string {
 }
 
 // Dial 连接
-func (s *Selected) Dial(st, gt, gl int) (net.Conn, error) {
+func (s *Selected) Dial(st, gi, gt, gl int) (net.Conn, error) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	for _, v := range s.selected {
-		if v.ServiceType == st && v.GameType == gt && v.GameLevel == gl {
-			return net.Dial("tcp", v.IP)
+	if gi != 0 {
+		for _, v := range s.services {
+			if v.ServiceType == st && v.ID == gi {
+				return net.Dial("tcp", v.IP)
+			}
+		}
+	} else {
+		for _, v := range s.selected {
+			if v.ServiceType == st && v.GameType == gt && v.GameLevel == gl {
+				return net.Dial("tcp", v.IP)
+			}
 		}
 	}
 
@@ -59,7 +69,7 @@ func (s *Selected) Add(v *define.Service) {
 	s.mutex.Unlock()
 }
 
-// Del 减少
+// Del 删除
 func (s *Selected) Del(v *define.Service) {
 	s.mutex.Lock()
 	delete(s.selected, v.ID)
@@ -71,5 +81,26 @@ func (s *Selected) Change(v []*define.Service) {
 	s.mutex.Lock()
 	s.selected[v[0].ID] = v[0]
 	delete(s.selected, v[1].ID)
+	s.mutex.Unlock()
+}
+
+// InitAll 初始所有
+func (s *Selected) InitAll(v map[int]*define.Service) {
+	s.mutex.Lock()
+	s.services = v
+	s.mutex.Unlock()
+}
+
+// Incr 增加
+func (s *Selected) Incr(v *define.Service) {
+	s.mutex.Lock()
+	s.services[v.ID] = v
+	s.mutex.Unlock()
+}
+
+// Decr 删除
+func (s *Selected) Decr(v *define.Service) {
+	s.mutex.Lock()
+	delete(s.services, v.ID)
 	s.mutex.Unlock()
 }
