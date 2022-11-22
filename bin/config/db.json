@@ -1,6 +1,7 @@
 {
     "PprofIP": "127.0.0.1:9090",
     "ListenIP": "127.0.0.1:18000",
+    "RedisURL": "redis://123456@localhost:6379",
     "GameDSN": "root:123456@tcp(localhost:3306)/game",
     "LogDSN": "root:123456@tcp(localhost:3306)/log"
 }

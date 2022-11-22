@@ -43,6 +43,7 @@ var CG ConfigGame
 type ConfigDB struct {
 	PprofIP  string
 	ListenIP string
+	RedisURL string
 	GameDSN  string
 	LogDSN   string
 }

@@ -9,6 +9,7 @@ import (
 	"net"
 	"time"
 
+	"github.com/gomodule/redigo/redis"
 	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/network"
 	"github.com/panshiqu/framework/utils"
@@ -19,6 +20,9 @@ var LOG *sql.DB
 
 // GAME 游戏数据库
 var GAME *sql.DB
+
+// REDIS 缓存连接池
+var REDIS *redis.Pool
 
 // Processor 处理器
 type Processor struct {
@@ -300,6 +304,21 @@ func NewProcessor(server *network.Server, config *define.ConfigDB) *Processor {
 	if err = GAME.Ping(); err != nil {
 		log.Println("Ping game", err)
 		return nil
+	}
+
+	REDIS = &redis.Pool{
+		MaxIdle:     10,
+		IdleTimeout: time.Hour,
+		Dial: func() (redis.Conn, error) {
+			return redis.DialURL(config.RedisURL)
+		},
+		TestOnBorrow: func(c redis.Conn, t time.Time) error {
+			if time.Since(t) < time.Minute {
+				return nil
+			}
+			_, err := c.Do("PING")
+			return err
+		},
 	}
 
 	return &Processor{
