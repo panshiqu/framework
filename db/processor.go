@@ -325,3 +325,24 @@ func NewProcessor(server *network.Server, config *define.ConfigDB) *Processor {
 		server: server,
 	}
 }
+
+func GetRedis(database int) (conn redis.Conn) {
+	for {
+		conn = REDIS.Get()
+		if _, err := conn.Do("SELECT", database); err != nil {
+			log.Println("Redis select", err)
+			conn.Close()
+			continue
+		}
+		break
+	}
+
+	prefix := "Unknown"
+	pc := make([]uintptr, 1)
+	if n := runtime.Callers(2, pc); n == 1 {
+		// the Name method can be called with nil
+		prefix = path.Base(runtime.FuncForPC(pc[0]).Name())
+	}
+
+	return redis.NewLoggingConn(conn, log.Default(), prefix)
+}
