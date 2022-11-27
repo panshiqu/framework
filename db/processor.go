@@ -346,3 +346,12 @@ func GetRedis(database int) (conn redis.Conn) {
 
 	return redis.NewLoggingConn(conn, log.Default(), prefix)
 }
+
+// too many results to unpack
+// Online_2_[0~9999], support data item 7778+, or replace keys with scan
+var RedisDelKeys = redis.NewScript(1, `
+local results = redis.call('keys', KEYS[1])
+if #results == 0 then
+	return 0
+end
+return redis.call('del', unpack(results))`)
