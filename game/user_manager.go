@@ -20,6 +20,8 @@ type UserManager struct {
 
 // Delete 删除用户
 func (u *UserManager) Delete(id int) {
+	UpdateOnlineCache(define.DBDeleteOnlineCache, id)
+
 	u.mutex.Lock()
 	if userItem, ok := u.users[id]; ok {
 		if err := userItem.WriteToDB(userItem.CacheScore(), userItem.CacheDiamond(), define.ChangeTypeWinLose); err != nil {
@@ -44,6 +46,8 @@ func (u *UserManager) Search(id int) *UserItem {
 
 // Insert 插入用户
 func (u *UserManager) Insert(conn net.Conn, reply *define.ReplyFastLogin) *UserItem {
+	UpdateOnlineCache(define.DBInsertOnlineCache, reply.UserID)
+
 	userItem := &UserItem{
 		id:      reply.UserID,
 		name:    reply.UserName,

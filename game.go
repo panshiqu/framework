@@ -45,6 +45,8 @@ func main() {
 		log.Println(http.ListenAndServe(define.CG.PprofIP, nil))
 	}()
 
+	defer game.ClearOnlineCacheNowAndExit()()
+
 	if err := server.Start(); err != nil {
 		log.Println("Start", err)
 	}

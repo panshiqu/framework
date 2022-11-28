@@ -177,6 +177,15 @@ const (
 
 	// DBSignIn 签到
 	DBSignIn = 5
+
+	// DBInsertOnlineCache 插入在线缓存
+	DBInsertOnlineCache = 6
+
+	// DBDeleteOnlineCache 删除在线缓存
+	DBDeleteOnlineCache = 7
+
+	// DBClearOnlineCache 清空在线缓存
+	DBClearOnlineCache = 8
 )
 
 const (
@@ -349,4 +358,12 @@ type ReplyFastLogin struct {
 	ErrField
 	UserInfo
 	IsRobot bool `json:",omitempty"` // 机器人
+}
+
+// OnlineCache 在线缓存
+type OnlineCache struct {
+	UserID    int `json:",omitempty"` // 编号
+	GameID    int `json:",omitempty"` // 编号
+	GameType  int `json:",omitempty"` // 游戏类型
+	GameLevel int `json:",omitempty"` // 游戏等级
 }

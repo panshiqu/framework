@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"path"
+	"runtime"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
@@ -72,6 +74,8 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) interf
 		return p.OnSubSignInDays(conn, data)
 	case define.DBSignIn:
 		return p.OnSubSignIn(conn, data)
+	case define.DBInsertOnlineCache, define.DBDeleteOnlineCache, define.DBClearOnlineCache:
+		return p.OnSubOnlineCache(conn, scmd, data)
 	}
 
 	return define.ErrUnknownSubCmd
@@ -263,6 +267,37 @@ func (p *Processor) OnSubChangeTreasure(conn net.Conn, data []byte) interface{} 
 		-1, notifyTreasure.VarScore,
 		-1, notifyTreasure.VarDiamond,
 		notifyTreasure.ChangeType))
+}
+
+// OnSubOnlineCache 在线缓存
+func (p *Processor) OnSubOnlineCache(conn net.Conn, scmd uint16, data []byte) interface{} {
+	cache := &define.OnlineCache{}
+
+	if err := json.Unmarshal(data, cache); err != nil {
+		return utils.Wrap(err)
+	}
+
+	rc := GetRedis(define.RedisOnline)
+	defer rc.Close()
+
+	switch scmd {
+	case define.DBInsertOnlineCache:
+		if _, err := rc.Do("SET", fmt.Sprintf("Online_%d_%d", cache.GameID, cache.UserID), data); err != nil {
+			return utils.Wrap(err)
+		}
+
+	case define.DBDeleteOnlineCache:
+		if _, err := rc.Do("DEL", fmt.Sprintf("Online_%d_%d", cache.GameID, cache.UserID)); err != nil {
+			return utils.Wrap(err)
+		}
+
+	case define.DBClearOnlineCache:
+		if _, err := RedisDelKeys.Do(rc, fmt.Sprintf("Online_%d_*", cache.GameID)); err != nil {
+			return utils.Wrap(err)
+		}
+	}
+
+	return nil
 }
 
 // OnClose 连接关闭
