@@ -66,11 +66,7 @@ func SendMessage(conn net.Conn, mcmd uint16, scmd uint16, data []byte) error {
 	binary.BigEndian.PutUint16(message[4:], scmd)
 	copy(message[6:], data)
 
-	if _, err := conn.Write(message); err != nil {
-		return utils.Wrap(err)
-	}
-
-	return nil
+	return utils.Wrap(utils.Error(conn.Write(message)))
 }
 
 // SendJSONMessage 发送消息

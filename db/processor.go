@@ -106,11 +106,7 @@ func (p *Processor) ChangeUserTreasure(id int, score int64, varScore int64, diam
 		return utils.Wrap(err)
 	}
 
-	if err := tx.Commit(); err != nil {
-		return utils.Wrap(err)
-	}
-
-	return nil
+	return utils.Wrap(tx.Commit())
 }
 
 // OnSubFastRegister 快速注册子命令
@@ -282,19 +278,13 @@ func (p *Processor) OnSubOnlineCache(conn net.Conn, scmd uint16, data []byte) in
 
 	switch scmd {
 	case define.DBInsertOnlineCache:
-		if _, err := rc.Do("SET", fmt.Sprintf("Online_%d_%d", cache.GameID, cache.UserID), data); err != nil {
-			return utils.Wrap(err)
-		}
+		return utils.Wrap(utils.Error(rc.Do("SET", fmt.Sprintf("Online_%d_%d", cache.GameID, cache.UserID), data)))
 
 	case define.DBDeleteOnlineCache:
-		if _, err := rc.Do("DEL", fmt.Sprintf("Online_%d_%d", cache.GameID, cache.UserID)); err != nil {
-			return utils.Wrap(err)
-		}
+		return utils.Wrap(utils.Error(rc.Do("DEL", fmt.Sprintf("Online_%d_%d", cache.GameID, cache.UserID))))
 
 	case define.DBClearOnlineCache:
-		if _, err := RedisDelKeys.Do(rc, fmt.Sprintf("Online_%d_*", cache.GameID)); err != nil {
-			return utils.Wrap(err)
-		}
+		return utils.Wrap(utils.Error(RedisDelKeys.Do(rc, fmt.Sprintf("Online_%d_*", cache.GameID))))
 	}
 
 	return nil

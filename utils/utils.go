@@ -54,3 +54,8 @@ func CheckError(data []byte) error {
 
 	return nil
 }
+
+// Error 仅看错误
+func Error(r any, err error) error {
+	return err
+}
