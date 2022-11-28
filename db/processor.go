@@ -362,10 +362,15 @@ func NewProcessor(server *network.Server, config *define.ConfigDB) *Processor {
 }
 
 func GetRedis(database int) (conn redis.Conn) {
-	for {
+	// 也可照搬redis.errorConn错误推迟到下次调用
+	for i := 5 * time.Millisecond; ; i *= 2 {
 		conn = REDIS.Get()
 		if _, err := conn.Do("SELECT", database); err != nil {
 			log.Println("Redis select", err)
+			if i > time.Second {
+				i = time.Second
+			}
+			time.Sleep(i)
 			conn.Close()
 			continue
 		}
@@ -376,7 +381,7 @@ func GetRedis(database int) (conn redis.Conn) {
 	pc := make([]uintptr, 1)
 	if n := runtime.Callers(2, pc); n == 1 {
 		// the Name method can be called with nil
-		prefix = path.Base(runtime.FuncForPC(pc[0]).Name())
+		prefix = path.Ext(runtime.FuncForPC(pc[0]).Name())
 	}
 
 	return redis.NewLoggingConn(conn, log.Default(), prefix)
