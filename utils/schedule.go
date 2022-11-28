@@ -10,7 +10,7 @@ type event struct {
 	ticker    *time.Ticker
 	endtime   time.Time
 	duration  time.Duration
-	parameter interface{}
+	parameter any
 }
 
 func (e *event) expire() bool {
@@ -35,7 +35,7 @@ func (e *event) expire() bool {
 
 // Scheduler 调度程序
 type Scheduler interface {
-	OnTimer(id int, parameter interface{})
+	OnTimer(id int, parameter any)
 }
 
 // Schedule 时间表
@@ -72,7 +72,7 @@ func (s *Schedule) Start() {
 				if v.ticker != nil {
 					v.endtime = v.endtime.Add(v.duration)
 				}
-				go SafeCall(func(args ...interface{}) {
+				go SafeCall(func(args ...any) {
 					if n, ok := args[0].(int); ok {
 						s.scheduler.OnTimer(n, args[1])
 					}
@@ -85,7 +85,7 @@ func (s *Schedule) Start() {
 }
 
 // Add 添加
-func (s *Schedule) Add(id int, duration time.Duration, parameter interface{}, persistence bool) {
+func (s *Schedule) Add(id int, duration time.Duration, parameter any, persistence bool) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 

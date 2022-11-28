@@ -13,7 +13,7 @@ import (
 var TraceSwitch = true
 
 // Trace trace
-func Trace(name string, param ...interface{}) func() {
+func Trace(name string, param ...any) func() {
 	if !TraceSwitch {
 		return func() {}
 	}

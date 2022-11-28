@@ -61,7 +61,7 @@ func (t *TableLogic) OnMessage(scmd uint16, data []byte, userItem define.IUserIt
 }
 
 // OnTimer 定时器
-func (t *TableLogic) OnTimer(id int, parameter interface{}) error {
+func (t *TableLogic) OnTimer(id int, parameter any) error {
 	return nil
 }
 

@@ -69,7 +69,7 @@ func (r *RPC) Call(mcmd uint16, scmd uint16, data []byte) (dt []byte, err error)
 }
 
 // JSONCall 调用
-func (r *RPC) JSONCall(mcmd uint16, scmd uint16, in interface{}, out interface{}) (err error) {
+func (r *RPC) JSONCall(mcmd uint16, scmd uint16, in any, out any) (err error) {
 	var indata, outdata []byte
 
 	if indata, err = json.Marshal(in); err != nil {

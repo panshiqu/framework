@@ -24,7 +24,7 @@ func Signature(timestamp int64) string {
 }
 
 // ReadJSON 打开读取解析JSON文件
-func ReadJSON(name string, js interface{}) error {
+func ReadJSON(name string, js any) error {
 	f, err := os.Open(name)
 	if err != nil {
 		return Wrap(err)

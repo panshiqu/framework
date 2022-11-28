@@ -24,7 +24,7 @@ type IUserItem interface {
 	SendMessage(uint16, uint16, []byte)
 
 	// 发送消息
-	SendJSONMessage(uint16, uint16, interface{})
+	SendJSONMessage(uint16, uint16, any)
 }
 
 // ITableFrame 桌子框架接口
@@ -42,13 +42,13 @@ type ITableFrame interface {
 	SendTableMessage(uint16, uint16, []byte)
 
 	// 发送桌子消息
-	SendTableJSONMessage(uint16, uint16, interface{})
+	SendTableJSONMessage(uint16, uint16, any)
 
 	// 发送椅子消息
 	SendChairMessage(int, uint16, uint16, []byte)
 
 	// 发送椅子消息
-	SendChairJSONMessage(int, uint16, uint16, interface{})
+	SendChairJSONMessage(int, uint16, uint16, any)
 }
 
 // ITableLogic 桌子逻辑接口
@@ -75,5 +75,5 @@ type ITableLogic interface {
 	OnMessage(uint16, []byte, IUserItem) error
 
 	// 定时器
-	OnTimer(int, interface{}) error
+	OnTimer(int, any) error
 }

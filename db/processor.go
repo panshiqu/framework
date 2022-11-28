@@ -50,7 +50,7 @@ func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []by
 }
 
 // OnMessageEx 收到消息
-func (p *Processor) OnMessageEx(conn net.Conn, mcmd uint16, scmd uint16, data []byte) interface{} {
+func (p *Processor) OnMessageEx(conn net.Conn, mcmd uint16, scmd uint16, data []byte) any {
 	log.Println("OnMessage", mcmd, scmd, string(data))
 
 	switch mcmd {
@@ -62,7 +62,7 @@ func (p *Processor) OnMessageEx(conn net.Conn, mcmd uint16, scmd uint16, data []
 }
 
 // OnMainCommon 通用主命令
-func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) interface{} {
+func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) any {
 	switch scmd {
 	case define.DBFastRegister:
 		return p.OnSubFastRegister(conn, data)
@@ -110,7 +110,7 @@ func (p *Processor) ChangeUserTreasure(id int, score int64, varScore int64, diam
 }
 
 // OnSubFastRegister 快速注册子命令
-func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
+func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) any {
 	fastRegister := &define.FastRegister{}
 	replyFastRegister := &define.ReplyFastRegister{}
 
@@ -206,7 +206,7 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) interface{} {
 }
 
 // OnSubSignInDays 签到天数
-func (p *Processor) OnSubSignInDays(conn net.Conn, data []byte) interface{} {
+func (p *Processor) OnSubSignInDays(conn net.Conn, data []byte) any {
 	replySignInDays := &define.ReplySignInDays{}
 
 	if err := GAME.QueryRow("CALL procedure_user_sign_in_days(?)", data).Scan(&replySignInDays.Can, &replySignInDays.Days); err != nil {
@@ -217,7 +217,7 @@ func (p *Processor) OnSubSignInDays(conn net.Conn, data []byte) interface{} {
 }
 
 // OnSubSignIn 签到
-func (p *Processor) OnSubSignIn(conn net.Conn, data []byte) interface{} {
+func (p *Processor) OnSubSignIn(conn net.Conn, data []byte) any {
 	replySignIn := &define.ReplySignIn{}
 
 	if err := GAME.QueryRow("CALL procedure_user_sign_in(?)", data).Scan(&replySignIn.Errno, &replySignIn.Errdesc,
@@ -229,7 +229,7 @@ func (p *Processor) OnSubSignIn(conn net.Conn, data []byte) interface{} {
 }
 
 // OnSubFastLogin 快速登陆子命令
-func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) interface{} {
+func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) any {
 	replyFastLogin := &define.ReplyFastLogin{}
 
 	// 查询用户信息
@@ -251,7 +251,7 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) interface{} {
 }
 
 // OnSubChangeTreasure 改变财富
-func (p *Processor) OnSubChangeTreasure(conn net.Conn, data []byte) interface{} {
+func (p *Processor) OnSubChangeTreasure(conn net.Conn, data []byte) any {
 	notifyTreasure := &define.NotifyTreasure{}
 
 	if err := json.Unmarshal(data, notifyTreasure); err != nil {
@@ -266,7 +266,7 @@ func (p *Processor) OnSubChangeTreasure(conn net.Conn, data []byte) interface{} 
 }
 
 // OnSubOnlineCache 在线缓存
-func (p *Processor) OnSubOnlineCache(conn net.Conn, scmd uint16, data []byte) interface{} {
+func (p *Processor) OnSubOnlineCache(conn net.Conn, scmd uint16, data []byte) any {
 	cache := &define.OnlineCache{}
 
 	if err := json.Unmarshal(data, cache); err != nil {

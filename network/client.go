@@ -116,7 +116,7 @@ func (c *Client) SendMessage(mcmd uint16, scmd uint16, data []byte) error {
 }
 
 // SendJSONMessage 发送消息
-func (c *Client) SendJSONMessage(mcmd uint16, scmd uint16, js interface{}) error {
+func (c *Client) SendJSONMessage(mcmd uint16, scmd uint16, js any) error {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 	if c.conn != nil { // 担心正在重连时发送conn==nil

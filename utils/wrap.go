@@ -8,7 +8,7 @@ import (
 )
 
 // Wrap .
-func Wrap(err error, info ...interface{}) error {
+func Wrap(err error, info ...any) error {
 	if err == nil {
 		return nil
 	}

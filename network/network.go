@@ -5,7 +5,7 @@ Package network server and client
 
 2.不管主动停止Stop还是被动停止Accept error，继续接收的消息都应该记录后因为GetBind==nil而返回错误（除非登陆、注册等等）
 
-3.OnMessage返回值可以扩展成interface{}类型，通过断言error, MyError, others进而区别对待，将可以实现快捷回复消息（暂不实现）
+3.OnMessage返回值可以扩展成any类型，通过断言error, MyError, others进而区别对待，将可以实现快捷回复消息（现仅在db中实现）
 
 4.RPC发送接收必须匹配才能实现同步调用，则必然需要特殊处理return nil，但若nil等同于ErrSuccess则需要与真正的回复互斥，所以捎带实现第3点
 */
@@ -70,7 +70,7 @@ func SendMessage(conn net.Conn, mcmd uint16, scmd uint16, data []byte) error {
 }
 
 // SendJSONMessage 发送消息
-func SendJSONMessage(conn net.Conn, mcmd uint16, scmd uint16, js interface{}) error {
+func SendJSONMessage(conn net.Conn, mcmd uint16, scmd uint16, js any) error {
 	data, err := json.Marshal(js)
 	if err != nil {
 		return utils.Wrap(err)

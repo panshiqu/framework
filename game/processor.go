@@ -24,7 +24,7 @@ type Processor struct {
 }
 
 // OnTimer 定时器
-func (p *Processor) OnTimer(id int, parameter interface{}) {
+func (p *Processor) OnTimer(id int, parameter any) {
 	if id < define.TimerPerTable {
 		return
 	}

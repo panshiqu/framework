@@ -260,26 +260,26 @@ func (u *UserItem) SendMessage(mcmd uint16, scmd uint16, data []byte) {
 }
 
 // SendJSONMessage 发送消息
-func (u *UserItem) SendJSONMessage(mcmd uint16, scmd uint16, js interface{}) {
+func (u *UserItem) SendJSONMessage(mcmd uint16, scmd uint16, js any) {
 	if data, err := json.Marshal(js); err == nil {
 		u.SendMessage(mcmd, scmd, data)
 	}
 }
 
 // AddTimer 添加定时器
-func (u *UserItem) AddTimer(id int, duration time.Duration, parameter interface{}, persistence bool) {
+func (u *UserItem) AddTimer(id int, duration time.Duration, parameter any, persistence bool) {
 	if id >= 0 && id < define.TimerPerUser {
 		sins.Add(u.TableID()*define.TimerPerTable+define.TimerPerTable+u.ChairID()*define.TimerPerUser+define.TimerPerUser+id, duration, parameter, persistence)
 	}
 }
 
 // RunAfter 添加定时器
-func (u *UserItem) RunAfter(id int, duration time.Duration, parameter interface{}) {
+func (u *UserItem) RunAfter(id int, duration time.Duration, parameter any) {
 	u.AddTimer(id, duration, parameter, false)
 }
 
 // RunAlways 添加定时器
-func (u *UserItem) RunAlways(id int, duration time.Duration, parameter interface{}) {
+func (u *UserItem) RunAlways(id int, duration time.Duration, parameter any) {
 	u.AddTimer(id, duration, parameter, true)
 }
 
@@ -300,6 +300,6 @@ func (u *UserItem) SurplusDuration(id int) time.Duration {
 }
 
 // OnTimer 定时器
-func (u *UserItem) OnTimer(id int, parameter interface{}) error {
+func (u *UserItem) OnTimer(id int, parameter any) error {
 	return nil
 }

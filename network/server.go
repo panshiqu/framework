@@ -17,7 +17,7 @@ type Server struct {
 
 	mutex       sync.Mutex
 	waitgroup   sync.WaitGroup
-	connections map[net.Conn]interface{}
+	connections map[net.Conn]any
 }
 
 // NewServer 创建服务器
@@ -29,7 +29,7 @@ func NewServer(address string) *Server {
 
 	return &Server{
 		listener:    listener,
-		connections: make(map[net.Conn]interface{}),
+		connections: make(map[net.Conn]any),
 	}
 }
 
@@ -47,7 +47,7 @@ func (s *Server) Start() error {
 			return utils.Wrap(err)
 		}
 
-		go utils.SafeCall(func(...interface{}) {
+		go utils.SafeCall(func(...any) {
 			s.handleConn(conn)
 		})
 	}
@@ -124,7 +124,7 @@ func (s *Server) handleConn(conn net.Conn) {
 }
 
 // SetBind 设置绑定
-func (s *Server) SetBind(conn net.Conn, v interface{}) {
+func (s *Server) SetBind(conn net.Conn, v any) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	if s.connections != nil {
@@ -133,7 +133,7 @@ func (s *Server) SetBind(conn net.Conn, v interface{}) {
 }
 
 // GetBind 获取绑定
-func (s *Server) GetBind(conn net.Conn) interface{} {
+func (s *Server) GetBind(conn net.Conn) any {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	if s.connections != nil {

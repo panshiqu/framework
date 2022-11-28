@@ -196,19 +196,19 @@ func (t *TableFrame) ConcludeGame() {
 }
 
 // AddTimer 添加定时器
-func (t *TableFrame) AddTimer(id int, duration time.Duration, parameter interface{}, persistence bool) {
+func (t *TableFrame) AddTimer(id int, duration time.Duration, parameter any, persistence bool) {
 	if id >= 0 && id < define.TimerPerUser {
 		sins.Add(t.TableID()*define.TimerPerTable+define.TimerPerTable+id, duration, parameter, persistence)
 	}
 }
 
 // RunAfter 添加定时器
-func (t *TableFrame) RunAfter(id int, duration time.Duration, parameter interface{}) {
+func (t *TableFrame) RunAfter(id int, duration time.Duration, parameter any) {
 	t.AddTimer(id, duration, parameter, false)
 }
 
 // RunAlways 添加定时器
-func (t *TableFrame) RunAlways(id int, duration time.Duration, parameter interface{}) {
+func (t *TableFrame) RunAlways(id int, duration time.Duration, parameter any) {
 	t.AddTimer(id, duration, parameter, true)
 }
 
@@ -229,7 +229,7 @@ func (t *TableFrame) SurplusDuration(id int) time.Duration {
 }
 
 // OnTimer 定时器
-func (t *TableFrame) OnTimer(id int, parameter interface{}) error {
+func (t *TableFrame) OnTimer(id int, parameter any) error {
 	if id < define.TimerPerUser {
 		return utils.Wrap(t.table.OnTimer(id, parameter))
 	}
@@ -254,7 +254,7 @@ func (t *TableFrame) SendTableMessage(mcmd uint16, scmd uint16, data []byte) {
 }
 
 // SendTableJSONMessage 发送桌子消息
-func (t *TableFrame) SendTableJSONMessage(mcmd uint16, scmd uint16, js interface{}) {
+func (t *TableFrame) SendTableJSONMessage(mcmd uint16, scmd uint16, js any) {
 	if data, err := json.Marshal(js); err == nil {
 		t.SendTableMessage(mcmd, scmd, data)
 	}
@@ -268,7 +268,7 @@ func (t *TableFrame) SendChairMessage(chair int, mcmd uint16, scmd uint16, data 
 }
 
 // SendChairJSONMessage 发送椅子消息
-func (t *TableFrame) SendChairJSONMessage(chair int, mcmd uint16, scmd uint16, js interface{}) {
+func (t *TableFrame) SendChairJSONMessage(chair int, mcmd uint16, scmd uint16, js any) {
 	if data, err := json.Marshal(js); err == nil {
 		t.SendChairMessage(chair, mcmd, scmd, data)
 	}
