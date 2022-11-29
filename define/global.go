@@ -267,6 +267,13 @@ type Service struct {
 	Conn        net.Conn `json:"-"`          // 网络连接
 }
 
+// GameService 游戏服务
+type GameService struct {
+	GameID    int `json:",omitempty"` // 编号
+	GameType  int `json:",omitempty"` // 类型
+	GameLevel int `json:",omitempty"` // 等级
+}
+
 // UserInfo 用户信息
 type UserInfo struct {
 	UserID      int    `json:",omitempty"` // 编号
@@ -326,6 +333,7 @@ type FastRegister struct {
 type ReplyFastRegister struct {
 	ErrField
 	UserInfo
+	GameService
 }
 
 // ReplySignInDays 回复签到天数
@@ -345,10 +353,8 @@ type ReplySignIn struct {
 
 // FastLogin 快速登陆
 type FastLogin struct {
+	GameService
 	UserID    int    `json:",omitempty"` // 编号
-	GameID    int    `json:",omitempty"` // 编号
-	GameType  int    `json:",omitempty"` // 类型
-	GameLevel int    `json:",omitempty"` // 等级
 	Timestamp int64  `json:",omitempty"` // 时间戳
 	Signature string `json:",omitempty"` // 加密签名
 }
@@ -357,13 +363,12 @@ type FastLogin struct {
 type ReplyFastLogin struct {
 	ErrField
 	UserInfo
+	GameService
 	IsRobot bool `json:",omitempty"` // 机器人
 }
 
 // OnlineCache 在线缓存
 type OnlineCache struct {
-	UserID    int `json:",omitempty"` // 编号
-	GameID    int `json:",omitempty"` // 编号
-	GameType  int `json:",omitempty"` // 游戏类型
-	GameLevel int `json:",omitempty"` // 游戏等级
+	GameService
+	UserID int `json:",omitempty"` // 编号
 }

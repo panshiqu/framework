@@ -128,6 +128,14 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) error {
 		return utils.Wrap(err)
 	}
 
+	// 是否在其它游戏中
+	if replyFastLogin.GameID != 0 && replyFastLogin.GameID != define.CG.ID {
+		return utils.Wrap(network.SendJSONMessage(conn, define.GameCommon, define.GameFastLogin, define.ReplyFastLogin{
+			ErrField:    define.ErrInAnotherGame,
+			GameService: replyFastLogin.GameService,
+		}))
+	}
+
 	// 插入用户
 	userItem := uins.Insert(conn, replyFastLogin)
 

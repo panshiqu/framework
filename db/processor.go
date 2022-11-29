@@ -190,6 +190,10 @@ func (p *Processor) OnSubFastRegister(conn net.Conn, data []byte) any {
 		replyFastRegister.UserLevel = 1
 	} else if err != nil {
 		return utils.Wrap(err)
+	} else { // 非新用户
+		if err := GetOnlineCache(replyFastRegister.UserID, replyFastRegister); err != nil {
+			return utils.Wrap(err)
+		}
 	}
 
 	// 总是更新这些字段
@@ -244,6 +248,10 @@ func (p *Processor) OnSubFastLogin(conn net.Conn, data []byte) any {
 		&replyFastLogin.UserDiamond,
 		&replyFastLogin.IsRobot,
 	); err != nil {
+		return utils.Wrap(err)
+	}
+
+	if err := GetOnlineCache(replyFastLogin.UserID, replyFastLogin); err != nil {
 		return utils.Wrap(err)
 	}
 
@@ -377,6 +385,22 @@ func GetRedis(database int) (conn redis.Conn) {
 	return redis.NewLoggingConn(conn, log.Default(), prefix)
 }
 
+// GetOnlineCache 获取在线缓存
+func GetOnlineCache(id int, reply any) error {
+	rc := GetRedis(define.RedisOnline)
+	defer rc.Close()
+
+	data, err := redis.Bytes(RedisGetKeys.Do(rc, fmt.Sprintf("Online_*_%d", id)))
+	if errors.Is(err, redis.ErrNil) {
+		return nil
+	}
+	if err != nil {
+		return utils.Wrap(err)
+	}
+
+	return json.Unmarshal(data, reply)
+}
+
 // too many results to unpack
 // Online_2_[0~9999], support data item 7778+, or replace keys with scan
 var RedisDelKeys = redis.NewScript(1, `
@@ -385,3 +409,13 @@ if #results == 0 then
 	return 0
 end
 return redis.call('del', unpack(results))`)
+
+var RedisGetKeys = redis.NewScript(1, `
+local results = redis.call('keys', KEYS[1])
+if #results == 0 then
+	return nil
+end
+if #results > 1 then
+	return redis.error_reply('more than one')
+end
+return redis.call('get', results[1])`)

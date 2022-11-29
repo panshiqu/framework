@@ -66,6 +66,9 @@ var (
 
 	// ErrAlreadyPlaceStone 已经落子
 	ErrAlreadyPlaceStone = &MyError{ErrField{Errno: ErrnoFailure, Errdesc: "already place stone"}}
+
+	// ErrInAnotherGame 在其它游戏中
+	ErrInAnotherGame = ErrField{Errno: ErrnoFailure, Errdesc: "in another game"}
 )
 
 // MyError 错误

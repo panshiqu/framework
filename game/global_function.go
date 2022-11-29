@@ -8,9 +8,8 @@ import (
 
 // UpdateOnlineCache 更新在线缓存，插入、删除、清空
 func UpdateOnlineCache(ns ...int) {
-	cache := &define.OnlineCache{
-		GameID: define.CG.ID,
-	}
+	cache := &define.OnlineCache{}
+	cache.GameID = define.CG.ID
 
 	scmd := define.DBClearOnlineCache
 	if len(ns) == 2 {
