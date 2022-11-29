@@ -7,24 +7,12 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"path"
-	"runtime"
 	"time"
 
-	"github.com/gomodule/redigo/redis"
 	"github.com/panshiqu/framework/define"
 	"github.com/panshiqu/framework/network"
 	"github.com/panshiqu/framework/utils"
 )
-
-// LOG 日志数据库
-var LOG *sql.DB
-
-// GAME 游戏数据库
-var GAME *sql.DB
-
-// REDIS 缓存连接池
-var REDIS *redis.Pool
 
 // Processor 处理器
 type Processor struct {
@@ -315,107 +303,12 @@ func (p *Processor) OnClientConnect(conn net.Conn) {
 
 // NewProcessor 创建处理器
 func NewProcessor(server *network.Server, config *define.ConfigDB) *Processor {
-	var err error
-
-	// todo SetMaxOpenConns, SetMaxIdleConns
-
-	if LOG, err = sql.Open("mysql", config.LogDSN); err != nil {
-		log.Println("Open log", err)
+	if err := InitDatabase(config.LogDSN, config.GameDSN, config.RedisURL); err != nil {
+		log.Println("InitDatabase", err)
 		return nil
-	}
-
-	if err = LOG.Ping(); err != nil {
-		log.Println("Ping log", err)
-		return nil
-	}
-
-	if GAME, err = sql.Open("mysql", config.GameDSN); err != nil {
-		log.Println("Open game", err)
-		return nil
-	}
-
-	if err = GAME.Ping(); err != nil {
-		log.Println("Ping game", err)
-		return nil
-	}
-
-	REDIS = &redis.Pool{
-		MaxIdle:     10,
-		IdleTimeout: time.Hour,
-		Dial: func() (redis.Conn, error) {
-			return redis.DialURL(config.RedisURL)
-		},
-		TestOnBorrow: func(c redis.Conn, t time.Time) error {
-			if time.Since(t) < time.Minute {
-				return nil
-			}
-			_, err := c.Do("PING")
-			return err
-		},
 	}
 
 	return &Processor{
 		server: server,
 	}
 }
-
-func GetRedis(database int) (conn redis.Conn) {
-	// 也可照搬redis.errorConn错误推迟到下次调用
-	for i := 5 * time.Millisecond; ; i *= 2 {
-		conn = REDIS.Get()
-		if _, err := conn.Do("SELECT", database); err != nil {
-			log.Println("Redis select", err)
-			if i > time.Second {
-				i = time.Second
-			}
-			time.Sleep(i)
-			conn.Close()
-			continue
-		}
-		break
-	}
-
-	prefix := "Unknown"
-	pc := make([]uintptr, 1)
-	if n := runtime.Callers(2, pc); n == 1 {
-		// the Name method can be called with nil
-		prefix = path.Ext(runtime.FuncForPC(pc[0]).Name())
-	}
-
-	return redis.NewLoggingConn(conn, log.Default(), prefix)
-}
-
-// GetOnlineCache 获取在线缓存
-func GetOnlineCache(id int, reply any) error {
-	rc := GetRedis(define.RedisOnline)
-	defer rc.Close()
-
-	data, err := redis.Bytes(RedisGetKeys.Do(rc, fmt.Sprintf("Online_*_%d", id)))
-	if errors.Is(err, redis.ErrNil) {
-		return nil
-	}
-	if err != nil {
-		return utils.Wrap(err)
-	}
-
-	return json.Unmarshal(data, reply)
-}
-
-// too many results to unpack
-// Online_2_[0~9999], support data item 7778+, or replace keys with scan
-var RedisDelKeys = redis.NewScript(1, `
-local results = redis.call('keys', KEYS[1])
-if #results == 0 then
-	return 0
-end
-return redis.call('del', unpack(results))`)
-
-var RedisGetKeys = redis.NewScript(1, `
-local results = redis.call('keys', KEYS[1])
-if #results == 0 then
-	return nil
-end
-if #results > 1 then
-	return redis.error_reply('more than one')
-end
-return redis.call('get', results[1])`)

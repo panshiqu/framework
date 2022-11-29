@@ -55,10 +55,9 @@ func (p *Processor) OnClientMessage(conn net.Conn, mcmd uint16, scmd uint16, dat
 			uid = replyFastRegister.UserID
 
 			// 快速登陆
-			fastLogin := &define.FastLogin{
-				GameType:  define.GameFiveInARow,
-				GameLevel: define.LevelOne,
-			}
+			fastLogin := &define.FastLogin{}
+			fastLogin.GameType = define.GameFiveInARow
+			fastLogin.GameLevel = define.LevelOne
 
 			// 发送快速登陆消息
 			if err := p.client.SendJSONMessage(define.GameCommon, define.GameFastLogin, fastLogin); err != nil {
