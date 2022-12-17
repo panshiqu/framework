@@ -6,3 +6,10 @@ a simple game framework
 已修改源码中Token，必要时可以联系我
 
 时隔三年首次完善，详细请看 Commits
+
+又隔两年开始完善
+
+### TODO
+* use lumberjack
+* enable UpdateCount
+* finish RobotManager
