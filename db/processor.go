@@ -71,18 +71,18 @@ func (p *Processor) OnMainCommon(conn net.Conn, scmd uint16, data []byte) any {
 
 // ChangeUserTreasure 改变用户财富
 func (p *Processor) ChangeUserTreasure(id int, score int64, varScore int64, diamond int64, varDiamond int64, changeType int) error {
-	// 当前分数钻石
-	if score < 0 || diamond < 0 {
-		if err := GAME.QueryRow("SELECT user_score, user_diamond FROM user_treasure WHERE user_id = ?", id).Scan(&score, &diamond); err != nil {
-			return utils.Wrap(err)
-		}
-	}
-
 	tx, err := GAME.Begin()
 	if err != nil {
 		return utils.Wrap(err)
 	}
 	defer tx.Rollback()
+
+	// 当前分数钻石
+	if score < 0 || diamond < 0 {
+		if err := tx.QueryRow("SELECT user_score, user_diamond FROM user_treasure WHERE user_id = ?", id).Scan(&score, &diamond); err != nil {
+			return utils.Wrap(err)
+		}
+	}
 
 	// 更新分数钻石
 	if _, err := tx.Exec("UPDATE user_treasure SET user_score = user_score + ?, user_diamond = user_diamond + ? WHERE user_id = ?", varScore, varDiamond, id); err != nil {
