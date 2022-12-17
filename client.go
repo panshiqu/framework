@@ -225,9 +225,10 @@ func httpStart(client *network.Client) {
 		}
 	})
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), nil))
 }
 
+var port = flag.Int("port", 8080, "port")
 var account = flag.String("account", "panshiqu", "account")
 
 func main() {

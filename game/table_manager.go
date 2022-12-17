@@ -3,7 +3,6 @@ package game
 import (
 	"log"
 	"net/http"
-	"sort"
 	"sync"
 
 	"github.com/panshiqu/framework/define"
@@ -31,26 +30,41 @@ func (t *TableManager) GetTable(id int) *TableFrame {
 }
 
 // TrySitDown 尝试坐下
-func (t *TableManager) TrySitDown(userItem *UserItem) *TableFrame {
+func (t *TableManager) TrySitDown(userItem *UserItem) (tableFrame *TableFrame) {
+	var max int
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
-	for {
-		sort.Sort(TableFrameSlice(t.tables))
-
-		// 只要有桌子椅子就能坐下，这里不关心桌子状态
-		if len(t.tables) == 0 || t.tables[0].UserCount() == define.CG.UserPerTable {
-			t.AddTableFrame()
+	for _, v := range t.tables {
+		if v.TableStatus() != define.TableStatusFree {
 			continue
 		}
 
-		t.tables[0].SitDown(userItem)
-		return t.tables[0]
+		userCount := v.UserCount()
+		if userCount == define.CG.UserPerTable {
+			continue
+		}
+
+		if tableFrame == nil || userCount > max {
+			max, tableFrame = userCount, v
+		}
+
+		if userCount+1 == define.CG.UserPerTable {
+			break
+		}
 	}
+
+	if tableFrame == nil {
+		tableFrame = t.AddTableFrame()
+	}
+
+	tableFrame.SitDown(userItem)
+
+	return
 }
 
 // AddTableFrame 增加桌子
-func (t *TableManager) AddTableFrame() {
-	tableFrame := &TableFrame{
+func (t *TableManager) AddTableFrame() (tableFrame *TableFrame) {
+	tableFrame = &TableFrame{
 		id:    t.count,
 		users: make([]*UserItem, define.CG.UserPerTable),
 	}
@@ -60,32 +74,8 @@ func (t *TableManager) AddTableFrame() {
 	t.tables = append(t.tables, tableFrame)
 
 	t.count++
-}
 
-// TableFrameSlice 排序
-type TableFrameSlice []*TableFrame
-
-func (t TableFrameSlice) Len() int {
-	return len(t)
-}
-func (t TableFrameSlice) Less(i, j int) bool {
-	if t[i].TableStatus() != t[j].TableStatus() {
-		return t[i].TableStatus() < t[j].TableStatus()
-	} else if c1, c2 := t[i].UserCount(), t[j].UserCount(); c1 != c2 {
-		switch {
-		case c2 == define.CG.UserPerTable:
-			return true
-		case c1 == define.CG.UserPerTable:
-			return false
-		default:
-			return c1 > c2
-		}
-	}
-
-	return t[i].TableID() < t[j].TableID()
-}
-func (t TableFrameSlice) Swap(i, j int) {
-	t[i], t[j] = t[j], t[i]
+	return
 }
 
 // Monitor 监视器
