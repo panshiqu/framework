@@ -20,7 +20,9 @@ type Processor struct {
 }
 
 // OnMessage 收到消息
-func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []byte) error {
+func (p *Processor) OnMessage(conn net.Conn, mcmd uint16, scmd uint16, data []byte) (err error) {
+	defer func() { utils.Stack(recover(), &err) }()
+
 	ret := p.OnMessageEx(conn, mcmd, scmd, data)
 
 	// 必须回复消息
