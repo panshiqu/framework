@@ -9,7 +9,10 @@ a simple game framework
 
 又隔两年开始完善
 
+又一年简单完善
+
 ### TODO
+* use slog
 * use lumberjack
 * enable UpdateCount
 * finish RobotManager
