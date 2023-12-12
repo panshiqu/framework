@@ -28,6 +28,9 @@ var (
 	// ErrLengthLimit 长度限制
 	ErrLengthLimit = &MyError{ErrField{Errno: ErrnoFailure, Errdesc: "length limit"}}
 
+	// ErrMessageHead 非法消息头
+	ErrMessageHead = &MyError{ErrField{Errno: ErrnoFailure, Errdesc: "message head"}}
+
 	// ErrUnknownMainCmd 未知主命令
 	ErrUnknownMainCmd = &MyError{ErrField{Errno: ErrnoFailure, Errdesc: "unknown main cmd"}}
 

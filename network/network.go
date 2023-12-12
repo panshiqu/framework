@@ -21,6 +21,8 @@ import (
 	"github.com/panshiqu/framework/utils"
 )
 
+const MessageHead = 0x5277
+
 // Processor 处理器
 type Processor interface {
 	OnMessage(net.Conn, uint16, uint16, []byte) error
@@ -32,13 +34,17 @@ type Processor interface {
 
 // RecvMessage 接收消息
 func RecvMessage(conn net.Conn) (uint16, uint16, []byte, error) {
-	size := make([]byte, 2)
+	size := make([]byte, 4)
 
 	if _, err := io.ReadFull(conn, size); err != nil {
 		return 0, 0, nil, utils.Wrap(err)
 	}
 
-	n := binary.BigEndian.Uint16(size)
+	if binary.BigEndian.Uint16(size) != MessageHead {
+		return 0, 0, nil, utils.Wrap(define.ErrMessageHead)
+	}
+
+	n := binary.BigEndian.Uint16(size[2:])
 	if n > define.LengthLimit {
 		return 0, 0, nil, utils.Wrap(define.ErrLengthLimit)
 	}
@@ -46,25 +52,26 @@ func RecvMessage(conn net.Conn) (uint16, uint16, []byte, error) {
 	message := make([]byte, n)
 	copy(message, size)
 
-	if _, err := io.ReadFull(conn, message[2:]); err != nil {
+	if _, err := io.ReadFull(conn, message[4:]); err != nil {
 		return 0, 0, nil, utils.Wrap(err)
 	}
 
-	return binary.BigEndian.Uint16(message[2:]), binary.BigEndian.Uint16(message[4:]), message[6:], nil
+	return binary.BigEndian.Uint16(message[4:]), binary.BigEndian.Uint16(message[6:]), message[8:], nil
 }
 
 // SendMessage 发送消息
 func SendMessage(conn net.Conn, mcmd uint16, scmd uint16, data []byte) error {
-	size := len(data) + 6
+	size := len(data) + 8
 	if size > define.LengthLimit {
 		return utils.Wrap(define.ErrLengthLimit)
 	}
 
 	message := make([]byte, size)
-	binary.BigEndian.PutUint16(message, uint16(size))
-	binary.BigEndian.PutUint16(message[2:], mcmd)
-	binary.BigEndian.PutUint16(message[4:], scmd)
-	copy(message[6:], data)
+	binary.BigEndian.PutUint16(message, MessageHead)
+	binary.BigEndian.PutUint16(message[2:], uint16(size))
+	binary.BigEndian.PutUint16(message[4:], mcmd)
+	binary.BigEndian.PutUint16(message[6:], scmd)
+	copy(message[8:], data)
 
 	return utils.Wrap(utils.Error(conn.Write(message)))
 }
